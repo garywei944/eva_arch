@@ -1,0 +1,66 @@
+<keymap version="1" name="aris" parent="Sublime Text">
+  <action id="ActivateMessagesToolWindow">
+    <keyboard-shortcut first-keystroke="alt 0" />
+    <keyboard-shortcut first-keystroke="ctrl back_quote" />
+  </action>
+  <action id="ActivateTerminalToolWindow">
+    <keyboard-shortcut first-keystroke="alt f12" />
+    <keyboard-shortcut first-keystroke="shift ctrl t" />
+  </action>
+  <action id="CMake.CompileCurrentFile" />
+  <action id="CloseAllEditors">
+    <keyboard-shortcut first-keystroke="shift ctrl w" />
+  </action>
+  <action id="CodeGlance.toggle" />
+  <action id="Console.TableResult.SetNull" />
+  <action id="Debug">
+    <keyboard-shortcut first-keystroke="shift f9" />
+    <keyboard-shortcut first-keystroke="shift ctrl b" />
+  </action>
+  <action id="EditorSelectLine">
+    <keyboard-shortcut first-keystroke="ctrl l" />
+  </action>
+  <action id="FileChooser.NewFile">
+    <keyboard-shortcut first-keystroke="ctrl alt n" />
+  </action>
+  <action id="Inline" />
+  <action id="NotebookRunCellAction">
+    <keyboard-shortcut first-keystroke="shift ctrl g" />
+  </action>
+  <action id="NotebookRunCellSelectBelowAction">
+    <keyboard-shortcut first-keystroke="alt g" />
+  </action>
+  <action id="PythonCellMode.RunCellMoveNext">
+    <keyboard-shortcut first-keystroke="shift ctrl alt g" />
+  </action>
+  <action id="QuickChangeScheme" />
+  <action id="ReformatCode">
+    <keyboard-shortcut first-keystroke="ctrl alt f" />
+    <keyboard-shortcut first-keystroke="ctrl alt l" />
+  </action>
+  <action id="ReopenClosedTab" />
+  <action id="RestoreDefaultLayout">
+    <keyboard-shortcut first-keystroke="shift ctrl alt r" />
+  </action>
+  <action id="Run">
+    <keyboard-shortcut first-keystroke="shift f10" />
+    <keyboard-shortcut first-keystroke="ctrl b" />
+  </action>
+  <action id="ServiceView.ShowServices" />
+  <action id="ShowSettings">
+    <keyboard-shortcut first-keystroke="ctrl alt s" />
+    <keyboard-shortcut first-keystroke="alt comma" />
+  </action>
+  <action id="SplitHorizontally">
+    <keyboard-shortcut first-keystroke="shift ctrl alt 2" />
+  </action>
+  <action id="SplitSelectionIntoLines">
+    <keyboard-shortcut first-keystroke="shift ctrl l" />
+  </action>
+  <action id="SplitVertically">
+    <keyboard-shortcut first-keystroke="shift alt 2" />
+  </action>
+  <action id="UnsplitAll">
+    <keyboard-shortcut first-keystroke="shift alt 1" />
+  </action>
+</keymap>

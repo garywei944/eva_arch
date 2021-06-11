@@ -1,0 +1,26 @@
+[global_config]
+  focus = system
+  title_transmit_bg_color = "#d30102"
+  suppress_multiple_term_dialog = True
+[keybindings]
+[profiles]
+  [[default]]
+    background_color = "#2d2d2d"
+    background_darkness = 0.62
+    background_type = transparent
+    cursor_color = "#2D2D2D"
+    font = Ubuntu Mono 13
+    foreground_color = "#eee9e9"
+    show_titlebar = False
+    palette = "#2d2d2d:#f2777a:#99cc99:#ffcc66:#6699cc:#cc99cc:#66cccc:#d3d0c8:#747369:#f2777a:#99cc99:#ffcc66:#6699cc:#cc99cc:#66cccc:#f2f0ec"
+    use_system_font = False
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+      profile = default
+    [[[window0]]]
+      type = Window
+      parent = ""
+[plugins]

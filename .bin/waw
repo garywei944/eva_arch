@@ -1,0 +1,5 @@
+#!/bin/bash
+
+nitrogen --force-setter=xinerama --head=0 --set-zoom-fill --random ~/Pictures/Wallpapers
+nitrogen --force-setter=xinerama --head=1 --set-zoom-fill --random ~/Pictures/Wallpapers
+nitrogen --force-setter=xinerama --head=2 --set-zoom-fill --random ~/Pictures/Wallpapers

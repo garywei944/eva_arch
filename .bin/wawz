@@ -1,0 +1,5 @@
+#!/bin/bash
+
+nitrogen --force-setter=xinerama --head=0 --set-zoom-fill ~/Pictures/Wallpapers/39_white2_4k.jpg
+nitrogen --force-setter=xinerama --head=1 --set-zoom-fill ~/Pictures/Wallpapers/28_painter_4k.jpg
+nitrogen --force-setter=xinerama --head=2 --set-zoom-fill ~/Pictures/Wallpapers/32_4k.jpg

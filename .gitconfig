@@ -1,0 +1,13 @@
+[user]
+	name = garywei944
+	email = 33930674+garywei944@users.noreply.github.com
+	signingkey = 93FD1909EEAE3F3684C74C49ECF74FE31A5B3EC7
+[core]
+	editor = vim
+	autocrlf = input
+[init]
+	defaultBranch = main
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg2
