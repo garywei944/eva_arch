@@ -8,4 +8,7 @@
 [init]
 	defaultBranch = main
 [commit]
-	gpgsign = true
+#	gpgsign = true
+	gpgsign = false
+[gpg]
+	program = gpg
