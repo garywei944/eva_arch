@@ -8,6 +8,7 @@
 !.eva.gitignore
 !.gitconfig
 !.profile
+!.bash_profile
 !.vimrc
 !.wakatime.cfg
 !LICENSE

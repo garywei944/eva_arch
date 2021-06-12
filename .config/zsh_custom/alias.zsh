@@ -35,6 +35,11 @@ alias reload='. ~/.zshrc'
 alias sachiel='ssh root@47.92.194.143'
 alias shamshel='ssh ubuntu@3.83.202.176'
 
+# Shadowsocks
+alias sssachiel='ss-local -c /etc/shadowsocks/sachiel.json & disown'
+alias ss2hp='hpts -s 127.0.0.1:1080 -p 8080 & disown'
+alias killss='killall ss-local'
+
 # Maybe
 alias lg='lazygit'
 alias ra='ranger'
