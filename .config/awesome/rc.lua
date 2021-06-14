@@ -206,6 +206,10 @@ mytextclock:connect_signal("button::press",
         if button == 1 then cw.toggle() end
     end)
 
+local dis_main = 1
+local dis_left = 2
+local dis_right = 3
+
 
 awful.screen.connect_for_each_screen(function(s)
     -- -- Wallpaper
@@ -214,7 +218,7 @@ awful.screen.connect_for_each_screen(function(s)
     -- Each screen has its own tag table.
     -- Hardcoded Primary screen.
     local tags
-    if s.index == 2 then
+    if s.index == dis_right then
         -- Support screen
         tags = { "1|Web", "2|Chat", "3|Smerge", "4|Doc", "5|App", "6|Code", "7|Music", "8|Terminal", "9|Reserve" }
     else
@@ -267,7 +271,7 @@ awful.screen.connect_for_each_screen(function(s)
             -- Welcome message textbox
             wibox.widget {
                 markup = "<span foreground=\"#ff66cc\">Welcome, ariseus.</span>",
-                font = 'sans 8',
+                font = 'DejaVu Sans Mono 10',
                 screen = s,
                 buttons = gears.table.join(awful.button({}, 1, function() awful.spawn.with_shell("waw &") end)),
                 widget = wibox.widget.textbox
@@ -570,14 +574,14 @@ clientkeys = gears.table.join(awful.key({ modkey }, "f",
     awful.key({ modkey, "Shift" }, "comma",
         function(c)
             -- if c.screen.index < screen.count() then
-                c:move_to_screen(c.screen.index + 1)
+                c:move_to_screen(c.screen.index - 1)
             -- end
         end,
         { description = "move to the next screen", group = "screen" }),
     awful.key({ modkey, "Shift" }, "m",
         function(c)
             -- if c.screen.index > 1 then
-                c:move_to_screen(c.screen.index - 1)
+                c:move_to_screen(c.screen.index + 1)
             -- end
         end,
         { description = "move to the previous screen", group = "screen" }))
@@ -682,6 +686,13 @@ awful.rules.rules = {
         }
     },
 
+    {
+        rule = {
+            instance = "krunner"
+        },
+        properties = { floating = true },
+    },
+
     -- Floating clients.
     {
         rule_any = {
@@ -734,37 +745,37 @@ awful.rules.rules = {
         rule = {
             instance = "sublime_text"
         },
-        properties = { tag = screen[1].tags[6] }
+        properties = { tag = screen[dis_main].tags[6] }
     },
     {
         rule = {
             name = "WeChat"
         },
-        properties = { tag = screen[2].tags[2] }
+        properties = { tag = screen[dis_right].tags[2] }
     },
     {
         rule = {
             name = "Discord"
         },
-        properties = { tag = screen[2].tags[2] }
+        properties = { tag = screen[dis_right].tags[2] }
     },
     {
         rule = {
             instance = "sublime_merge"
         },
-        properties = { tag = screen[2].tags[3] }
+        properties = { tag = screen[dis_right].tags[3] }
     },
     {
         rule = {
             instance = "netease-cloud-music"
         },
-        properties = { tag = screen[2].tags[7] }
+        properties = { tag = screen[dis_right].tags[7] }
     },
     {
         rule = {
             instance = "plasma-systemmonitor"
         },
-        properties = { tag = screen[2].tags[8] }
+        properties = { tag = screen[dis_right].tags[8] }
     },
 }
 -- }}}
@@ -837,10 +848,9 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 -- -- Theme
 local dpi = require("beautiful.xresources").apply_dpi
-beautiful.font = "sans 8"
+beautiful.font = "DejaVu Sans Mono 10"
 beautiful.useless_gap = dpi(5)
 beautiful.menu_height = dpi(15)
 
 -- Autostart
-awful.spawn.with_shell("~/.config/autostart.sh &")
 awful.spawn.with_shell("~/.config/autostart.sh &")
