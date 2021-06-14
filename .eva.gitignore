@@ -4,11 +4,10 @@
 !.bin
 
 # files
-!.bash_profile
 !.condarc
+!.envrc
 !.eva.gitignore
 !.gitconfig
-!.pathrc
 !.profile
 !.vimrc
 !.wakatime.cfg
