@@ -18,12 +18,6 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
--- Load Debian menu entries
-local debian = require("debian.menu")
-local has_fdo, freedesktop = pcall(require, "freedesktop")
-
-
-
 local function log_debug(msg)
     naughty.notify({
         preset = naughty.config.presets.critical,
@@ -81,8 +75,8 @@ beautiful.init(string.format("%s/.config/awesome/themes/%s/theme.lua", os.getenv
 -- This is used later as the default terminal and editor to run.
 -- terminal = "x-terminal-emulator"
 -- editor = os.getenv("EDITOR") or "editor"
-local terminal = "terminator"
-local editor = "emacs"
+local terminal = "konsole"
+local editor = "vim"
 local editor_cmd = terminal .. " -e " .. editor
 
 -- Default modkey.
@@ -123,23 +117,10 @@ myawesomemenu = {
     { "quit", function() awesome.quit() end },
 }
 
-local menu_awesome = { "awesome", myawesomemenu, beautiful.awesome_icon }
-local menu_terminal = { "open terminal", terminal }
-
-if has_fdo then
-    mymainmenu = freedesktop.menu.build({
-        before = { menu_awesome },
-        after = { menu_terminal }
-    })
-else
-    mymainmenu = awful.menu({
-        items = {
-            menu_awesome,
-            { "Debian", debian.menu.Debian_menu.Debian },
-            menu_terminal,
-        }
-    })
-end
+mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
+                                    { "open terminal", terminal }
+                                  }
+                        })
 
 mylauncher = awful.widget.launcher({
     image = beautiful.awesome_icon,
@@ -335,7 +316,7 @@ globalkeys = gears.table.join(-- awesome features
             }
         end,
         { description = "lua execute prompt", group = "awesome" }),
-    awful.key({ modkey, "Mod1" }, "l", function() awful.spawn.with_shell("lock") end,
+    awful.key({ "Control", "Mod1" }, "l", function() awful.spawn.with_shell("lock") end,
         { description = "lock screen", group = "awesome" }),
 
     -- Change focus
@@ -452,15 +433,15 @@ globalkeys = gears.table.join(-- awesome features
         { description = "open a terminal", group = "launcher" }),
     awful.key({ "Control" }, "space", function() awful.spawn("dmenu_run") end,
         { description = "run dmenu", group = "launcher" }),
-    awful.key({ "Control", "Shift" }, "Escape", function() awful.spawn("gnome-system-monitor") end,
+    awful.key({ "Control", "Shift" }, "Escape", function() awful.spawn("plasma-systemmonitor") end,
         { description = "launch system monitor", group = "launcher" }),
-    awful.key({ modkey }, "b", function() awful.spawn("google-chrome --password-store=gnome") end,
+    awful.key({ modkey }, "b", function() awful.spawn("google-chrome-stable --password-store=gnome") end,
         { description = "launch google chrome", group = "launcher" }),
-    awful.key({ modkey }, "e", function() awful.spawn("nautilus") end,
+    awful.key({ modkey }, "e", function() awful.spawn("dolphin") end,
         { description = "launch nautilus", group = "launcher" }),
     awful.key({ modkey }, "KP_Left", function() awful.spawn("netease-cloud-music") end,
         { description = "launch netease cloud music", group = "launcher" }),
-    awful.key({ modkey }, "KP_Home", function() awful.spawn("/opt/apps/com.qq.weixin.deepin/files/run.sh -u") end,
+    awful.key({ modkey }, "KP_Home", function() awful.spawn("/opt/apps/com.qq.weixin.deepin/files/run.sh") end,
         { description = "launch wechat", group = "launcher" }),
     awful.key({ modkey }, "KP_Insert", function() awful.spawn("discord") end,
         { description = "launch discord", group = "launcher" }),
@@ -781,7 +762,7 @@ awful.rules.rules = {
     },
     {
         rule = {
-            instance = "gnome-system-monitor"
+            instance = "plasma-systemmonitor"
         },
         properties = { tag = screen[2].tags[8] }
     },
@@ -861,4 +842,5 @@ beautiful.useless_gap = dpi(5)
 beautiful.menu_height = dpi(15)
 
 -- Autostart
+awful.spawn.with_shell("~/.config/autostart.sh &")
 awful.spawn.with_shell("~/.config/autostart.sh &")
