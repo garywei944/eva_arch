@@ -29,7 +29,7 @@ alias stopmm='sudo /opt/metamap_2020/public_mm/bin/skrmedpostctl stop
 sudo /opt/metamap_2020/public_mm/bin/wsdserverctl stop'
 
 
-alias reload='. ~/.zshrc'
+alias reload='. ~/.envrc; . ~/.zshrc'
 
 # Servers
 alias sachiel='ssh root@47.92.194.143'
@@ -44,3 +44,9 @@ alias killss='killall ss-local'
 alias lg='lazygit'
 alias ra='ranger'
 alias sra='sudo -E ranger'
+
+
+# Check CUDA version
+function cudaver() {
+	nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
+}

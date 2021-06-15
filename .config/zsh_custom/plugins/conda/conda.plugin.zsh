@@ -39,7 +39,3 @@ function cver() {
 	version=$(echo $(clink) | sed -ne 's/.*Anaconda3-\(.*\)-Linux-x86_64.sh/\1/p')
 	echo $version
 }
-
-function cudaver() {
-	nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
-}
