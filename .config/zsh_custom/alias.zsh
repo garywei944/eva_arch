@@ -28,7 +28,11 @@ sudo /opt/metamap_2020/public_mm/bin/wsdserverctl start'
 alias stopmm='sudo /opt/metamap_2020/public_mm/bin/skrmedpostctl stop
 sudo /opt/metamap_2020/public_mm/bin/wsdserverctl stop'
 
+# docker mysql
+alias dmysql='docker run -it --rm --network host mysql mysql'
+alias nasumls='docker run -it --rm --network host mysql mysql -h nas.oasis.eva -P 33060 -u root -p123456'
 
+# Reload rc scripts
 alias reload='. ~/.envrc; . ~/.zshrc'
 
 # Servers
