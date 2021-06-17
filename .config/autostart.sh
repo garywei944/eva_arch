@@ -1,10 +1,14 @@
 #!/bin/bash
 
-([[ $(pgrep picom) ]] || picom -b) &
-([[ $(pgrep chrome) ]] || google-chrome-stable --password-store=gnome --no-startup-window) &
-# [[ $(pgrep albert) ]] || (unset XDG_CURRENT_DESKTOP; albert) &
-[[ $(pgrep albert) ]] || albert &
-([[ $(pgrep fcitx) ]] || fcitx -d) &
-([[ $(pgrep krunner) ]] || krunner -d) &
+__spawn() {
+	([[ $(pgrep $1) ]] || ${@:2}) &
+}
+
+__spawn picom picom -b
+__spawn chrome google-chrome-stable --password-store=gnome --no-startup-window
+__spawn insync insync start
+__spawn albert albert
+__spawn fcitx fcitx -d
+__spawn krunner krunner -d
 numlockx on
 waw
