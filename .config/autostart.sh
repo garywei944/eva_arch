@@ -9,7 +9,7 @@ waw
 __spawn picom picom -b
 __spawn fcitx fcitx -d
 
-sleep 3
+sleep 1
 
 __spawn chrome google-chrome-stable --password-store=gnome --no-startup-window
 __spawn insync insync start
