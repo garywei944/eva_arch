@@ -461,7 +461,7 @@ globalkeys = gears.table.join(-- awesome features
         { description = "launch dolphin", group = "launcher" }),
     awful.key({ modkey }, "KP_Left", function() awful.spawn("netease-cloud-music") end,
         { description = "launch netease cloud music", group = "launcher" }),
-    awful.key({ modkey }, "KP_Home", function() awful.spawn("/opt/apps/com.qq.weixin.deepin/files/run.sh -u") end,
+    awful.key({ modkey }, "KP_Home", function() awful.spawn("wechat") end,
         { description = "launch wechat", group = "launcher" }),
     awful.key({ modkey }, "KP_Insert", function() awful.spawn("discord") end,
         { description = "launch discord", group = "launcher" }),
