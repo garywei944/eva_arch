@@ -39,3 +39,33 @@ function cver() {
 	version=$(echo $(clink) | sed -ne 's/.*Anaconda3-\(.*\)-Linux-x86_64.sh/\1/p')
 	echo $version
 }
+
+
+# Mamba alias
+if ! type "$mamba" > /dev/null; then
+	alias mel="mamba env list"
+	alias ml="mamba list"
+	alias mle="mamba list --export"
+	alias mles="mamba list --explicit > spec-file.txt"
+
+	alias mi="mamba install"
+	alias miy="mamba install -y"
+
+	alias mr="mamba remove"
+	alias mry="mamba remove -y"
+	alias mrn="mamba remove -y --all -n"
+	alias mrp="mamba remove -y --all -p"
+
+	alias mcn="mamba create -y -n"
+	alias mcp="mamba create -y -p"
+	alias mcf="mamba env create -f"
+	alias mcfe="mamba env create -f environment.yml"
+	alias mcfp="mamba env create -f environment.yml -p .venv"
+
+	alias mconf="mamba config"
+	alias mcss="mamba config --show-source"
+	alias mu="mamba update"
+	alias mum="mamba update mamba"
+	alias mua="mamba update --all"
+	alias muf="mamba env update -f"
+fi

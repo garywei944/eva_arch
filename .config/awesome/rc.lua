@@ -18,6 +18,9 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
+
+local freedesktop   = require("freedesktop")
+
 local function log_debug(msg)
     naughty.notify({
         preset = naughty.config.presets.critical,
@@ -109,18 +112,31 @@ awful.layout.layouts = {
 
 -- {{{ Menu
 -- Create a launcher widget and a main menu
-myawesomemenu = {
-    { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
-    { "manual", terminal .. " -e man awesome" },
-    { "edit config", editor_cmd .. " " .. awesome.conffile },
+local myawesomemenu = {
+    { "hotkeys", function() return false, hotkeys_popup.show_help end },
+    { "manual", terminal .. " -e 'man awesome'" },
+    { "edit config", editor_cmd.." ~/.config/awesome/rc.lua" },
     { "restart", awesome.restart },
     { "quit", function() awesome.quit() end },
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
-                                  }
-                        })
+mymainmenu = freedesktop.menu.build({
+    icon_size = beautiful.menu_height or 16,
+    before = {
+        { "Awesome", myawesomemenu, beautiful.awesome_icon },
+        --{ "Atom", "atom" },
+        -- other triads can be put here
+    },
+    after = {
+        { "Terminal", terminal },
+        { "Log out", function() awesome.quit() end },
+        { "Sleep", "systemctl suspend" },
+        { "Restart", "systemctl reboot" },
+        { "Exit", "systemctl poweroff" },
+        -- other triads can be put here
+    }
+})
+menubar.utils.terminal = terminal -- Set the Menubar terminal for applications that require it
 
 mylauncher = awful.widget.launcher({
     image = beautiful.awesome_icon,
@@ -442,10 +458,10 @@ globalkeys = gears.table.join(-- awesome features
     awful.key({ modkey }, "b", function() awful.spawn("google-chrome-stable --password-store=gnome") end,
         { description = "launch google chrome", group = "launcher" }),
     awful.key({ modkey }, "e", function() awful.spawn("dolphin") end,
-        { description = "launch nautilus", group = "launcher" }),
+        { description = "launch dolphin", group = "launcher" }),
     awful.key({ modkey }, "KP_Left", function() awful.spawn("netease-cloud-music") end,
         { description = "launch netease cloud music", group = "launcher" }),
-    awful.key({ modkey }, "KP_Home", function() awful.spawn("/opt/apps/com.qq.weixin.deepin/files/run.sh") end,
+    awful.key({ modkey }, "KP_Home", function() awful.spawn("/opt/apps/com.qq.weixin.deepin/files/run.sh -u") end,
         { description = "launch wechat", group = "launcher" }),
     awful.key({ modkey }, "KP_Insert", function() awful.spawn("discord") end,
         { description = "launch discord", group = "launcher" }),
