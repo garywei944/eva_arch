@@ -1,5 +1,5 @@
 #!/bin/sh
 
-source $HOME/.envrc
-
 export XDG_CURRENT_DESKTOP=KDE
+
+source $HOME/.envrc
