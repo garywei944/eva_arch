@@ -42,7 +42,7 @@ cver() {
 
 
 # Mamba alias
-if ! type "$mamba" > /dev/null; then
+if $(command -v mamba); then
 	alias mel="mamba env list"
 	alias ml="mamba list"
 	alias mle="mamba list --export"

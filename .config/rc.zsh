@@ -70,7 +70,9 @@ ZSH_CUSTOM=$HOME/.config/zsh_custom
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(sudo man zsh_reload archlinux systemd screen gpg-agent fd ripgrep z history extract git gitignore git-flow git-flow-avh pip npm emacs sublime sublime-merge themes zsh-autosuggestions zsh-syntax-highlighting python pyenv rsync aws heroku vagrant conda)
+plugins=(sudo man zsh_reload archlinux ubuntu systemd screen gpg-agent fd ripgrep z history extract git gitignore git-flow git-flow-avh pip npm emacs sublime sublime-merge themes zsh-autosuggestions zsh-syntax-highlighting python pyenv rsync aws heroku vagrant conda)
+
+[[ ${EVA+x} ]] || . ~/.envrc
 
 source $ZSH/oh-my-zsh.sh
 
