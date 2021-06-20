@@ -19,8 +19,8 @@
 !.config
 .config/*
 !.config/awesome
+!.config/neofetch
 !.config/personal
-!.config/qtile
 !.config/terminator
 !.config/zsh_custom
 
