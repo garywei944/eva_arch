@@ -51,6 +51,6 @@ alias sra='sudo -E ranger'
 
 
 # Check CUDA version
-function cudaver() {
+cudaver() {
 	nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
 }
