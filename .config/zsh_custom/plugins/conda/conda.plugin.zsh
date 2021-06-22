@@ -5,7 +5,9 @@ alias cde="conda deactivate"
 alias cel="conda env list"
 alias cl="conda list"
 alias cle="conda list --export"
-alias cles="conda list --explicit > spec-file.txt"
+alias cles="conda list --export > spec-file.txt"
+alias cee='conda env export'
+alias ceee='conda env export > environment-spec.yml'
 
 alias ci="conda install"
 alias ciy="conda install -y"
@@ -24,7 +26,7 @@ alias ccfp="conda env create -f environment.yml -p .venv"
 alias cconf="conda config"
 alias ccss="conda config --show-source"
 alias cu="conda update"
-alias cuc="conda update conda"
+alias cuc="conda update -n base conda"
 alias cua="conda update --all"
 alias cuf="conda env update -f"
 
@@ -44,8 +46,8 @@ cver() {
 # Mamba alias
 alias mel="mamba env list"
 alias ml="mamba list"
-alias mle="mamba list --export"
-alias mles="mamba list --explicit > spec-file.txt"
+alias mee='mamba env export'
+alias meee='mamba env export > environment-spec.yml'
 
 alias mi="mamba install"
 alias miy="mamba install -y"
@@ -64,6 +66,7 @@ alias mcfp="mamba env create -f environment.yml -p .venv"
 alias mconf="mamba config"
 alias mcss="mamba config --show-source"
 alias mu="mamba update"
-alias mum="mamba update mamba"
+alias muc="mamba update -n base conda"
+alias mum="mamba update -n base mamba"
 alias mua="mamba update --all"
 alias muf="mamba env update -f"
