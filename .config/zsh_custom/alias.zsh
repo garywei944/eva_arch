@@ -1,3 +1,7 @@
+spawn() {
+	$@ </dev/null &>/dev/null & disown
+}
+
 # Shortcuts
 alias c="clear"
 alias fdh='fd -H'

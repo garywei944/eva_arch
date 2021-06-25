@@ -1,5 +1,10 @@
+# Dolphin
+open() {
+	spawn dolphin $@
+}
+
 # PyCharm
 pcm() {
-	pycharm $@ &> /dev/null & disown
+	spawn pycharm $@
 }
-alias pcmt='pycharm . &> /dev/null & disown'
+alias pcmt='spawn pycharm .'
