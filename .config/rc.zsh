@@ -1,4 +1,4 @@
-if [[ ! ${EVA+x} ]]; then source $HOME/.envrc; fi
+if [ -z ${EVA+x} ]; then source $HOME/.envrc; fi
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -83,7 +83,7 @@ elif [[ $ID == centos ]]; then
 	plugins=(yum)
 fi
 
-if [[ ! ${NOSUDO+x} ]]; then
+if [ -z ${NOSUDO+x} ]; then
 	plugins+=(sudo)
 fi
 
@@ -96,21 +96,21 @@ plugins+=(
 	conda
 )
 
-if [[ $(command -v fd) ]]; then plugins+=(fd); fi
-if [[ $(command -v rg) ]]; then plugins+=(ripgrep); fi
-if [[ $(command -v aws) ]]; then plugins+=(aws); fi
-if [[ $(command -v heroku) ]]; then plugins+=(heroku); fi
-if [[ $(command -v vagrant) ]]; then plugins+=(vagrant); fi
+if [ -n $(command -v fd) ]; then plugins+=(fd); fi
+if [ -n $(command -v rg) ]; then plugins+=(ripgrep); fi
+if [ -n $(command -v aws) ]; then plugins+=(aws); fi
+if [ -n $(command -v heroku) ]; then plugins+=(heroku); fi
+if [ -n $(command -v vagrant) ]; then plugins+=(vagrant); fi
 
-if [[ $(command -v subl) ]]; then plugins+=(sublime); fi
-if [[ $(command -v smerge) ]]; then plugins+=(sublime-merge); fi
+if [ -n $(command -v subl) ]; then plugins+=(sublime); fi
+if [ -n $(command -v smerge) ]; then plugins+=(sublime-merge); fi
 
 
 source $ZSH/oh-my-zsh.sh
 
 
 # Welcome message
-if [[ $(command -v figlet) && $(command -v lolcat) ]]; then
+if [ -n $(command -v figlet) -a -n $(command -v lolcat) ]; then
 	echo "$(echo "ariseus" | figlet)
 Welcome back, ariseus." | lolcat
 else
