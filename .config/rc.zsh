@@ -110,7 +110,7 @@ source $ZSH/oh-my-zsh.sh
 
 
 # Welcome message
-if [ -n $(command -v figlet) -a -n $(command -v lolcat) ]; then
+if [[ -n $(command -v figlet) && -n $(command -v lolcat) ]]; then
 	echo "$(echo "ariseus" | figlet)
 Welcome back, ariseus." | lolcat
 else
