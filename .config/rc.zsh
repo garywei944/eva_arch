@@ -1,3 +1,5 @@
+if [[ ! ${EVA+x} ]]; then source $HOME/.envrc; fi
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -70,18 +72,51 @@ ZSH_CUSTOM=$HOME/.config/zsh_custom
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(sudo man zsh_reload archlinux ubuntu systemd screen gpg-agent fd ripgrep z history extract git gitignore git-flow git-flow-avh pip npm emacs sublime sublime-merge themes zsh-autosuggestions zsh-syntax-highlighting python pyenv rsync aws heroku vagrant conda)
 
-[[ ${EVA+x} ]] || . ~/.envrc
+# Add plugins according to distribution releases
+# Only arch is considered as desktop
+if [[ $ID == arch ]]; then
+	plugins=(archlinux)
+elif [[ $ID == ubuntu ]]; then
+	plugins=(ubuntu)
+elif [[ $ID == centos ]]; then
+	plugins=(yum)
+fi
+
+if [[ ! ${NOSUDO+x} ]]; then
+	plugins+=(sudo)
+fi
+
+plugins+=(
+	systemd man screen gpg-agent
+	python pip pyenv npm
+	git gitignore git-flow git-flow-avh
+	emacs rsync extract
+	z history zsh_reload themes zsh-autosuggestions zsh-syntax-highlighting
+	conda
+)
+
+if [[ $(command -v fd) ]]; then plugins+=(fd); fi
+if [[ $(command -v rg) ]]; then plugins+=(ripgrep); fi
+if [[ $(command -v aws) ]]; then plugins+=(aws); fi
+if [[ $(command -v heroku) ]]; then plugins+=(heroku); fi
+if [[ $(command -v vagrant) ]]; then plugins+=(vagrant); fi
+
+if [[ $(command -v subl) ]]; then plugins+=(sublime); fi
+if [[ $(command -v smerge) ]]; then plugins+=(sublime-merge); fi
+
 
 source $ZSH/oh-my-zsh.sh
 
+
 # Welcome message
-[[ $(command -v figlet) && $(command -v lolcat) ]] \
-&& echo "$(echo "ariseus" | figlet)
-Welcome back, ariseus." | lolcat \
-|| echo "--------------------
+if [[ $(command -v figlet) && $(command -v lolcat) ]]; then
+	echo "$(echo "ariseus" | figlet)
+Welcome back, ariseus." | lolcat
+else
+	echo "--------------------
 
 Welcome back, ariseus.
 
 --------------------"
+fi

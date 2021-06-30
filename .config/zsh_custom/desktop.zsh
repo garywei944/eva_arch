@@ -2,9 +2,10 @@
 open() {
 	spawn dolphin $@
 }
+alias opent='open .'
 
 # PyCharm
 pcm() {
 	spawn pycharm $@
 }
-alias pcmt='spawn pycharm .'
+alias pcmt='pcm .'
