@@ -1,8 +1,8 @@
 # Dolphin
-open() {
+dolp() {
 	spawn dolphin "$@"
 }
-alias opent='open .'
+alias opent='dolp .'
 
 # PyCharm
 pcm() {
