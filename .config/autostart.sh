@@ -1,7 +1,7 @@
 #!/bin/bash
 
 __spawn() {
-	([[ $(pgrep $1) ]] || ${@:2}) </dev/null >/dev/null 2>&1 & disown
+	([[ -z $(pgrep $1) ]] && ${@:2} </dev/null >/dev/null 2>&1) & disown
 }
 
 numlockx on

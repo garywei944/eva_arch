@@ -1,4 +1,4 @@
-if [ -z ${EVA+x} ]; then source $HOME/.envrc; fi
+[[ -z ${EVA+x} ]] && source $HOME/.envrc
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -73,6 +73,9 @@ ZSH_CUSTOM=$HOME/.config/zsh_custom
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 
+# Load version comparision
+autoload is-at-least
+
 # Add plugins according to distribution releases
 # Only arch is considered as desktop
 if [[ $ID == arch ]]; then
@@ -83,9 +86,7 @@ elif [[ $ID == centos ]]; then
 	plugins=(yum)
 fi
 
-if [ -z ${NOSUDO+x} ]; then
-	plugins+=(sudo)
-fi
+[[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
 
 plugins+=(
 	systemd man screen gpg-agent
@@ -96,14 +97,15 @@ plugins+=(
 	conda
 )
 
-if [ -n $(command -v fd) ]; then plugins+=(fd); fi
-if [ -n $(command -v rg) ]; then plugins+=(ripgrep); fi
-if [ -n $(command -v aws) ]; then plugins+=(aws); fi
-if [ -n $(command -v heroku) ]; then plugins+=(heroku); fi
-if [ -n $(command -v vagrant) ]; then plugins+=(vagrant); fi
+[[ -n $(command -v fd) ]] && plugins+=(fd)
+[[ -n $(command -v rg) ]] && plugins+=(ripgrep)
+[[ -n $(command -v heroku) ]] && plugins+=(heroku)
+[[ -n $(command -v vagrant) ]] && plugins+=(vagrant)
 
-if [ -n $(command -v subl) ]; then plugins+=(sublime); fi
-if [ -n $(command -v smerge) ]; then plugins+=(sublime-merge); fi
+[[ -n $(command -v aws) ]] && is-at-least 5.3 && plugins+=(aws)
+
+[[ -n $(command -v subl) ]] && plugins+=(sublime)
+[[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
 
 source $ZSH/oh-my-zsh.sh

@@ -1,11 +1,11 @@
 # Dolphin
 open() {
-	spawn dolphin $@
+	spawn dolphin "$@"
 }
 alias opent='open .'
 
 # PyCharm
 pcm() {
-	spawn pycharm $@
+	spawn pycharm "$@"
 }
 alias pcmt='pcm .'
