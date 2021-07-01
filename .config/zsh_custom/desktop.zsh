@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Dolphin
 dolp() {
 	spawn dolphin "$@"

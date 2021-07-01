@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 spawn() {
 	($@ </dev/null &>/dev/null) & disown
 }

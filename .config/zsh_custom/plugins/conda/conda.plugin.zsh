@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 alias ca="conda activate"
 alias cab="conda activate base"
 alias cde="conda deactivate"

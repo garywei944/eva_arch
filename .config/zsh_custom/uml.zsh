@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 alias umlcs='ssh gwei@cs.uml.edu'
 
 alias omega='ssh gwei@172.16.34.1'

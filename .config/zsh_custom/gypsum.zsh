@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 alias selenite='ssh guanghaowei@gypsum-gateway.cs.umass.edu'
 alias gypsum='ssh guanghaowei@gypsum.cs.umass.edu'
 
