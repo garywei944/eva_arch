@@ -112,13 +112,33 @@ source $ZSH/oh-my-zsh.sh
 
 
 # Welcome message
+box_out() {
+	local s=("$@") b w
+
+	for l in "${s[@]}"; do
+		((w<${#l})) && { b="$l"; w="${#l}"; }
+	done
+	tput setaf 3
+
+	# Top line
+	echo " -${b//?/-}-
+| ${b//?/ } |"
+
+	# Print sentences
+	for l in "${s[@]}"; do
+		printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
+	done
+
+	#Bottom line
+	echo "| ${b//?/ } |
+ -${b//?/-}-"
+	tput sgr 0
+}
+
 if [[ -n $(command -v figlet) && -n $(command -v lolcat) ]]; then
-	echo "$(echo "ariseus" | figlet)
-Welcome back, ariseus." | lolcat
+	echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
+elif [[ -n $(command -v lolcat) ]]; then
+	box_out "Welcome back, ariseus." | lolcat
 else
-	echo "--------------------
-
-Welcome back, ariseus.
-
---------------------"
+	box_out "Welcome back, ariseus."
 fi
