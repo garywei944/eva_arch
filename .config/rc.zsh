@@ -78,11 +78,11 @@ autoload is-at-least
 
 # Add plugins according to distribution releases
 # Only arch is considered as desktop
-if [[ $ID == arch ]]; then
+if [[ $OS_ID == arch ]]; then
 	plugins=(archlinux)
-elif [[ $ID == ubuntu ]]; then
+elif [[ $OS_ID == ubuntu ]]; then
 	plugins=(ubuntu)
-elif [[ $ID == centos ]]; then
+elif [[ $OS_ID == centos ]]; then
 	plugins=(yum)
 fi
 
