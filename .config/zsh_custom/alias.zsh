@@ -1,5 +1,5 @@
 spawn() {
-	$@ </dev/null &>/dev/null & disown
+	($@ </dev/null &>/dev/null) & disown
 }
 
 # Shortcuts
