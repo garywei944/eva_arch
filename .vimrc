@@ -55,13 +55,13 @@ set wildmenu
 set wildmode=longest:list,full
 
 " Theme
-set termguicolors
-color tender
-highlight Normal guibg=#000001
-highlight Visual guibg=#323232
-highlight StatusLine guibg=#444444 guifg=#b3deef
-highlight StatusLineTerm guibg=#444444 guifg=#b3deef
-highlight StatusLineTermNC guibg=#444444 guifg=#999999
+" set termguicolors
+" color tender
+" highlight Normal guibg=#000001
+" highlight Visual guibg=#323232
+" highlight StatusLine guibg=#444444 guifg=#b3deef
+" highlight StatusLineTerm guibg=#444444 guifg=#b3deef
+" highlight StatusLineTermNC guibg=#444444 guifg=#999999
 
 " Keymap
 nnoremap <silent> <leader>e :NERDTreeToggle<cr>
