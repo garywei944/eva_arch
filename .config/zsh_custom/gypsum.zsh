@@ -17,4 +17,4 @@ alias gpc='scancel'
 alias gpi='sinfo'
 
 
-alias gpnoteaid='cd /mnt/nfs/work1/hongyu/guanghaowei/NoteAid-Annotation && conda activate noteaid'
+alias noteaid='cd ~/projects/NoteAid-Annotation; conda activate noteaid'
