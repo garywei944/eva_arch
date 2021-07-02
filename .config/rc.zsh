@@ -75,26 +75,17 @@ ZSH_CUSTOM=$HOME/.config/zsh_custom
 # Load version comparision
 autoload is-at-least
 
-# Add plugins according to distribution releases
-# Only arch is considered as desktop
-if [[ $OS_ID == arch ]]; then
-	plugins=(archlinux)
-elif [[ $OS_ID == ubuntu ]]; then
-	plugins=(ubuntu)
-elif [[ $OS_ID == centos ]]; then
-	plugins=(yum)
+if [[ -n $(command -v pacman) ]]; then
+	plugins+=(archlinux)
+elif [[ -n $(command -v apt-get) ]]; then
+	plugins+=(ubuntu)
+elif [[ -n $(command -v yum) ]]; then
+	plugins+=(yum)
+elif [[ -n $(command -v brew) ]]; then
+	plugins+=(brew)
 fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
-
-plugins+=(
-	systemd man screen gpg-agent
-	python pip pyenv npm
-	git gitignore git-flow git-flow-avh
-	emacs rsync extract
-	z history zsh_reload themes zsh-autosuggestions zsh-syntax-highlighting
-	conda
-)
 
 [[ -n $(command -v fd) ]] && plugins+=(fd)
 [[ -n $(command -v rg) ]] && plugins+=(ripgrep)
@@ -105,6 +96,16 @@ plugins+=(
 
 [[ -n $(command -v subl) ]] && plugins+=(sublime)
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
+
+plugins+=(
+	systemd man screen gpg-agent
+	python pip pyenv npm
+	git gitignore git-flow git-flow-avh
+	emacs rsync extract
+	z history zsh_reload themes zsh-autosuggestions zsh-syntax-highlighting
+	conda
+)
+
 
 
 source $ZSH/oh-my-zsh.sh
