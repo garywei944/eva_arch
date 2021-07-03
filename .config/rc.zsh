@@ -101,7 +101,7 @@ plugins+=(
 	systemd man screen gpg-agent
 	python pip pyenv npm
 	git gitignore git-flow git-flow-avh
-	emacs rsync extract
+	rsync extract
 	z history zsh_reload themes zsh-autosuggestions zsh-syntax-highlighting
 	conda
 )
