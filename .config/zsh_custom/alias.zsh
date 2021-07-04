@@ -11,6 +11,7 @@ alias fdhi='fd -HI'
 alias rgh='rg --hidden'
 alias rghi='rg --hidden --no-ignore'
 alias s='neofetch'
+alias ftree='fd | as-tree'
 
 # Time
 alias isodate='date +%F'
