@@ -19,3 +19,7 @@ if [[ -n ${CONDA_PATH+x} ]]; then
 	fi
 	unset __conda_setup
 fi
+
+
+# CentOS no `tree` workaround
+[[ -z $(command -v tree) && -n $(command -v fd) && -n $(command -v as-tree) ]] && alias tree='fd -HI | as-tree'
