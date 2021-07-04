@@ -42,10 +42,6 @@ alias nasumls='docker run -it --rm --network host mysql mysql -h nas.oasis.eva -
 # Reload rc scripts
 alias reload='. ~/.envrc; . ~/.zshrc'
 
-# Servers
-alias sachiel='ssh root@47.92.194.143'
-alias shamshel='ssh ubuntu@100.25.13.185'
-
 # Shadowsocks
 alias sssachiel='ss-local -c /etc/shadowsocks/sachiel.json & disown'
 alias ss2hp='hpts -s 127.0.0.1:1080 -p 8080 & disown'
