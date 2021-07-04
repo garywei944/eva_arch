@@ -1,5 +1,10 @@
 #!/bin/zsh
 
+
+# Run .envrc
+[[ -z ${EVA+x} ]] && . ~/.envrc
+
+
 # Conda init
 if [[ -n ${CONDA_PATH+x} ]]; then
 	__conda_setup="$('$CONDA_PATH/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
