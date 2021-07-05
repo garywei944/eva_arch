@@ -13,6 +13,7 @@ if [[ $(uname -r | sed -n 's/.*\( *Microsoft *\).*/\1/ip') == microsoft ]]; then
 
 	alias subl='__cmd subl.bat'
 	alias smerge='__cmd smerge.bat'
+	alias nvidia-smi='nvidia-smi.exe'
 fi
 
 
