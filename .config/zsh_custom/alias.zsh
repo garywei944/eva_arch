@@ -12,6 +12,7 @@ alias rgh='rg --hidden'
 alias rghi='rg --hidden --no-ignore'
 alias s='neofetch'
 alias ftree='fd | as-tree'
+alias ncore='grep -m 1 "cpu cores" /proc/cpuinfo | sed "s/[^0-9]*//g"'
 
 # Time
 alias isodate='date +%F'

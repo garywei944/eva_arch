@@ -13,7 +13,7 @@ if [[ $(hostname) == node* ]]; then
 	alias gpshgl='srun --pty --gres=gpu:1 --partition=titanx-long /bin/zsh'
 
 	alias gpq='squeue | grep'
-	alias gpps='squeue | grep guanghaowei'
+	alias gpps='squeue | grep guanghao'
 
 	alias gpc='scancel'
 
