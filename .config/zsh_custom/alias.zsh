@@ -5,14 +5,15 @@ spawn() {
 }
 
 # Shortcuts
-alias c="clear"
+alias c='clear'
+alias copy='xclip -sel clip'
 alias fdh='fd -H'
 alias fdhi='fd -HI'
 alias rgh='rg --hidden'
 alias rghi='rg --hidden --no-ignore'
-alias s='neofetch'
 alias ftree='fd | as-tree'
 alias ncore='grep -m 1 "cpu cores" /proc/cpuinfo | sed "s/[^0-9]*//g"'
+alias s='neofetch'
 
 # Time
 alias isodate='date +%F'
