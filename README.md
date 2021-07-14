@@ -1,8 +1,12 @@
 # eva_arch
 
-![](arch_neofetch.png)
-
 Custom Arch Linux configurations and dotfiles
+
+![KDE Plasma](arch_neofetch.png)
+KDE Plasma
+
+![Awesome WM](.config/awesome/arch_awesome.png)
+Awesome WM ([`~/.config/awesome/`](.config/awesome))
 
 ## Usage
 To clone the repo to the existing user home directory and preserve other files, I use the following commands
@@ -10,9 +14,9 @@ To clone the repo to the existing user home directory and preserve other files, 
 cd ~ || exit
 rm -fr .git
 git init
-git remote add origin https://github.com:garywei944/eva_arch.git
+git remote add origin https://github.com/garywei944/eva_arch.git
 git config core.excludesFile .eva.gitignore
-git fetch
+git fetch --depth=1
 git reset --hard origin/main
 git branch -m master main
 git branch --set-upstream-to=origin/main main
