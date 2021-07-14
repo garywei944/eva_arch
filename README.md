@@ -2,7 +2,7 @@
 
 Custom Arch Linux configurations and dotfiles
 
-![KDE Plasma](arch_neofetch.png)
+![KDE Plasma](arch_neofetch_v3.png)
 KDE Plasma
 
 ![Awesome WM](.config/awesome/arch_awesome.png)
