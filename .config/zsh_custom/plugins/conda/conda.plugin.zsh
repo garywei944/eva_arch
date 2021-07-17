@@ -31,6 +31,8 @@ alias cu="conda update"
 alias cuc="conda update -n base conda"
 alias cua="conda update --all"
 alias cuf="conda env update -f"
+alias cufe="conda env update -f environment.yml"
+alias cufep="conda env update -f environment.yml --prune"
 
 clink() {
 	local link
@@ -72,3 +74,5 @@ alias muc="mamba update -n base conda"
 alias mum="mamba update -n base mamba"
 alias mua="mamba update --all"
 alias muf="mamba env update -f"
+alias mufe="mamba env update -f environment.yml"
+alias mufep="mamba env update -f environment.yml --prune"
