@@ -20,6 +20,9 @@ alias isodate='date +%F'
 alias isotime='date +%Y-%m-%dT%H:%M:%S%z'
 alias utctime='date -u +%FT%TZ'
 
+# Chrome
+alias startchrome='spawn google-chrome-stable --password-store=gnome --no-startup-window'
+
 # Browser-sync
 alias bs='browser-sync'
 alias bss='browser-sync start'
@@ -31,12 +34,6 @@ alias ckct='cookiecutter https://github.com/garywei944/cookiecutter-data-science
 # git
 alias gcld='git clone --recurse-submodules --depth 1'
 alias gaignore='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
-
-# MetaMap Server
-alias startmm='sudo /opt/metamap_2020/public_mm/bin/skrmedpostctl start
-sudo /opt/metamap_2020/public_mm/bin/wsdserverctl start'
-alias stopmm='sudo /opt/metamap_2020/public_mm/bin/skrmedpostctl stop
-sudo /opt/metamap_2020/public_mm/bin/wsdserverctl stop'
 
 # docker mysql
 alias dmysql='docker run -it --rm --network host mysql mysql'
