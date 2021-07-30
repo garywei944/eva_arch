@@ -1,0 +1,14 @@
+name: cv
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - pip
+  - anaconda
+  - pytorch
+  - torchvision
+  - cudatoolkit
+  - opencv

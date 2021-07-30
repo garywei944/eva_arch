@@ -1,0 +1,19 @@
+name: hf
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - pip
+  - anaconda
+  - pytorch
+  - tensorflow-gpu
+  - cudatoolkit
+  - transformers
+  - datasets
+  - seqeval
+
+  - pip:
+      - pytokenizations

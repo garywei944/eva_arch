@@ -1,0 +1,12 @@
+name: torch
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - pip
+  - anaconda
+  - pytorch
+  - cudatoolkit

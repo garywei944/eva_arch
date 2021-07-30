@@ -20,3 +20,4 @@ __spawn chrome google-chrome-stable --password-store=gnome --no-startup-window
 __spawn insync insync start
 __spawn deja-dup deja-dup --gapplication-service
 __nokde_spawn birdtrap birdtray
+__nokde_spawn Evernote-Beta Evernote-Beta
