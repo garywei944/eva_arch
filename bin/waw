@@ -1,5 +1,9 @@
 #!/bin/bash
 
-nitrogen --force-setter=xinerama --head=0 --set-zoom-fill --random ~/Pictures/Wallpapers
-nitrogen --force-setter=xinerama --head=1 --set-zoom-fill --random ~/Pictures/Wallpapers
-nitrogen --force-setter=xinerama --head=2 --set-zoom-fill --random ~/Pictures/Wallpapers
+DIR=~/Pictures/Wallpapers
+
+i=0
+ls $DIR | shuf -n 3 | while read pic; do
+	nitrogen --force-setter=xinerama --head=$i --set-zoom-fill $DIR/$pic
+	i=$(($i+1))
+done
