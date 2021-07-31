@@ -1,10 +1,10 @@
- ☐ Rename each tags
  ☐ Set change wallpaper every 10 min
- ☐ Rule chrome/other apps with default labels
-
+ ☐ Set up mpc and mpd for audio control
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Rule chrome/other apps with default labels @done (21-07-30 21:13)
+ ✔ Rename each tags @done (21-07-30 21:13)
  ✔ Show desktop and then resume with the previous tag @done (21-03-17 21:14)
  ✘ recursive init git submodules @cancelled (21-03-17 21:13)
  ✔ random theme @done (21-03-17 21:13)

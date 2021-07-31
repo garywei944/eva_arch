@@ -752,45 +752,129 @@ awful.rules.rules = {
         },
         properties = { titlebars_enabled = true }
     },
-
-    -- Set Firefox to always map on the tag named "2" on screen 1.
-    -- { rule = { class = "Firefox" },
-    --   properties = { screen = 1, tag = "2" } },
-
     {
         rule = {
-            instance = "sublime_text"
+            instance = "dolphin"
         },
+        callback = function(c)
+            local t = screen[dis_main].tags[3]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_main].tags[3] }
+    },
+    {
+        rule = {
+            instance = "Msgcompose",
+            class = "Thunderbird"
+        },
+        callback = function(c)
+            local t = screen[dis_main].tags[4]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_main].tags[4] }
+    },
+    {
+        rule = {
+            instance = "Mail",
+            class = "Thunderbird"
+        },
+        callback = function(c)
+            local t = screen[dis_main].tags[5]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_main].tags[5] }
+    },
+    {
+        rule = {
+            instance = "subl",
+            name = "Sublime Text"
+        },
+        callback = function(c)
+            local t = screen[dis_main].tags[6]
+            t:view_only()
+        end,
         properties = { tag = screen[dis_main].tags[6] }
     },
     {
         rule = {
-            name = "WeChat"
+            instance = "wechat.exe"
         },
+        callback = function(c)
+            local t = screen[dis_right].tags[2]
+            t:view_only()
+        end,
         properties = { tag = screen[dis_right].tags[2] }
     },
     {
         rule = {
-            name = "Discord"
+            instance = "discord"
         },
+        callback = function(c)
+            local t = screen[dis_right].tags[2]
+            t:view_only()
+        end,
         properties = { tag = screen[dis_right].tags[2] }
     },
     {
         rule = {
             instance = "sublime_merge"
         },
+        callback = function(c)
+            local t = screen[dis_right].tags[3]
+            t:view_only()
+        end,
         properties = { tag = screen[dis_right].tags[3] }
+    },
+    {
+        rule = {
+            instance = "youdao-dict"
+        },
+        callback = function(c)
+            local t = screen[dis_right].tags[5]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_right].tags[5] }
+    },
+    {
+        rule = {
+            instance = "jetbrains-pycharm",
+            name = "SciView - "
+        },
+        callback = function(c)
+            local t = screen[dis_right].tags[6]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_right].tags[6] }
+    },
+    {
+        rule = {
+            instance = "jetbrains-pycharm",
+            name = "Run - "
+        },
+        callback = function(c)
+            local t = screen[dis_right].tags[6]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_right].tags[6] }
     },
     {
         rule = {
             instance = "netease-cloud-music"
         },
+        callback = function(c)
+            local t = screen[dis_right].tags[7]
+            t:view_only()
+        end,
         properties = { tag = screen[dis_right].tags[7] }
     },
     {
         rule = {
             instance = "plasma-systemmonitor"
         },
+        callback = function(c)
+            local t = screen[dis_right].tags[8]
+            t:view_only()
+        end,
         properties = { tag = screen[dis_right].tags[8] }
     },
 }
