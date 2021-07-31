@@ -684,6 +684,10 @@ end),
 root.keys(globalkeys)
 -- }}}
 
+
+-- Workaround Thunderbird show a windows at start up
+local __tb_started = false
+
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
@@ -779,8 +783,12 @@ awful.rules.rules = {
             class = "Thunderbird"
         },
         callback = function(c)
-            local t = screen[dis_main].tags[5]
-            t:view_only()
+            if __tb_started then
+                local t = screen[dis_main].tags[5]
+                t:view_only()
+            else
+                __tb_started = true
+            end
         end,
         properties = { tag = screen[dis_main].tags[5] }
     },
