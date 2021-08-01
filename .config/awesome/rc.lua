@@ -797,7 +797,7 @@ awful.rules.rules = {
             instance = "filezilla"
         },
         callback = function(c)
-            local t = screen[dis_main].tags[6]
+            local t = screen[dis_main].tags[5]
             t:view_only()
         end,
         properties = { tag = screen[dis_main].tags[5] }
