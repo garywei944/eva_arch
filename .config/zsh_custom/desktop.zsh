@@ -1,10 +1,10 @@
 #!/bin/zsh
 
 # Dolphin
-dolp() {
+dol() {
 	spawn dolphin "$@"
 }
-alias opent='dolp .'
+alias dolt='dol .'
 
 # PyCharm
 pcm() {
