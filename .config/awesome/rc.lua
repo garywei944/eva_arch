@@ -794,6 +794,16 @@ awful.rules.rules = {
     },
     {
         rule = {
+            instance = "filezilla"
+        },
+        callback = function(c)
+            local t = screen[dis_main].tags[6]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_main].tags[5] }
+    },
+    {
+        rule = {
             instance = "subl",
             name = "Sublime Text"
         },
