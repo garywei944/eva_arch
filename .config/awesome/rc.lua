@@ -877,6 +877,17 @@ awful.rules.rules = {
     },
     {
         rule = {
+            instance = "jetbrains-pycharm",
+            name = "Documentation - "
+        },
+        callback = function(c)
+            local t = screen[dis_right].tags[6]
+            t:view_only()
+        end,
+        properties = { tag = screen[dis_right].tags[6] }
+    },
+    {
+        rule = {
             instance = "netease-cloud-music"
         },
         callback = function(c)
