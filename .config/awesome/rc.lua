@@ -78,7 +78,7 @@ beautiful.init(string.format("%s/.config/awesome/themes/%s/theme.lua", os.getenv
 -- This is used later as the default terminal and editor to run.
 -- terminal = "x-terminal-emulator"
 -- editor = os.getenv("EDITOR") or "editor"
-local terminal = "konsole"
+local terminal = "terminator"
 local editor = "vim"
 local editor_cmd = terminal .. " -e " .. editor
 
