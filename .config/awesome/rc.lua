@@ -756,16 +756,16 @@ awful.rules.rules = {
         },
         properties = { titlebars_enabled = true }
     },
-    {
-        rule = {
-            instance = "dolphin"
-        },
-        callback = function(c)
-            local t = screen[dis_main].tags[3]
-            t:view_only()
-        end,
-        properties = { tag = screen[dis_main].tags[3] }
-    },
+    -- {
+    --     rule = {
+    --         instance = "dolphin"
+    --     },
+        -- callback = function(c)
+        --     local t = screen[dis_main].tags[3]
+        --     t:view_only()
+        -- end,
+    --     properties = { tag = screen[dis_main].tags[3] }
+    -- },
     {
         rule = {
             instance = "Msgcompose",
