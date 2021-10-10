@@ -102,7 +102,7 @@ plugins+=(
 	python pip pyenv npm
 	git gitignore git-flow git-flow-avh
 	rsync extract
-	z history zsh_reload themes zsh-autosuggestions zsh-syntax-highlighting
+	z history themes zsh-autosuggestions zsh-syntax-highlighting
 	conda
 )
 
