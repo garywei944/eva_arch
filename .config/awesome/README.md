@@ -20,7 +20,3 @@ or manually run the command
 git clone --depth 1 https://github.com/lcpz/awesome-freedesktop.git ~/.config/awesome/freedesktop
 git clone --depth 1 https://github.com/lcpz/lain.git ~/.config/awesome/lain
 ```
-
-
-## Issues
-1. For some reasons, it only supports 3 monitors(displays) now and fail to start if only 1 or 2 monitors is connected. Will be fixed to support 1-3 monitors soon. 

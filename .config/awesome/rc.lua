@@ -222,9 +222,18 @@ mytextclock:connect_signal("button::press",
         if button == 1 then cw.toggle() end
     end)
 
+
+
 local dis_main = 1
-local dis_left = 2
-local dis_right = 3
+local dis_left = 1
+local dis_right = 1
+
+if screen:count() >= 2 then
+    dis_left = 2
+end
+if screen:count() >= 3 then
+    dis_right = 3
+end
 
 
 awful.screen.connect_for_each_screen(function(s)
@@ -234,7 +243,7 @@ awful.screen.connect_for_each_screen(function(s)
     -- Each screen has its own tag table.
     -- Hardcoded Primary screen.
     local tags
-    if s.index == dis_right then
+    if screen:count() >= 2 and s.index == dis_right then
         -- Support screen
         tags = { "1|Web", "2|Chat", "3|Smerge", "4|Doc", "5|App", "6|Code", "7|Music", "8|Terminal", "9|Reserve" }
     else
