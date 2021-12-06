@@ -225,8 +225,8 @@ mytextclock:connect_signal("button::press",
 
 
 local dis_main = 1
-local dis_left = 1
-local dis_right = 1
+local dis_left = 3
+local dis_right = 2
 
 if screen:count() >= 2 then
     dis_left = 2
