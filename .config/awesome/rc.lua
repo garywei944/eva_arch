@@ -224,15 +224,17 @@ mytextclock:connect_signal("button::press",
 
 
 
+-- Don't change these for assign monitor index
 local dis_main = 1
-local dis_left = 3
-local dis_right = 2
+local dis_left = 1
+local dis_right = 1
 
+-- Change these values for assigning monitor index
 if screen:count() >= 2 then
-    dis_left = 2
+    dis_left = 3
 end
 if screen:count() >= 3 then
-    dis_right = 3
+    dis_right = 2
 end
 
 
