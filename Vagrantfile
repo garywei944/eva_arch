@@ -6,5 +6,5 @@ Vagrant.configure("2") do |config|
   end
   config.vm.network "forwarded_port", id: "ssh", host: 2222, guest: 22
   config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.synced_folder "./sandbox/", "/home/vagrant/shared"
+  config.vm.synced_folder "./sandbox", "/home/vagrant/sandbox"
 end
