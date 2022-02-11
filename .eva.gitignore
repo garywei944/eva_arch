@@ -8,6 +8,7 @@
 !.envrc
 !.eva.gitignore
 !.gitconfig
+!.tmux.conf
 !.vimrc
 !.wakatime.cfg
 !.xsessionrc

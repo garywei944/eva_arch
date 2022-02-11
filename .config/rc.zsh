@@ -98,7 +98,7 @@ fi
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
 plugins+=(
-	systemd man screen gpg-agent
+	systemd tmux man screen gpg-agent
 	python pip pyenv npm
 	git gitignore git-flow git-flow-avh
 	rsync extract
