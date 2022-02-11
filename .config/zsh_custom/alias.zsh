@@ -6,6 +6,7 @@ spawn() {
 
 # Shortcuts
 alias c='clear'
+alias t='tmux'
 alias copy='xclip -sel clip'
 alias fdh='fd -H'
 alias fdhi='fd -HI'

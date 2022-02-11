@@ -67,7 +67,7 @@ HIST_STAMPS="mm/dd/yyyy"
 ZSH_CUSTOM=$HOME/.config/zsh_custom
 
 # Autostart tmux
-ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_AUTOSTART=false
 ZSH_TMUX_DEFAULT_SESSION_NAME=eva
 
 # Which plugins would you like to load?
