@@ -98,6 +98,7 @@ fi
 
 [[ -n $(command -v aws) ]] && is-at-least 5.3 && plugins+=(aws)
 
+[[ -n $(command -v code) ]] && plugins+=(vscode)
 [[ -n $(command -v subl) ]] && plugins+=(sublime)
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
@@ -115,7 +116,7 @@ plugins+=(
 source $ZSH/oh-my-zsh.sh
 
 
-# Welcome message
+# Box welcome message
 box_out() {
 	local s=("$@") b w
 
@@ -139,6 +140,8 @@ box_out() {
 	tput sgr 0
 }
 
+
+# Welcome message
 if [[ -n $(command -v figlet) && -n $(command -v lolcat) ]]; then
 	echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
 elif is-at-least 5.8; then
