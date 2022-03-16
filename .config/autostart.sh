@@ -5,7 +5,7 @@ __spawn() {
 }
 
 __nokde_spawn() {
-	(unset KDE_FULL_SESSION XDG_CURRENT_DESKTOP; __spawn "$@") &
+	(unset KDE_FULL_SESSION XDG_CURRENT_DESKTOP; __spawn "$@") & disown
 }
 
 numlockx on
@@ -18,5 +18,5 @@ sleep 1
 
 __spawn chrome google-chrome-stable --password-store=gnome --no-startup-window
 __spawn insync insync start
-__spawn deja-dup deja-dup --gapplication-service
+# __spawn deja-dup deja-dup --gapplication-service
 __nokde_spawn birdtrap birdtray
