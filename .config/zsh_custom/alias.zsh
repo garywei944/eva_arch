@@ -30,7 +30,7 @@ alias bss='browser-sync start'
 alias bsexpress='browser-sync start -p "localhost:5000" -f "public"'
 
 # Cookiecutter
-alias ckct='cookiecutter https://github.com/garywei944/cookiecutter-data-science.git'
+alias ccml='cookiecutter gh:garywei944/cookiecutter-machine-learning'
 
 # git
 alias gcld='git clone --recurse-submodules --depth 1'
