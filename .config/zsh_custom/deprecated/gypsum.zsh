@@ -3,6 +3,8 @@
 alias selenite='ssh guanghaowei@gypsum-gateway.cs.umass.edu'
 alias gypsum='ssh guanghaowei@gypsum.cs.umass.edu'
 
+# net-tools depracated hostname
+# https://bbs.archlinux.org/viewtopic.php?id=125308
 if [[ $(hostname) == node* ]]; then
 	alias gpcd='cd /mnt/nfs/work1/hongyu/guanghaowei'
 
