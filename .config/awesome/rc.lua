@@ -493,7 +493,7 @@ awful.key({modkey}, "d", function()
         last_tag.selected = true
     end
 end, {
-    description = "open a terminal",
+    description = "Show Desktop",
     group = "launcher"
 }), -- Launcher
 awful.key({modkey}, "t", function()
@@ -517,6 +517,7 @@ end, {
     description = "launch google chrome",
     group = "launcher"
 }), awful.key({modkey}, "e", function()
+    -- Check KDE shortcut settings if the dolphin doesn't show theme!!!
     awful.spawn("dolphin")
 end, {
     description = "launch dolphin",
