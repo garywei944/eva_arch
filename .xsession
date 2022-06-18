@@ -10,4 +10,8 @@ export DE="kde"
 export KDE_FULL_SESSION=true
 export QT_QPA_PLATFORMTHEME="kde"
 
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+
 source $HOME/.envrc
