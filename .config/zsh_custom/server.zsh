@@ -1,8 +1,8 @@
 #!/bin/zsh
 
 # Servers
-alias sachiel='ssh root@47.92.194.143'
-alias shamshel='ssh ubuntu@100.25.13.185'
+alias sachiel='ssh root@sachiel.ariseus.net'
+alias shamshel='ssh ubuntu@shamshel.ariseus.net'
 
 alias ariseus='ssh aris@arisues.oasis.eva'
 alias amiya='ssh guanghaowei@amiya.oasis.eva'
