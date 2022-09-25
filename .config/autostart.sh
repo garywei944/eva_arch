@@ -16,8 +16,8 @@ __spawn albert albert
 
 sleep 1
 
-__spawn qv2ray qv2ray
+#__spawn qv2ray qv2ray
 __spawn chrome google-chrome-stable --password-store=gnome --no-startup-window
-#__spawn insync insync start
+__spawn insync insync start
 # __spawn deja-dup deja-dup --gapplication-service
-#__nokde_spawn birdtrap birdtray
+__nokde_spawn birdtrap birdtray

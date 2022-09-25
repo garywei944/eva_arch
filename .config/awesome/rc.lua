@@ -216,10 +216,10 @@ local dis_right = 1
 
 -- Change these values for assigning monitor index
 if screen:count() >= 2 then
-    dis_left = 3
+    dis_left = 2
 end
 if screen:count() >= 3 then
-    dis_right = 2
+    dis_right = 3
 end
 
 awful.screen.connect_for_each_screen(function(s)
@@ -857,7 +857,7 @@ awful.rules.rules = { -- All clients will match this rule.
 {
     rule = {
         instance = "Msgcompose",
-        class = "Thunderbird"
+        class = "thunderbird"
     },
     callback = function(c)
         local t = screen[dis_main].tags[4]
@@ -869,7 +869,7 @@ awful.rules.rules = { -- All clients will match this rule.
 }, {
     rule = {
         instance = "Mail",
-        class = "Thunderbird"
+        class = "thunderbird"
     },
     callback = function(c)
         if __tb_started then
