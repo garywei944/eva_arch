@@ -1,0 +1,47 @@
+# Typical conda environment for a reproducible machine learning project
+# Use `mamba env create -f environment.yml`
+# or `conda env create -f environment.yml` to install the environment
+# Created and maintained by garywei944(garywei944@gmail.com)
+
+name: ml-base
+channels:
+  - nvidia # for CUDA
+  - pytorch
+  - huggingface
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - cudatoolkit=11
+  - psutil
+  - python-dotenv
+  - ruamel.yaml
+  - tqdm
+
+  # Frameworks
+  - pytorch
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn
+  - openpyxl # to open excel files
+  - pandarallel # for parallel computing panda dataframe
+
+  # utils
+  - torchinfo
+  - bayesian-optimization
+
+  # Visualization
+  - matplotlib
+
+  # Development
+  - jupyter
+  - click
+  - wandb
+
+  # If you need to install pip packages, don't do `pip install xxx`
+  # Add the package here and run `mamba env update -f environment.yml --prune`
+  # for dependency completeness.
+  - pip:
+      - singleton-decorator
