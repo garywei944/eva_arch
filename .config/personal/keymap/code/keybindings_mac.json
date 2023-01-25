@@ -1,0 +1,29 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "cmd+t",
+        "command": "-workbench.action.quickOpen"
+    },
+    {
+        "key": "cmd+t",
+        "command": "-workbench.action.showAllSymbols"
+    },
+    {
+        "key": "cmd+t",
+        "command": "workbench.action.terminal.toggleTerminal",
+        "when": "terminal.active"
+    },
+    {
+        "key": "cmd+b",
+        "command": "-workbench.action.toggleSidebarVisibility"
+    },
+    {
+        "key": "ctrl+cmd+t",
+        "command": "editor.action.trimTrailingWhitespace",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "cmd+b",
+        "command": "code-runner.run"
+    }
+]
