@@ -36,17 +36,8 @@ alias ccml='cookiecutter gh:garywei944/cookiecutter-machine-learning'
 alias gcld='git clone --recurse-submodules --depth 1'
 alias gaignore='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 
-# docker mysql
-alias dmysql='docker run -it --rm --network host mysql mysql'
-alias nasumls='docker run -it --rm --network host mysql mysql -h nas.oasis.eva -P 33060 -u root -p123456'
-
 # Reload rc scripts
 alias reload='. ~/.envrc; . ~/.zshrc'
-
-# Shadowsocks
-alias sssachiel='ss-local -c /etc/shadowsocks/sachiel.json & disown'
-alias ss2hp='hpts -s 127.0.0.1:1080 -p 8080 & disown'
-alias killss='killall ss-local'
 
 # Maybe
 alias lg='lazygit'
