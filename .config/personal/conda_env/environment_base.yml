@@ -14,6 +14,8 @@ dependencies:
   - python=3
   - pip
   - cudatoolkit
+  - cudnn
+  - pytorch-cuda
   - psutil
   - python-dotenv
   - ruamel.yaml

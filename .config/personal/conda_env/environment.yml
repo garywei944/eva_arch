@@ -14,6 +14,8 @@ dependencies:
   - python=3
   - pip
   - cudatoolkit
+  - cudnn
+  - pytorch-cuda
   - python-dotenv
 
   # Anaconda
@@ -21,6 +23,7 @@ dependencies:
 
   # Frameworks
   - pytorch
+  - torchvision
   - pandarallel # for parallel computing panda dataframe
 
   # utils
