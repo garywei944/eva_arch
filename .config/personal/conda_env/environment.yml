@@ -11,18 +11,18 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3
+  - python=3.10
   - pip
-  - cudatoolkit
+  - cudatoolkit=11.7
   - cudnn
-  - pytorch-cuda
+  - pytorch-cuda=11.7
   - python-dotenv
 
   # Anaconda
   - anaconda
 
   # Frameworks
-  - pytorch
+  - pytorch=1.13
   - torchvision
   - pandarallel # for parallel computing panda dataframe
 

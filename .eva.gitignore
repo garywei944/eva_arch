@@ -29,6 +29,7 @@
 !.config/autostart.sh
 !.config/picom.conf
 !.config/rc.zsh
+!.config/ssh.conf
 
 # extentions
 *.uuid
