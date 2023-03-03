@@ -5,34 +5,28 @@
 
 name: eva
 channels:
-  - conda-forge
   - anaconda
+  - conda-forge
   - defaults
 dependencies:
-  - python>=3.8
+  - python>=3.9
   - pip
-  - psutil
   - python-dotenv
-  - ruamel.yaml
-  - tqdm
+
+  # Anaconda
+  - anaconda
+  - _anaconda_depends=2022.10
 
   # Frameworks
-  - numpy
-  - scipy
-  - pandas
-  - openpyxl # to open excel files
   - pandarallel # for parallel computing panda dataframe
 
   # utils
   - bayesian-optimization
-  - pwntools  # not compatible with Apple M2
+  - pwntools
 
   # Visualization
-  - matplotlib
 
   # Development
-  - jupyter
-  - click
 
   # If you need to install pip packages, don't do `pip install xxx`
   # Add the package here and run `mamba env update -f environment.yml --prune`

@@ -8,13 +8,13 @@ channels:
   - nvidia # for CUDA
   - pytorch
   - huggingface
+  - anaconda
   - conda-forge
   - defaults
 dependencies:
-  - python=3
+  - python
   - pip
   - cudatoolkit
-  - cudnn
   - pytorch-cuda
   - psutil
   - python-dotenv
