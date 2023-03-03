@@ -25,7 +25,7 @@ dependencies:
 
   # utils
   - bayesian-optimization
-  # - pwntools  # not compatible with Apple M2
+  - pwntools  # not compatible with Apple M2
 
   # Visualization
   - matplotlib
