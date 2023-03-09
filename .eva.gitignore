@@ -28,7 +28,7 @@
 
 !.config/autostart.sh
 !.config/picom.conf
-!.config/postrc.zsh
+!.config/rc.post.zsh
 !.config/rc.zsh
 !.config/ssh.conf
 
