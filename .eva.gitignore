@@ -11,7 +11,6 @@
 !.tmux.conf
 !.vimrc
 !.wakatime.cfg
-!.zlogin
 !.zshenv
 !arch_neofetch_v3.png
 !LICENSE
@@ -29,6 +28,7 @@
 
 !.config/autostart.sh
 !.config/picom.conf
+!.config/postrc.zsh
 !.config/rc.zsh
 !.config/ssh.conf
 
