@@ -44,6 +44,8 @@ alias lg='lazygit'
 alias ra='ranger'
 alias sra='sudo -E ranger'
 
+# CentOS no `tree` workaround
+[[ -z $(command -v tree) && -n $(command -v fd) && -n $(command -v as-tree) ]] && alias tree='fd -HI | as-tree'
 
 # Check CUDA version
 cudaver() {
