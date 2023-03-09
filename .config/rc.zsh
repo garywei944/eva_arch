@@ -156,4 +156,4 @@ else
  ------------------------"
 fi
 
-source "$HOME/.config/postrc.zsh"
+source "$HOME/.config/rc.post.zsh"
