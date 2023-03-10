@@ -4,7 +4,7 @@ alias gennersckey='sshproxy -u garywei'
 alias perlmutter='ssh -i ~/.ssh/nersc garywei@perlmutter-p1.nersc.gov'
 
 # The rest is only for perlmutter servers
-[[ $NERSC_HOST == perlmutter ]] || exit
+[[ $NERSC_HOST == perlmutter ]] || return
 
 export GLOBAL_COMMON=/global/common/software/m4341/garywei
 export CONDA_PATH="$GLOBAL_COMMON/mambaforge"
