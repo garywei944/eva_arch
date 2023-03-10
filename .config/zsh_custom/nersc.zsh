@@ -9,7 +9,7 @@ alias perlmutter='ssh -i ~/.ssh/nersc garywei@perlmutter-p1.nersc.gov'
 export GLOBAL_COMMON=/global/common/software/m4341/garywei
 export CONDA_PATH="$GLOBAL_COMMON/mambaforge"
 
-alias pcpunode='salloc -N 1 -q interactive -t 00:05:00 -C cpu -A m4341'
+alias pcpunode='salloc -N 1 -q interactive -t 01:00:00 -C cpu -A m4341'
 
 # module workaround
 # https://github.com/ACAD-UofA/Bioinformatics-Wiki/wiki/Modules#module-is-a-shell-function
