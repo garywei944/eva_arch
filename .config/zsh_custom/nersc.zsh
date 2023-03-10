@@ -11,6 +11,8 @@ export CONDA_PATH="$GLOBAL_COMMON/mambaforge"
 
 alias pcpunode='salloc -N 1 -q interactive -t 01:00:00 -C cpu -A m4341'
 
+[[ -n ${SLURM_NODELIST+x} ]] && export NODENAME=$SLURM_NODELIST
+
 # module workaround
 # https://github.com/ACAD-UofA/Bioinformatics-Wiki/wiki/Modules#module-is-a-shell-function
 module() {

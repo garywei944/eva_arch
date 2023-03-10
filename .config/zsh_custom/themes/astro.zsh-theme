@@ -22,11 +22,15 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="$YS_VCS_PROMPT_SUFFIX"
 ZSH_THEME_GIT_PROMPT_DIRTY="$YS_VCS_PROMPT_DIRTY"
 ZSH_THEME_GIT_PROMPT_CLEAN="$YS_VCS_PROMPT_CLEAN"
 
+# Some server have extra nodename
+local node_name=${NODENAME:+%{$fg[green]%}[${NODENAME}]%{$reset_color%}}
+
 
 # Prompt format: \n # DIRECTORY [GIT_BRANCH STATE GIT_SHA] [TIME] \n ➜
 PROMPT="
 %{$terminfo[bold]$fg[blue]%}#%{$reset_color%} \
-%{$fg[cyan]%}%n%{$fg[green]%}@%{$fg[red]%}%m%{$reset_color%} \
+%{$fg[cyan]%}%n%{$fg[green]%}@%{$fg[red]%}%m%{$reset_color%}\
+${node_name} \
 %{$terminfo[bold]$fg[yellow]%}${current_dir}%{$reset_color%}\
 ${git_info}\
 ${git_sha}\
