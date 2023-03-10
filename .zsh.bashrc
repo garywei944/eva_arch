@@ -4,7 +4,7 @@
 # shell to non-bash is not well-supported, this script replace the login shell
 # to zsh
 
-# if this is a login shell and an interactive shell
+# if this is a login shell and this is an interactive shell, and zsh available
 # https://unix.stackexchange.com/a/26782
 if shopt -q login_shell && [[ $- == *i* && -n $(command -v zsh) ]]; then
   exec zsh --login

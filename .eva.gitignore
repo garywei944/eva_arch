@@ -11,6 +11,7 @@
 !.tmux.conf
 !.vimrc
 !.wakatime.cfg
+!.zsh.bashrc
 !.zshenv
 !arch_neofetch_v3.png
 !LICENSE
@@ -23,6 +24,7 @@
 !.config/awesome
 !.config/neofetch
 !.config/personal
+!.config/scripts
 !.config/terminator
 !.config/zsh_custom
 

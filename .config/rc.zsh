@@ -111,7 +111,7 @@ plugins+=(
 
 
 
-source $ZSH/oh-my-zsh.sh
+. $ZSH/oh-my-zsh.sh
 
 
 # Box welcome message
@@ -156,4 +156,4 @@ else
  ------------------------"
 fi
 
-source "$HOME/.config/rc.post.zsh"
+. "$HOME/.config/rc.post.zsh"

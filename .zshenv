@@ -1,4 +1,4 @@
 #!/bin/zsh
 
 # Run .envrc
-[[ -z ${EVA+x} ]] && source "$HOME/.envrc"
+[[ -z ${EVA+x} ]] && . "$HOME/.envrc"

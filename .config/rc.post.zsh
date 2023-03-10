@@ -7,7 +7,7 @@ if [[ -n ${CONDA_PATH+x} ]]; then
     eval "$__conda_setup"
   else
     if [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]]; then
-      source "$CONDA_PATH/etc/profile.d/conda.sh"
+      . "$CONDA_PATH/etc/profile.d/conda.sh"
     else
       export PATH="$CONDA_PATH/bin:$PATH"
     fi
@@ -17,5 +17,5 @@ fi
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
-  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && . "$HOME/.sdkman/bin/sdkman-init.sh"
 fi
