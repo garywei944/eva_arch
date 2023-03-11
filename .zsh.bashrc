@@ -9,8 +9,7 @@
 # https://unix.stackexchange.com/a/26782
 if shopt -q login_shell &&
   [[ $- == *i* &&
-    -n $(command -v zsh) &&
-    $SHLVL == 1 ]]; then
+    -n $(command -v zsh) ]]; then
   exec zsh -li
 fi
 
