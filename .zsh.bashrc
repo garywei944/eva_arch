@@ -13,3 +13,9 @@ if shopt -q login_shell &&
     $SHLVL == 1 ]]; then
   exec zsh -li
 fi
+
+# For Nersc and Perlmutter
+# if we are in a perlmutter computing node, exec zsh
+if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
+  exec zsh
+fi
