@@ -21,6 +21,11 @@ alias isodate='date +%F'
 alias isotime='date +%Y-%m-%dT%H:%M:%S%z'
 alias utctime='date -u +%FT%TZ'
 
+# Public IP
+alias myip="curl 'https://ifconfig.me'"
+alias getip="curl 'https://api.ipify.org'"
+alias getipv6="curl 'https://api64.ipify.org'"
+
 # Chrome
 alias startchrome='spawn google-chrome-stable --password-store=gnome --no-startup-window'
 
