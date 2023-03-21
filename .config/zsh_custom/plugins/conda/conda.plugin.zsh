@@ -5,7 +5,7 @@ alias cab="conda activate base"
 alias cde="conda deactivate"
 
 alias cel="conda env list"
-alias cl="conda list"
+alias clst="conda list"
 alias cle="conda list --export"
 alias cles="conda list --export > spec-file.txt"
 alias cee='conda env export'
@@ -48,7 +48,7 @@ cver() {
 
 # Mamba alias
 alias mel="mamba env list"
-alias ml="mamba list"
+alias mlst="mamba list"
 alias mee='mamba env export'
 alias meee='mamba env export > environment-spec.yml'
 
