@@ -106,7 +106,7 @@ plugins+=(
 	git gitignore git-flow git-flow-avh
 	rsync extract
 	z history themes zsh-autosuggestions zsh-syntax-highlighting
-	conda
+	conda cmake
 )
 
 

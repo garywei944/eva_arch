@@ -46,7 +46,6 @@ cver() {
 	echo $version
 }
 
-
 # Mamba alias
 alias mel="mamba env list"
 alias ml="mamba list"
