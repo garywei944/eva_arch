@@ -110,11 +110,12 @@ fi
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
 plugins+=(
-  systemd tmux man screen gpg-agent
+  systemd tmux man screen gpg-agent systemadmin
   python pip pyenv npm
   git gitignore git-flow git-flow-avh
   rsync extract
   z history themes zsh-autosuggestions zsh-syntax-highlighting
+  isodate
   conda cmake
 )
 
