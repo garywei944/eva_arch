@@ -21,6 +21,7 @@ prepend_path() {
   case ":${PATH}:" in
   *:"$1":*)
     remove_path "$1"
+    export PATH="$1:$PATH"
     ;;
   *)
     export PATH="$1:$PATH"
