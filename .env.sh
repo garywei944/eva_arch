@@ -17,18 +17,15 @@ remove_path() {
   export PATH
 }
 
-export_path() {
+prepend_path() {
   case ":${PATH}:" in
-  *:"$1":*) ;;
+  *:"$1":*)
+    remove_path "$1"
+    ;;
   *)
     export PATH="$1:$PATH"
     ;;
   esac
-}
-
-# KISS
-prepend_path() {
-  export PATH="$1:$PATH"
 }
 
 prepend_path "$HOME/bin"
