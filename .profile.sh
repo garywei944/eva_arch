@@ -4,7 +4,7 @@
 
 # inspired from https://unix.stackexchange.com/a/108933
 # WARNING: only remove path that fully match
-remove_path() {
+__remove_path() {
   PATH=":$PATH:"
   #  PATH=${PATH//":"/"::"}
   #  PATH=${PATH//":$1:"/}
@@ -17,10 +17,10 @@ remove_path() {
   export PATH
 }
 
-prepend_path() {
+__prepend_path() {
   case ":${PATH}:" in
   *:"$1":*)
-    remove_path "$1"
+    __remove_path "$1"
     export PATH="$1:$PATH"
     ;;
   *)
@@ -29,18 +29,18 @@ prepend_path() {
   esac
 }
 
-prepend_path "$HOME/bin"
-prepend_path "$HOME/.local/bin"
+__prepend_path "$HOME/bin"
+__prepend_path "$HOME/.local/bin"
 
 [ -d /opt/cuda/lib64 ] &&
   export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 [ -d "$HOME/.local/lib" ] &&
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
-[ -n "$(command -v brew)" ] && prepend_path /usr/local/sbin
+[ -n "$(command -v brew)" ] && __prepend_path /usr/local/sbin
 
 # go
-[ -d /usr/local/go/bin ] && prepend_path /usr/local/go/bin
+[ -d /usr/local/go/bin ] && __prepend_path /usr/local/go/bin
 
 # SUDO
 # https://superuser.com/a/1281228
@@ -94,7 +94,7 @@ fi
 
 # Prefer MPICH over Open MPI
 if [ -d /opt/mpich/bin ]; then
-  prepend_path /opt/mpich/bin
+  __prepend_path /opt/mpich/bin
   export PKG_CONFIG_PATH="/opt/mpich/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
 fi
 
@@ -104,13 +104,18 @@ fi
 # Cargo
 # rustup shell setup
 # affix colons on either side of $PATH to simplify matching
-[ -d "$HOME/.cargo/bin" ] && prepend_path "$HOME/.cargo/bin"
+[ -d "$HOME/.cargo/bin" ] && __prepend_path "$HOME/.cargo/bin"
 
 # wine
 [ -n "$(command -v wine)" ] && export WINEDEBUG=fixme-font
 
 # Cisco Anyconnect
-[ -d /opt/cisco/anyconnect/bin ] && prepend_path /opt/cisco/anyconnect/bin
+[ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
 
 # Custom environment variable
 export EVA=ariseus
+
+unset __remove_path
+unset __prepend_path
+
+EVA_LOGIN=ariseus
