@@ -120,5 +120,3 @@ export EVA=ariseus
 
 unset __remove_path
 unset __prepend_path
-
-EVA_LOGIN=ariseus
