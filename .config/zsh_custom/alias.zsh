@@ -43,7 +43,7 @@ alias gcld='git clone --recurse-submodules --depth 1'
 alias gaignore='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 
 # Reload rc scripts
-alias rldzsh='. ~/.env.sh; . ~/.zshrc'
+alias rldzsh='. ~/.zshrc'
 
 # Maybe
 alias lg='lazygit'
