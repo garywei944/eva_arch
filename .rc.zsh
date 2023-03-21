@@ -68,6 +68,12 @@ ZSH_CUSTOM="$HOME/.config/zsh_custom"
 ZSH_TMUX_AUTOSTART=false
 ZSH_TMUX_DEFAULT_SESSION_NAME=eva
 
+# Other environment variable that specific to this shell
+
+# GPG_TTY
+GPG_TTY="$(tty)"
+export GPG_TTY
+
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
@@ -78,13 +84,13 @@ ZSH_TMUX_DEFAULT_SESSION_NAME=eva
 autoload is-at-least
 
 if [[ -n $(command -v pacman) ]]; then
-	plugins+=(archlinux)
+  plugins+=(archlinux)
 elif [[ -n $(command -v apt-get) ]]; then
-	plugins+=(ubuntu)
+  plugins+=(ubuntu)
 elif [[ -n $(command -v yum) ]]; then
-	plugins+=(yum)
+  plugins+=(yum)
 elif [[ -n $(command -v brew) ]]; then
-	plugins+=(brew)
+  plugins+=(brew)
 fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
@@ -101,59 +107,80 @@ fi
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
 plugins+=(
-	systemd tmux man screen gpg-agent
-	python pip pyenv npm
-	git gitignore git-flow git-flow-avh
-	rsync extract
-	z history themes zsh-autosuggestions zsh-syntax-highlighting
-	conda cmake
+  systemd tmux man screen gpg-agent
+  python pip pyenv npm
+  git gitignore git-flow git-flow-avh
+  rsync extract
+  z history themes zsh-autosuggestions zsh-syntax-highlighting
+  conda cmake
 )
 
-
-
-. $ZSH/oh-my-zsh.sh
-
+. "$ZSH/oh-my-zsh.sh"
 
 # Box welcome message
 box_out() {
-	local s=("$@") b w
+  local s=("$@") b w
 
-	for l in "${s[@]}"; do
-		((w<${#l})) && { b="$l"; w="${#l}"; }
-	done
-	tput setaf 3
+  for l in "${s[@]}"; do
+    ((w < ${#l})) && {
+      b="$l"
+      w="${#l}"
+    }
+  done
+  tput setaf 3
 
-	# Top line
-	echo " -${b//?/-}-
+  # Top line
+  echo " -${b//?/-}-
 | ${b//?/ } |"
 
-	# Print sentences
-	for l in "${s[@]}"; do
-		printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
-	done
+  # Print sentences
+  for l in "${s[@]}"; do
+    printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
+  done
 
-	#Bottom line
-	echo "| ${b//?/ } |
+  #Bottom line
+  echo "| ${b//?/ } |
  -${b//?/-}-"
-	tput sgr 0
+  tput sgr 0
 }
-
 
 # Welcome message
 if [[ -n $(command -v figlet) && -n $(command -v lolcat) ]]; then
-	echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
+  echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
 elif is-at-least 5.8; then
-	if [[ -n $(command -v lolcat) ]]; then
-		box_out "Welcome back, ariseus." | lolcat
-	else
-		box_out "Welcome back, ariseus."
-	fi
+  if [[ -n $(command -v lolcat) ]]; then
+    box_out "Welcome back, ariseus." | lolcat
+  else
+    box_out "Welcome back, ariseus."
+  fi
 else
-	echo " ------------------------
+  echo " ------------------------
 |                        |
 | Welcome back, ariseus. |
 |                        |
  ------------------------"
 fi
 
-. "$HOME/.config/rc.post.zsh"
+###############################################################################
+# After .zshrc
+# ##############################################################################
+
+# Conda init
+if [[ -n ${CONDA_PATH+x} ]]; then
+  __conda_setup="$("$CONDA_PATH/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)"
+  if [[ $? -eq 0 ]]; then
+    eval "$__conda_setup"
+  else
+    if [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]]; then
+      . "$CONDA_PATH/etc/profile.d/conda.sh"
+    else
+      export PATH="$CONDA_PATH/bin:$PATH"
+    fi
+  fi
+  unset __conda_setup
+fi
+
+# SDKMAN init
+if [[ -n ${SDKMAN_DIR+x} ]]; then
+  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
+fi

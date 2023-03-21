@@ -95,16 +95,11 @@ fi
 # Prefer MPICH over Open MPI
 if [ -d /opt/mpich/bin ]; then
   prepend_path /opt/mpich/bin
-  export MANPATH="$MANPATH:/opt/mpich/share/man"
   export PKG_CONFIG_PATH="/opt/mpich/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
 fi
 
 # SDKMAN
 [ -d "$HOME/.sdkman" ] && export SDKMAN_DIR="$HOME/.sdkman"
-
-# GPG_TTY
-GPG_TTY="$(tty)"
-export GPG_TTY
 
 # Cargo
 # rustup shell setup

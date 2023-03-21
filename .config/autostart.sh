@@ -1,11 +1,16 @@
 #!/bin/bash
 
 __spawn() {
-	([[ -z $(pgrep "$1") ]] && "${@:2}" </dev/null >/dev/null 2>&1) & disown
+  ([[ -z $(pgrep "$1") ]] && "${@:2}" </dev/null >/dev/null 2>&1) &
+  disown
 }
 
 __nokde_spawn() {
-	(unset KDE_FULL_SESSION XDG_CURRENT_DESKTOP; __spawn "$@") & disown
+  (
+    unset KDE_FULL_SESSION XDG_CURRENT_DESKTOP
+    __spawn "$@"
+  ) &
+  disown
 }
 
 numlockx on

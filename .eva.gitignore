@@ -5,14 +5,15 @@
 
 # files
 !.condarc
-!.env.sh
 !.eva.gitignore
 !.gitconfig
+!.profile.sh
+!.rc.zsh
 !.tmux.conf
 !.vimrc
 !.wakatime.cfg
+!.zprofile
 !.zsh.bashrc
-!.zshenv
 !arch_neofetch_v3.png
 !LICENSE
 !Vagrantfile
@@ -30,8 +31,6 @@
 
 !.config/autostart.sh
 !.config/picom.conf
-!.config/rc.post.zsh
-!.config/rc.zsh
 !.config/ssh.conf
 
 # extentions
