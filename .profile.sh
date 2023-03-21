@@ -37,6 +37,9 @@ __prepend_path "$HOME/.local/bin"
 [ -d "$HOME/.local/lib" ] &&
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
+# Fix brew
+[ -f /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
 [ -n "$(command -v brew)" ] && __prepend_path /usr/local/sbin
 
 # go
