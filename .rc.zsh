@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+# Load env for non-login shell
+[[ -z "$EVA" ]] && . "$HOME/.profile.sh"
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
