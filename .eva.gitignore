@@ -5,7 +5,7 @@
 
 # files
 !.condarc
-!.envrc
+!.env.sh
 !.eva.gitignore
 !.gitconfig
 !.tmux.conf

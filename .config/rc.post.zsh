@@ -17,5 +17,5 @@ fi
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
-  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && . "$HOME/.sdkman/bin/sdkman-init.sh"
+  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
 fi

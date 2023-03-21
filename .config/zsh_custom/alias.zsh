@@ -1,7 +1,8 @@
 #!/bin/zsh
 
 spawn() {
-	($@ </dev/null &>/dev/null) & disown
+  ($@ </dev/null &>/dev/null) &
+  disown
 }
 
 # Shortcuts
@@ -42,7 +43,7 @@ alias gcld='git clone --recurse-submodules --depth 1'
 alias gaignore='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 
 # Reload rc scripts
-alias reload='. ~/.envrc; . ~/.zshrc'
+alias reload='. ~/.env.sh; . ~/.zshrc'
 
 # Maybe
 alias lg='lazygit'
@@ -54,5 +55,5 @@ alias sra='sudo -E ranger'
 
 # Check CUDA version
 cudaver() {
-	nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
+  nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
 }

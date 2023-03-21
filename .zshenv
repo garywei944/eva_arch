@@ -1,4 +1,4 @@
 #!/bin/zsh
 
-# Run .envrc
-[[ -z ${EVA+x} ]] && . "$HOME/.envrc"
+# Run .env.sh
+[[ -z ${EVA+x} ]] && . "$HOME/.env.sh"

@@ -2,7 +2,22 @@
 
 # This file should support both bash and zsh
 
-__export_path() {
+# inspired from https://unix.stackexchange.com/a/108933
+# WARNING: only remove path that fully match
+remove_path() {
+  PATH=":$PATH:"
+  #  PATH=${PATH//":"/"::"}
+  #  PATH=${PATH//":$1:"/}
+  #  PATH=${PATH//"::"/":"}
+  PATH=$(echo "$PATH" | sed 's/:/::/g')
+  PATH=$(echo "$PATH" | sed "s|:$1:||g")
+  PATH=$(echo "$PATH" | sed 's/::/:/g')
+  PATH=${PATH#:}
+  PATH=${PATH%:}
+  export PATH
+}
+
+export_path() {
   case ":${PATH}:" in
   *:"$1":*) ;;
   *)
@@ -11,16 +26,23 @@ __export_path() {
   esac
 }
 
-__export_path "$HOME/bin"
-__export_path "$HOME/.local/bin"
-export LD_LIBRARY_PATH="/opt/cuda/lib64:$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+# KISS
+prepend_path() {
+  export PATH="$1:$PATH"
+}
 
-[ -n "$(command -v brew)" ] && __export_path /usr/local/sbin
+prepend_path "$HOME/bin"
+prepend_path "$HOME/.local/bin"
+
+[ -d /opt/cuda/lib64 ] &&
+  export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+[ -d "$HOME/.local/lib" ] &&
+  export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+[ -n "$(command -v brew)" ] && prepend_path /usr/local/sbin
 
 # go
-if [ -d /usr/local/go/bin ]; then
-  __export_path /usr/local/go/bin
-fi
+[ -d /usr/local/go/bin ] && prepend_path /usr/local/go/bin
 
 # SUDO
 # https://superuser.com/a/1281228
@@ -72,10 +94,15 @@ elif [ -d /opt/homebrew/Caskroom/mambaforge/base ]; then
   export CONDA_PATH=/opt/homebrew/Caskroom/mambaforge/base
 fi
 
-# SDKMAN
-if [ -d "$HOME/.sdkman" ]; then
-  export SDKMAN_DIR="$HOME/.sdkman"
+# Prefer MPICH over Open MPI
+if [ -d /opt/mpich/bin ]; then
+  prepend_path /opt/mpich/bin
+  export MANPATH="$MANPATH:/opt/mpich/share/man"
+  export PKG_CONFIG_PATH="/opt/mpich/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
 fi
+
+# SDKMAN
+[ -d "$HOME/.sdkman" ] && export SDKMAN_DIR="$HOME/.sdkman"
 
 # GPG_TTY
 GPG_TTY="$(tty)"
@@ -84,17 +111,13 @@ export GPG_TTY
 # Cargo
 # rustup shell setup
 # affix colons on either side of $PATH to simplify matching
-__export_path "$HOME/.cargo/bin"
+[ -d "$HOME/.cargo/bin" ] && prepend_path "$HOME/.cargo/bin"
 
 # wine
-if [ -n "$(command -v wine)" ]; then
-  export WINEDEBUG=fixme-font
-fi
+[ -n "$(command -v wine)" ] && export WINEDEBUG=fixme-font
 
 # Cisco Anyconnect
-if [ -d /opt/cisco/anyconnect/bin ]; then
-  __export_path /opt/cisco/anyconnect/bin
-fi
+[ -d /opt/cisco/anyconnect/bin ] && prepend_path /opt/cisco/anyconnect/bin
 
 # Custom environment variable
 export EVA=ariseus
