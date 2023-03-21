@@ -1,4 +1,4 @@
 #!/bin/zsh
 
 # Run .env.sh
-. "$HOME/.profile.sh"
+[[ -z "$EVA" ]] && . "$HOME/.profile.sh"
