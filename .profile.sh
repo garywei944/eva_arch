@@ -95,12 +95,6 @@ elif [ -d /opt/homebrew/Caskroom/mambaforge/base ]; then
   export CONDA_PATH=/opt/homebrew/Caskroom/mambaforge/base
 fi
 
-# Prefer MPICH over Open MPI
-if [ -d /opt/mpich/bin ]; then
-  __prepend_path /opt/mpich/bin
-  export PKG_CONFIG_PATH="/opt/mpich/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
-fi
-
 # SDKMAN
 [ -d "$HOME/.sdkman" ] && export SDKMAN_DIR="$HOME/.sdkman"
 
