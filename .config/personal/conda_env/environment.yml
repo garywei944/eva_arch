@@ -25,6 +25,7 @@ dependencies:
   # Frameworks
   - pytorch=1.13
   - torchvision
+  - opencv
   - pandarallel # for parallel computing panda dataframe
 
   # utils
