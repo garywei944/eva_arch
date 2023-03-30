@@ -1,0 +1,46 @@
+# Typical conda environment for a reproducible machine learning project
+# Use `mamba env create -f environment.yml`
+# or `conda env create -f environment.yml` to install the environment
+# Created and maintained by garywei944(garywei944@gmail.com)
+
+name: hpc
+channels:
+  - nvidia # for CUDA
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.8
+  - pip
+  - psutil
+  - python-dotenv
+  - ruamel.yaml
+  - tqdm
+
+  # Frameworks
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn
+  - openpyxl # to open excel files
+  - pandarallel # for parallel computing panda dataframe
+
+  # utils
+  - bayesian-optimization
+  - doctest
+  - gtest
+  - catch2
+  - spdlog
+
+  # Visualization
+  - matplotlib
+
+  # Development
+  - jupyter
+  - click
+
+  # If you need to install pip packages, don't do `pip install xxx`
+  # Add the package here and run `mamba env update -f environment.yml --prune`
+  # for dependency completeness.
+  - pip:
+      - singleton-decorator
