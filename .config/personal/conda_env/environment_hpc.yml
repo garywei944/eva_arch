@@ -5,7 +5,6 @@
 
 name: hpc
 channels:
-  - nvidia # for CUDA
   - anaconda
   - conda-forge
   - defaults
@@ -22,7 +21,6 @@ dependencies:
   - numpy
   - scipy
   - pandas
-  - scikit-learn
   - openpyxl # to open excel files
   - pandarallel # for parallel computing panda dataframe
 
