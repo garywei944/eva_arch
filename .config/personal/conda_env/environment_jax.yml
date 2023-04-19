@@ -3,7 +3,7 @@
 # or `conda env create -f environment.yml` to install the environment
 # Created and maintained by garywei944(garywei944@gmail.com)
 
-name: ml
+name: jax
 channels:
   - nvidia # for CUDA
   - pytorch
@@ -15,7 +15,7 @@ dependencies:
   - python>=3.9
   - pip
   - cudatoolkit=11.8
-  - pytorch-cuda=11.8
+  - cuda-nvcc
   - python-dotenv
 
   # Anaconda
@@ -23,13 +23,12 @@ dependencies:
   - _anaconda_depends=2022.10
 
   # Frameworks
-  - pytorch=2.0.0
-  - torchvision
+  - jax=0.4.8
+  - jaxlib=0.4.7=*cuda*
   - opencv
   - pandarallel # for parallel computing panda dataframe
 
   # utils
-  - torchinfo
   - bayesian-optimization
 
   # Visualization
