@@ -1,0 +1,26 @@
+#!/bin/bash
+if echo $* | grep -e "-h" -q
+then
+  echo 'Usage: sqs is a simplified NERSC wrapper for the Slurm command "squeue" with a chosen default format below:'
+  echo '           squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M   %20V %15q %20S %14f %15R" ' 
+  echo '       Without any flag, it displays queued jobs for the logged-in user.'
+  echo '       sqs takes any flag that is accepted by squeue as well, such as: '
+  echo '           -a, --all           display all jobs in queue '
+  echo '           -t <job state>      display jobs in a certain state '
+  echo '           -q <qos>            display jobs in a certain qos'
+  echo '           -j <jobid>          display a certain job'
+  echo '           -r                  expand array jobs'
+  echo '           -u                  display jobs for a certain user'
+  echo '           -noheader           do not display column header '
+  echo '       and a lot more .... '
+  echo '       You could also overwrite the default format of sqs with the -o flag to provide the list and format for fields of inte
+rest.'
+  echo '       Please refer to "squeue --help" and the "squeue" man page for available flags and more information.'
+elif echo $* | grep -e "-a" -q
+then
+  squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M  %20V %15q %20S %14f %15R" "$@"
+else
+#  squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M  %20V %15q %20S %14f %15R" -u $(eval echo \$\{USER\}) $@
+  squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M  %20V %15q %20S %14f %15R" --me "$@"
+fi
+
