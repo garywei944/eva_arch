@@ -12,7 +12,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python>=3.9
+  - python>=3.10
   - pip
   - cudatoolkit=11.8
   - pytorch-cuda=11.8
@@ -23,12 +23,17 @@ dependencies:
   - _anaconda_depends=2022.10
 
   # Frameworks
-  - pytorch=2.0.0
+  - pytorch>=2.0.0
   - torchvision
   - opencv
   - pandarallel # for parallel computing panda dataframe
+  - transformers
+  - datasets
+  - accelerate
 
   # utils
+  - absl-py
+  - torchmetrics
   - torchinfo
   - bayesian-optimization
 
@@ -41,4 +46,7 @@ dependencies:
   # Add the package here and run `mamba env update -f environment.yml --prune`
   # for dependency completeness.
   - pip:
+      - build
       - singleton-decorator
+      - torchopt
+      - evaluate

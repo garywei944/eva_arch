@@ -31,6 +31,8 @@ dependencies:
   - pandarallel # for parallel computing panda dataframe
 
   # utils
+  - absl-py
+  - torchmetrics
   - torchinfo
   - bayesian-optimization
 
@@ -46,4 +48,7 @@ dependencies:
   # Add the package here and run `mamba env update -f environment.yml --prune`
   # for dependency completeness.
   - pip:
+      - build
       - singleton-decorator
+      - torchopt
+      - evaluate
