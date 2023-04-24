@@ -7,10 +7,12 @@
 # if this is a login shell and this is an interactive shell, and zsh available
 # only replace shell when SHLVL=1
 # https://unix.stackexchange.com/a/26782
-if shopt -q login_shell &&
-  [[ $- == *i* &&
-    -n $(command -v zsh) ]]; then
-  exec zsh -li
+if [[ $- == *i* && $SHLVL == 1 && -n $(command -v zsh) ]]; then
+  if shopt -q login_shell; then
+    exec zsh -li
+  else
+    exec zsh
+  fi
 fi
 
 # For Nersc and Perlmutter
