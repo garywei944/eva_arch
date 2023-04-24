@@ -20,3 +20,8 @@ fi
 if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
   exec zsh
 fi
+
+# Workaround for vscode start terminal with SHLVL=4
+if [[ $NERSC_HOST == perlmutter && $TERM_PROGRAM == vscode && $SHLVL == 4 ]]; then
+  exec zsh
+fi
