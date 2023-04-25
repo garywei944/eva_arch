@@ -17,13 +17,13 @@ if [[ $SHLVL == 1 ]]; then
   fi
 fi
 
+# Workaround for vscode start terminal in bash with inconsistent SHLVL
+if [[ $TERM_PROGRAM == vscode && -n ${VSCODE_TERM+x} ]]; then
+  unset VSCODE_TERM; exec bash -l -c 'zsh -li'
+fi
+
 # For Nersc and Perlmutter
 # if we are in a perlmutter computing node, exec zsh
 if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
-  exec zsh
-fi
-
-# Workaround for vscode start terminal in bash with inconsistent SHLVL
-if [[ $TERM_PROGRAM == vscode ]]; then
   exec zsh
 fi
