@@ -10,20 +10,21 @@
 # only replace shell when SHLVL=1
 # https://unix.stackexchange.com/a/26782
 if [[ $SHLVL == 1 ]]; then
-  if shopt -q login_shell; then
-    exec zsh -li
-  else
-    exec zsh
-  fi
-fi
-
-# Workaround for vscode start terminal in bash with inconsistent SHLVL
-if [[ $TERM_PROGRAM == vscode && -n ${VSCODE_TERM+x} ]]; then
-  unset VSCODE_TERM; exec bash -l -c 'zsh -li'
+    if shopt -q login_shell; then
+        exec zsh -li
+    else
+        exec zsh
+    fi
 fi
 
 # For Nersc and Perlmutter
 # if we are in a perlmutter computing node, exec zsh
 if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
-  exec zsh
+    exec zsh
+fi
+
+# Workaround for vscode start terminal in bash with inconsistent SHLVL
+if [[ $TERM_PROGRAM == vscode && -n ${VSCODE_TERM+x} ]]; then
+    unset VSCODE_TERM
+    exec bash -l -c 'zsh -li'
 fi
