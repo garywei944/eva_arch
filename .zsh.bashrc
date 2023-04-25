@@ -4,10 +4,12 @@
 # shell to non-bash is not well-supported, this script replace the login shell
 # to zsh
 
+[[ -n $(command -v zsh) && $- == *i* ]] || return
+
 # if this is a login shell and this is an interactive shell, and zsh available
 # only replace shell when SHLVL=1
 # https://unix.stackexchange.com/a/26782
-if [[ $- == *i* && $SHLVL == 1 && -n $(command -v zsh) ]]; then
+if [[ $SHLVL == 1 ]]; then
   if shopt -q login_shell; then
     exec zsh -li
   else
@@ -21,7 +23,7 @@ if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
   exec zsh
 fi
 
-# Workaround for vscode start terminal with SHLVL=4
-if [[ $NERSC_HOST == perlmutter && $TERM_PROGRAM == vscode && $SHLVL == 4 ]]; then
+# Workaround for vscode start terminal in bash with inconsistent SHLVL
+if [[ $TERM_PROGRAM == vscode ]]; then
   exec zsh
 fi
