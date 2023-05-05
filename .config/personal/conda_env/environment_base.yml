@@ -8,8 +8,8 @@ channels:
   - nvidia # for CUDA
   - pytorch
   - huggingface
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - python
@@ -22,13 +22,25 @@ dependencies:
   - tqdm
 
   # Frameworks
-  - pytorch
   - numpy
   - scipy
   - pandas
-  - scikit-learn
   - openpyxl # to open excel files
   - pandarallel # for parallel computing panda dataframe
+
+  # scikit-learn
+  - scikit-learn
+  - scikit-image
+
+  # PyTorch
+  - pytorch
+  - torchvision
+
+  # Huggingface
+  - transformers
+  - datasets
+  - accelerate
+  - tokenizers>=0.13.1  # https://stackoverflow.com/a/74386742
 
   # utils
   - absl-py

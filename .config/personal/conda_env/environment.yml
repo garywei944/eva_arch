@@ -8,11 +8,11 @@ channels:
   - nvidia # for CUDA
   - pytorch
   - huggingface
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
-  - python>=3.10
+  - python=3.10
   - pip
   - cudatoolkit=11.8
   - pytorch-cuda=11.8
@@ -23,13 +23,18 @@ dependencies:
   - _anaconda_depends=2022.10
 
   # Frameworks
+  - pandarallel # for parallel computing panda dataframe
+  # PyTorch
   - pytorch>=2.0.0
   - torchvision
+
   - opencv
-  - pandarallel # for parallel computing panda dataframe
-  - transformers
+
+  # Huggingface
+  - transformers>=4.28.1
   - datasets
   - accelerate
+  - tokenizers>=0.13.1  # https://stackoverflow.com/a/74386742
 
   # utils
   - absl-py
@@ -50,3 +55,4 @@ dependencies:
       - singleton-decorator
       - torchopt
       - evaluate
+      - pwntools

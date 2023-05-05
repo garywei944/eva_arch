@@ -8,8 +8,8 @@ channels:
   - nvidia # for CUDA
   - pytorch
   - huggingface
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - python>=3.9

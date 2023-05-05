@@ -6,6 +6,6 @@ channels:
   - nvidia # for CUDA
   - pytorch
   - huggingface
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
