@@ -1,5 +1,13 @@
 #!/bin/bash
 
+li_shell() {
+    exec bash -l -c 'zsh -li'
+}
+
+i_shell() {
+    exec bash -l -c 'zsh -i'
+}
+
 # For servers that cannot change default login shell or changing default login
 # shell to non-bash is not well-supported, this script replace the login shell
 # to zsh
@@ -11,20 +19,20 @@
 # https://unix.stackexchange.com/a/26782
 if [[ $SHLVL == 1 ]]; then
     if shopt -q login_shell; then
-        exec zsh -li
+        li_shell
     else
-        exec zsh
+        i_shell
     fi
 fi
 
-# For Nersc and Perlmutter
-# if we are in a perlmutter computing node, exec zsh
-if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
-    exec zsh
-fi
+# # For Nersc and Perlmutter
+# # if we are in a perlmutter computing node, exec zsh
+# if [[ $NERSC_HOST == perlmutter && -n ${SLURM_NODELIST+x} ]]; then
+#     exec zsh
+# fi
 
-# Workaround for vscode start terminal in bash with inconsistent SHLVL
-if [[ $TERM_PROGRAM == vscode && -n ${VSCODE_TERM+x} ]]; then
-    unset VSCODE_TERM
-    exec bash -l -c 'zsh -li'
-fi
+# # Workaround for vscode start terminal in bash with inconsistent SHLVL
+# if [[ $TERM_PROGRAM == vscode && -n ${VSCODE_TERM+x} ]]; then
+#     unset VSCODE_TERM
+#     exec bash -l -c 'zsh -li'
+# fi
