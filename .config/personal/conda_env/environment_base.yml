@@ -14,8 +14,10 @@ channels:
 dependencies:
   - python
   - pip
+  - cython
   - cudatoolkit
   - pytorch-cuda
+  - cudnn  # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
   - psutil
   - python-dotenv
   - ruamel.yaml
@@ -35,6 +37,7 @@ dependencies:
   # PyTorch
   - pytorch
   - torchvision
+  - pytorch-sparse
 
   # Huggingface
   - transformers
@@ -44,12 +47,14 @@ dependencies:
 
   # utils
   - absl-py
+  - overrides
   - torchmetrics
   - torchinfo
   - bayesian-optimization
 
   # Visualization
   - matplotlib
+  - seaborn
 
   # Development
   - jupyter

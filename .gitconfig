@@ -1,7 +1,7 @@
 [user]
 	name = garywei944
 	email = 33930674+garywei944@users.noreply.github.com
-	signingkey = 9BC8C5A654BC03D9A8D07225B6DDB1D9AD77DE0D
+	signingkey = 5C3F438106CEB92685722EC49CB746AA84259A7A
 [core]
 	editor = vim
 	autocrlf = input
