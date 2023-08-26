@@ -5,6 +5,7 @@
 
 name: ml
 channels:
+  - pyg
   - nvidia # for CUDA
   - pytorch
   - huggingface
@@ -22,41 +23,49 @@ dependencies:
 
   # Anaconda
   - anaconda
-  - _anaconda_depends=2022.10
+  - _anaconda_depends~=2023.07
 
   # Frameworks
   - pandarallel # for parallel computing panda dataframe
   # PyTorch
-  - pytorch~=2.0.0
-  - torchvision
-  - pytorch-sparse
+  - pytorch~=2.0.1
+  - torchvision~=0.15.2
+  - pytorch-sparse~=0.6.17
 
   - opencv
 
   # Huggingface
-  - transformers~=4.28.1
-  - datasets
-  - accelerate
+  - transformers~=4.29.0
+  - datasets~=2.12.0
+  - accelerate~=0.19.0
   - tokenizers>=0.13.1  # https://stackoverflow.com/a/74386742
 
   # utils
   - absl-py
+  - overrides
   - torchmetrics
   - torchinfo
   - bayesian-optimization
 
   # Visualization
+  - moviepy # for generating gif
 
   # Development
   - wandb
   - twine
+  - blackd
+  - mypy
 
   # If you need to install pip packages, don't do `pip install xxx`
   # Add the package here and run `mamba env update -f environment.yml --prune`
   # for dependency completeness.
   - pip:
       - build
+      - nvitop
+      - sourcery
       - singleton-decorator
       - torchopt
       - evaluate
       - pwntools
+      - peft
+      - separableconv-torch
