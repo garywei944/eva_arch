@@ -58,15 +58,30 @@ dependencies:
 
   # Development
   - jupyter
-  - click
   - wandb
-  - twine
+
+  # PyPI common practice
+  - click
+  - setuptools_scm
+  - twine # for uploading to pypi
+  - blackd # black daemon, for python formatting
+  - mypy # for type checking
+  - bump2version # for version bump
+  - watchdog # filesystem event
+  - flake8 # linter
+  - tox
+  - coverage
+  - sphinx # doc
 
   # If you need to install pip packages, don't do `pip install xxx`
   # Add the package here and run `mamba env update -f environment.yml --prune`
   # for dependency completeness.
   - pip:
       - build
+      - nvitop # for monitoring GPU usage
+      - sourcery
       - singleton-decorator
       - torchopt
       - evaluate
+      - peft
+      - separableconv-torch
