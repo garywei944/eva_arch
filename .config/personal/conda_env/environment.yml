@@ -63,6 +63,7 @@ dependencies:
   # for dependency completeness.
   - pip:
       - build
+      - arxiv-latex-cleaner
       - nvitop # for monitoring GPU usage
       - sourcery
       - singleton-decorator
