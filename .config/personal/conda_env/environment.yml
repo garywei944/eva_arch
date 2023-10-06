@@ -14,7 +14,7 @@ channels:
   - defaults
 dependencies:
   - python=3.10
-  - pip~=23.1.2
+  - pip~=23.2.1
   - cython
   - cudatoolkit=11.8
   - pytorch-cuda=11.8
@@ -23,21 +23,21 @@ dependencies:
 
   # Anaconda
   - anaconda
-  - _anaconda_depends~=2023.07
+  - _anaconda_depends~=2023.09
 
   # Frameworks
   - pandarallel # for parallel computing panda dataframe
   # PyTorch
-  - pytorch~=2.0.1
-  - torchvision~=0.15.2
-  - pytorch-sparse~=0.6.17
+  - pytorch~=2.1.0
+  - torchvision~=0.16.0
+  - pytorch-sparse~=0.6.18
 
   - opencv
 
   # Huggingface
-  - transformers~=4.29.0
-  - datasets~=2.12.0
-  - accelerate~=0.19.0
+  - transformers~=4.33.3
+  - datasets~=2.14.5
+  - accelerate~=0.23.0
   - tokenizers>=0.13.1  # https://stackoverflow.com/a/74386742
 
   # utils
