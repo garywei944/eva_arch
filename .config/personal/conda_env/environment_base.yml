@@ -5,6 +5,7 @@
 
 name: ml-base
 channels:
+  - pyg # for pytorch-sparse
   - nvidia # for CUDA
   - pytorch
   - huggingface
@@ -17,11 +18,16 @@ dependencies:
   - cython
   - cudatoolkit
   - pytorch-cuda
-  - cudnn  # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+
+  # essential functionality
   - psutil
   - python-dotenv
   - ruamel.yaml
+  - omegaconf # for config
   - tqdm
+  - attrs
+  - tabulate
 
   # Frameworks
   - numpy
@@ -43,11 +49,12 @@ dependencies:
   - transformers
   - datasets
   - accelerate
-  - tokenizers>=0.13.1  # https://stackoverflow.com/a/74386742
+  - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
 
   # utils
   - absl-py
   - overrides
+  - typed-argument-parser # for type hinting in argparse
   - torchmetrics
   - torchinfo
   - bayesian-optimization
@@ -55,6 +62,7 @@ dependencies:
   # Visualization
   - matplotlib
   - seaborn
+  - moviepy # for generating gif
 
   # Development
   - jupyter
@@ -85,3 +93,6 @@ dependencies:
       - evaluate
       - peft
       - separableconv-torch
+      - cd2root
+      # Trial
+      - omegaconf-argparse # to use omegaconf with argparse
