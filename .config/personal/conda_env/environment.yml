@@ -5,7 +5,7 @@
 
 name: ml
 channels:
-  - pyg
+  - pyg # for pytorch-sparse
   - nvidia # for CUDA
   - pytorch
   - huggingface
@@ -18,8 +18,11 @@ dependencies:
   - cython
   - cudatoolkit=11.8
   - pytorch-cuda=11.8
-  - cudnn~=8.8.0  # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - cudnn~=8.8.0 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+
+  # essential functionality
   - python-dotenv
+  - omegaconf # for config
 
   # Anaconda
   - anaconda
@@ -30,6 +33,7 @@ dependencies:
   # PyTorch
   - pytorch~=2.1.0
   - torchvision~=0.16.0
+  - pytorch-lightning~=1.6.2
   - pytorch-sparse~=0.6.18
 
   - opencv
@@ -38,14 +42,17 @@ dependencies:
   - transformers~=4.33.3
   - datasets~=2.14.5
   - accelerate~=0.23.0
-  - tokenizers>=0.13.1  # https://stackoverflow.com/a/74386742
+  - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
 
   # utils
   - absl-py
   - overrides
+  - typed-argument-parser # for type hinting in argparse
   - torchmetrics
   - torchinfo
   - bayesian-optimization
+  # Trial
+  - hydra-core # for config using CLI
 
   # Visualization
   - moviepy # for generating gif
@@ -72,3 +79,6 @@ dependencies:
       - pwntools
       - peft
       - separableconv-torch
+      - cd2root # cd to project root
+      # Trial
+      - omegaconf-argparse # to use omegaconf with argparse

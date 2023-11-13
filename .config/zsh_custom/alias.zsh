@@ -37,6 +37,7 @@ alias bsexpress='browser-sync start -p "localhost:5000" -f "public"'
 
 # Cookiecutter
 alias ccml='cookiecutter gh:garywei944/cookiecutter-machine-learning'
+alias ccpypi='cookiecutter gh:garywei944/cookiecutter-pypackage'
 
 # git
 alias gcld='git clone --recurse-submodules --depth 1'
