@@ -8,6 +8,15 @@ i_shell() {
     exec bash -l -c 'zsh -i'
 }
 
+# https://unix.stackexchange.com/a/26782
+spawn_shell() {
+    if shopt -q login_shell; then
+        li_shell
+    else
+        i_shell
+    fi
+}
+
 # For servers that cannot change default login shell or changing default login
 # shell to non-bash is not well-supported, this script replace the login shell
 # to zsh
@@ -16,13 +25,8 @@ i_shell() {
 
 # if this is a login shell and this is an interactive shell, and zsh available
 # only replace shell when SHLVL=1
-# https://unix.stackexchange.com/a/26782
-if [[ $SHLVL == 1 ]]; then
-    if shopt -q login_shell; then
-        li_shell
-    else
-        i_shell
-    fi
+if [[ $SHLVL -le 5 ]]; then
+    spawn_shell
 fi
 
 # # For Nersc and Perlmutter
@@ -34,5 +38,5 @@ fi
 # # Workaround for vscode start terminal in bash with inconsistent SHLVL
 # if [[ $TERM_PROGRAM == vscode && -n ${VSCODE_TERM+x} ]]; then
 #     unset VSCODE_TERM
-#     exec bash -l -c 'zsh -li'
+#     spawn_shell
 # fi
