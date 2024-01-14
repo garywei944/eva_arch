@@ -20,14 +20,24 @@ dependencies:
   - pytorch-cuda
   - cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
 
-  # essential functionality
+  # System utils
   - psutil
+  - nvtop
+  - nvitop
+
+  # essential functionality
+  - overrides
   - python-dotenv
   - ruamel.yaml
-  - omegaconf # for config
+  - absl-py
   - tqdm
   - attrs
   - tabulate
+
+  # argparse
+  - omegaconf # for config
+  - typed-argument-parser # for type hinting in argparse
+  - hydra-core # for config using CLI
 
   # Frameworks
   - numpy
@@ -43,21 +53,25 @@ dependencies:
   # PyTorch
   - pytorch
   - torchvision
+  - torchinfo
   - pytorch-sparse
 
   # Huggingface
   - transformers
   - datasets
   - accelerate
+  - evaluate
   - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
+  - peft
+
+  # Lightning
+  - lightning
+  - lightning-bolts
+  - torchmetrics # lighting metrics
 
   # utils
-  - absl-py
-  - overrides
-  - typed-argument-parser # for type hinting in argparse
-  - torchmetrics
-  - torchinfo
   - bayesian-optimization
+  - singleton-decorator
 
   # Visualization
   - matplotlib
@@ -67,6 +81,7 @@ dependencies:
   # Development
   - jupyter
   - wandb
+  - tensorboardx
 
   # PyPI common practice
   - click
@@ -86,12 +101,13 @@ dependencies:
   # for dependency completeness.
   - pip:
       - build
-      - nvitop # for monitoring GPU usage
+      - datargs
+      # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
+      - lightning[pytorch-extra]
+      - lightning-gpt
       - sourcery
-      - singleton-decorator
       - torchopt
-      - evaluate
-      - peft
+      - torch_optimizer
       - separableconv-torch
       - cd2root
       # Trial

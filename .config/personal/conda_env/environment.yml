@@ -5,9 +5,9 @@
 
 name: ml
 channels:
-  - pyg # for pytorch-sparse
   - nvidia # for CUDA
   - pytorch
+  - pyg # for pytorch-sparse
   - huggingface
   - conda-forge
   - anaconda
@@ -20,65 +20,82 @@ dependencies:
   - pytorch-cuda=11.8
   - cudnn~=8.8.0 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
 
+  # System utils
+  - nvtop
+  - nvitop
+
   # essential functionality
+  - absl-py
+  - overrides
   - python-dotenv
+
+  # argparse
   - omegaconf # for config
+  - typed-argument-parser # for type hinting in argparse
+  - hydra-core # for config using CLI
 
   # Anaconda
   - anaconda
   - _anaconda_depends~=2023.09
 
   # Frameworks
+  - opencv
   - pandarallel # for parallel computing panda dataframe
+
   # PyTorch
-  - pytorch~=2.1.0
-  - torchvision~=0.16.0
-  - lightning~=2.1.2
-  - pytorch-lightning~=1.6.2
+  - pytorch~=2.1.2
+  - torchvision~=0.16.2
+  - torchinfo
+  - pyg~=2.4.0
   - pytorch-sparse~=0.6.18
 
-  - opencv
-
   # Huggingface
-  - transformers~=4.33.3
-  - datasets~=2.14.5
-  - accelerate~=0.23.0
+  - transformers~=4.36.1
+  - datasets~=2.15.0
+  - accelerate~=0.25.0
+  - evaluate~=0.4.0
   - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
+  - peft~=0.7.1
+
+  # Lightning
+  - lightning~=2.1.3
+  - lightning-bolts~=0.7.0
+  - torchmetrics # lighting metrics
 
   # utils
-  - absl-py
-  - overrides
-  - typed-argument-parser # for type hinting in argparse
-  - torchmetrics
-  - torchinfo
   - bayesian-optimization
-  # Trial
-  - hydra-core # for config using CLI
+  - singleton-decorator
 
   # Visualization
   - moviepy # for generating gif
 
   # Development
   - wandb
+  - tensorboardx
+
+  # PyPI common practice
   - setuptools_scm
   - twine
   - blackd
   - mypy
   - bump2version
 
+  # Pwntools
+  - pwntools
+
   # If you need to install pip packages, don't do `pip install xxx`
   # Add the package here and run `mamba env update -f environment.yml --prune`
   # for dependency completeness.
   - pip:
       - build
+      - datargs
       - arxiv-latex-cleaner
-      - nvitop # for monitoring GPU usage
+      # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
+      - lightning[pytorch-extra]
+      - lightning-gpt
       - sourcery
-      - singleton-decorator
       - torchopt
-      - evaluate
-      - pwntools
-      - peft
+      - torch_optimizer
       - separableconv-torch
       - cd2root # cd to project root
       # Trial

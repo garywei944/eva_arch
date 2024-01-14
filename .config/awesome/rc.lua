@@ -858,7 +858,7 @@ awful.rules.rules = { -- All clients will match this rule.
     {
         rule = {
             instance = "Msgcompose",
-            class = "thunderbird"
+            class = "betterbird"
         },
         callback = function(c)
             local t = screen[dis_main].tags[4]
@@ -870,7 +870,7 @@ awful.rules.rules = { -- All clients will match this rule.
     }, {
     rule = {
         instance = "Mail",
-        class = "thunderbird"
+        class = "betterbird"
     },
     callback = function(c)
         if __tb_started then
