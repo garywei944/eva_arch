@@ -52,10 +52,6 @@ cver() {
 #alias mab="mamba activate base"
 #alias mde="mamba deactivate"
 
-# Micromamba is the new fashion!
-# if mamba is not installed, use micromamba
-[[ -z $(command -v mamba) ]] && alias mamba="micromamba"
-
 alias mel="mamba env list"
 alias mlst="mamba list"
 alias mle="mamba list --export"
@@ -94,26 +90,26 @@ alias mle="mamba list --export"
 # alias mee='mamba env export'
 # alias meee='mamba env export > environment-spec.yml'
 
-# All aliases for micromamba
+# # All aliases for micromamba
 
-alias mm="micromamba"
+# alias mm="micromamba"
 
-alias mmel="micromamba env list"
-alias mmlst="micromamba list"
-alias mmle="micromamba list --export"
+# alias mmel="micromamba env list"
+# alias mmlst="micromamba list"
+# alias mmle="micromamba list --export"
 
-alias mmin="micromamba install"
-alias mminy="micromamba install -y"
+# alias mmin="micromamba install"
+# alias mminy="micromamba install -y"
 
-alias mmrn="micromamba remove -y --all -n"
+# alias mmrn="micromamba remove -y --all -n"
 
-alias mmcn="micromamba create -y -n"
-alias mmcf="micromamba env create -f"
-alias mmcfe="micromamba env create -f environment.yml"
+# alias mmcn="micromamba create -y -n"
+# alias mmcf="micromamba env create -f"
+# alias mmcfe="micromamba env create -f environment.yml"
 
-alias mmconf="micromamba config"
-alias mmcss="micromamba config --show-source"
-alias mmuf="micromamba env update -f"
-alias mmufe="micromamba env update -f environment.yml"
-alias mmufep="micromamba env update -f environment.yml --prune"
-alias mmupf="micromamba env update --prune -f"
+# alias mmconf="micromamba config"
+# alias mmcss="micromamba config --show-source"
+# alias mmuf="micromamba env update -f"
+# alias mmufe="micromamba env update -f environment.yml"
+# alias mmufep="micromamba env update -f environment.yml --prune"
+# alias mmupf="micromamba env update --prune -f"
