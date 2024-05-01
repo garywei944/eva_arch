@@ -33,6 +33,7 @@ dependencies:
   - tqdm
   - attrs
   - tabulate
+  - typing_extensions
 
   # argparse
   - omegaconf # for config
@@ -45,6 +46,10 @@ dependencies:
   - pandas
   - openpyxl # to open excel files
   - pandarallel # for parallel computing panda dataframe
+  - einops
+  - deepspeed
+  - sentencepiece
+  - bitsandbytes~=0.43.1
 
   # scikit-learn
   - scikit-learn

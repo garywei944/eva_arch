@@ -8,6 +8,6 @@ alias dolt='dol .'
 
 # PyCharm
 pcm() {
-	spawn pycharm "$@"
+	spawn pycharm-professional "$@"
 }
 alias pcmt='pcm .'

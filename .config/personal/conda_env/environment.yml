@@ -16,6 +16,7 @@ dependencies:
   - python=3.10
   - pip~=23.2.1
   - cython
+  - pocl # for OpenCL
   - cudatoolkit=11.8
   - pytorch-cuda=11.8
   - cudnn~=8.8.0 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
@@ -28,6 +29,7 @@ dependencies:
   - absl-py
   - overrides
   - python-dotenv
+  - typing_extensions
 
   # argparse
   - omegaconf # for config
