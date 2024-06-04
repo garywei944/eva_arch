@@ -86,11 +86,11 @@ local editor_cmd = terminal .. " -e " .. editor
 local modkey = "Mod4"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
-awful.layout.layouts = {         -- awful.layout.suit.floating,
+awful.layout.layouts = {             -- awful.layout.suit.floating,
     -- awful.layout.suit.tile,
-    awful.layout.suit.tile.left, -- awful.layout.suit.tile.bottom,
+    awful.layout.suit.tile.left,     -- awful.layout.suit.tile.bottom,
     -- awful.layout.suit.tile.top,
-    awful.layout.suit.fair,      -- awful.layout.suit.fair.horizontal,
+    awful.layout.suit.fair,          -- awful.layout.suit.fair.horizontal,
     -- awful.layout.suit.spiral,
     awful.layout.suit.spiral.dwindle -- awful.layout.suit.max,
     -- awful.layout.suit.max.fullscreen,
@@ -119,7 +119,7 @@ mymainmenu = freedesktop.menu.build({
     after = { { "Terminal", terminal }, { "Log out", function()
         awesome.quit()
     end }, { "Sleep", "systemctl suspend" }, { "Restart", "systemctl reboot" },
-        { "Exit", "systemctl poweroff" }                                                                  -- other triads can be put here
+        { "Exit", "systemctl poweroff" } -- other triads can be put here
     }
 })
 menubar.utils.terminal = terminal -- Set the Menubar terminal for applications that require it
@@ -736,7 +736,7 @@ for i = 1, 9 do
                 if tag then
                     tag:view_only()
                 end
-            end, -- { description = "view tag #" .. i, group = "tag" }),
+            end,         -- { description = "view tag #" .. i, group = "tag" }),
             descr_view), -- Toggle tag display.
         awful.key({ modkey, "Control" }, "#" .. i + 9, function()
                 local screen = awful.screen.focused()
@@ -744,7 +744,7 @@ for i = 1, 9 do
                 if tag then
                     awful.tag.viewtoggle(tag)
                 end
-            end,   -- { description = "toggle tag #" .. i, group = "tag" }),
+            end,           -- { description = "toggle tag #" .. i, group = "tag" }),
             descr_toggle), -- Move client to tag.
         awful.key({ modkey, "Shift" }, "#" .. i + 9, function()
                 if client.focus then
@@ -753,7 +753,7 @@ for i = 1, 9 do
                         client.focus:move_to_tag(tag)
                     end
                 end
-            end, -- { description = "move focused client to tag #" .. i, group = "tag" }),
+            end,         -- { description = "move focused client to tag #" .. i, group = "tag" }),
             descr_move), -- Toggle tag on focused client.
         awful.key({ modkey, "Control", "Shift" }, "#" .. i + 9, function()
                 if client.focus then
@@ -818,11 +818,11 @@ awful.rules.rules = { -- All clients will match this rule.
 }, -- Floating clients.
     {
         rule_any = {
-            instance = { "DTA",                                                -- Firefox addon DownThemAll.
-                "copyq",                                                       -- Includes session name in class.
+            instance = { "DTA",                                                     -- Firefox addon DownThemAll.
+                "copyq",                                                            -- Includes session name in class.
                 "pinentry" },
             class = { "Arandr", "Blueman-manager", "Gpick", "Kruler", "MessageWin", -- kalarm.
-                "Sxiv", "Tor Browser",                                         -- Needs a fixed window size to avoid fingerprinting by screen size.
+                "Sxiv", "Tor Browser",                                              -- Needs a fixed window size to avoid fingerprinting by screen size.
                 "Wpa_gui", "veromix", "xtightvncviewer" },
 
             -- Note that the name property shown in xprop might be set slightly after creation of the client
@@ -830,8 +830,8 @@ awful.rules.rules = { -- All clients will match this rule.
             name = { "Event Tester" -- xev.
             },
             role = { "AlarmWindow", -- Thunderbird's calendar.
-                "ConfigManager", -- Thunderbird's about:config.
-                "pop-up",      -- e.g. Google Chrome's (detached) Developer Tools.
+                "ConfigManager",    -- Thunderbird's about:config.
+                "pop-up",           -- e.g. Google Chrome's (detached) Developer Tools.
                 "setup" }
         },
         properties = {
