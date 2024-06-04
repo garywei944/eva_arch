@@ -86,6 +86,8 @@ export GPG_TTY
 # Load version comparision
 autoload is-at-least
 
+plugins=()
+
 if [[ -n $(command -v pacman) ]]; then
   plugins+=(archlinux)
 elif [[ -n $(command -v apt-get) ]]; then
@@ -93,29 +95,51 @@ elif [[ -n $(command -v apt-get) ]]; then
 elif [[ -n $(command -v yum) ]]; then
   plugins+=(yum)
 elif [[ -n $(command -v brew) ]]; then
-  plugins+=(brew)
+  plugins+=(brew macos iterm2)
+fi
+
+if [[ -n $(command -v zoxide) ]]; then
+  ZOXIDE_CMD_OVERRIDE=cd
+  plugins+=(zoxide)
+else
+  plugins+=(z)
 fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
 
 [[ -n $(command -v fd) ]] && plugins+=(fd)
 [[ -n $(command -v rg) ]] && plugins+=(ripgrep)
-[[ -n $(command -v heroku) ]] && plugins+=(heroku)
+[[ -n $(command -v fzf) ]] && plugins+=(fzf)
+[[ -n $(command -v procs) ]] && plugins+=(procs)
+[[ -n $(command -v docker) ]] && plugins+=(docker)
 [[ -n $(command -v vagrant) ]] && plugins+=(vagrant)
+[[ -n $(command -v snap) ]] && plugins+=(snap)
 
 [[ -n $(command -v aws) ]] && is-at-least 5.3 && plugins+=(aws)
+[[ -n $(command -v heroku) ]] && plugins+=(heroku)
+[[ -n $(command -v gh) ]] && plugins+=(gh)
+[[ -n $(command -v httpie) ]] && plugins+=(httpie)
 
 [[ -n $(command -v code) ]] && plugins+=(vscode)
 [[ -n $(command -v subl) ]] && plugins+=(sublime)
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
 plugins+=(
-  systemd tmux man screen gpg-agent systemadmin
-  python pip pyenv npm
+  # systemadmin
+  systemd tmux man screen gpg-agent systemadmin ssh ufw
+  # development
+  python pip pyenv pylint npm
+  # git
   git gitignore git-flow git-flow-avh
-  rsync extract
-  z history themes zsh-autosuggestions zsh-syntax-highlighting
+  # file
+  cp rsync qrcode torrent transfer encode64 urltools
+  extract universalarchive
+  # zsh
+  aliases history themes zsh-autosuggestions zsh-syntax-highlighting
+  emoji emotty safe-paste timer themes web-search
+  # formatting
   isodate
+  # custom plugins
   conda cmake
 )
 

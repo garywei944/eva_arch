@@ -44,9 +44,6 @@ alias gcld='git clone --recurse-submodules --depth 1'
 alias gaignore='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 alias gassh="ssh-keygen -R github.com; curl -L https://api.github.com/meta | jq -r '.ssh_keys | .[]' | sed -e 's/^/github.com /' >>~/.ssh/known_hosts"
 
-# Reload rc scripts
-alias rldzsh='. ~/.zshrc'
-
 # Maybe
 alias lg='lazygit'
 alias ra='ranger'
