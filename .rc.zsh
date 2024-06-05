@@ -99,7 +99,6 @@ elif [[ -n $(command -v brew) ]]; then
 fi
 
 if [[ -n $(command -v zoxide) ]]; then
-  ZOXIDE_CMD_OVERRIDE=cd
   plugins+=(zoxide)
 else
   plugins+=(z)
