@@ -14,6 +14,7 @@ channels:
   - defaults
 dependencies:
   - python>=3.10
+  - pip>=24.0
   - cython
   - pocl # for OpenCL
   - nvtop
@@ -30,6 +31,7 @@ dependencies:
   - pytorch::torchvision=0.18
   - conda-forge::flash-attn=2.5.8
   - conda-forge::deepspeed=*=cuda*
+  - conda-forge::triton=2.0.0
 
   # essential functionality
   - absl-py

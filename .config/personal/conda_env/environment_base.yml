@@ -58,6 +58,7 @@ dependencies:
   - pytorch::torchvision=0.18
   - conda-forge::flash-attn=2.5.8
   - conda-forge::deepspeed=*=cuda*
+  - conda-forge::triton=2.0.0
 
   # scikit-learn
   - scikit-learn
