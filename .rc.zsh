@@ -192,7 +192,8 @@ fi
 # After .zshrc
 # ##############################################################################
 
-# Conda init
+# >>> conda initialize >>>
+# conda initialization
 if [[ -n ${CONDA_PATH+x} ]]; then
   __conda_setup="$("$CONDA_PATH/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)"
   if [[ $? -eq 0 ]]; then
@@ -206,8 +207,26 @@ if [[ -n ${CONDA_PATH+x} ]]; then
   fi
   unset __conda_setup
 fi
+# mamba initialization
+[[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
+# micromamba initialization
+if [[ -n $(command -v micromamba) ]]; then
+  export MAMBA_EXE="$(command -v micromamba)"
+  export MAMBA_ROOT_PREFIX="$HOME/.conda"
+  __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
+  if [ $? -eq 0 ]; then
+    eval "$__mamba_setup"
+  else
+    alias micromamba="$MAMBA_EXE" # Fallback on help from mamba activate
+  fi
+  unset __mamba_setup
+fi
+# <<< conda initialize <<<
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
   [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
 fi
+
+# broot init
+[[ -f "$HOME/.config/broot/launcher/bash/br" ]] && . "$HOME/.config/broot/launcher/bash/br"

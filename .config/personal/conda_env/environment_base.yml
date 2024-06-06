@@ -5,25 +5,21 @@
 
 name: ml-base
 channels:
-  - pyg # for pytorch-sparse
   - nvidia # for CUDA
   - pytorch
+  - pyg # for pytorch-sparse
   - huggingface
   - conda-forge
   - anaconda
   - defaults
 dependencies:
-  - python
-  - pip
+  - python>=3.10
+  - pip>=24.0
   - cython
-  - cudatoolkit
-  - pytorch-cuda
-  - cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
 
   # System utils
   - psutil
   - nvtop
-  - nvitop
 
   # essential functionality
   - overrides
@@ -34,11 +30,14 @@ dependencies:
   - attrs
   - tabulate
   - typing_extensions
+  - rich
 
   # argparse
-  - omegaconf # for config
+  - omegaconf # for config, lightning dependency
   - typed-argument-parser # for type hinting in argparse
-  - hydra-core # for config using CLI
+  - hydra-core # for config using CLI, lightning dependency
+  - jsonargparse # required by lightning[extra]
+  - typeshed-client>=2.1.0 # for jsonargparse[signatures] required by lightning[extra]
 
   # Frameworks
   - numpy
@@ -47,32 +46,40 @@ dependencies:
   - openpyxl # to open excel files
   - pandarallel # for parallel computing panda dataframe
   - einops
-  - deepspeed
   - sentencepiece
-  - bitsandbytes~=0.43.1
+  - bitsandbytes~=0.43.1 # with CUDA 11.8
+
+  # pytorch with specific CUDA version
+  - conda-forge::pytorch=2.3
+  - pytorch::pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
+  - pytorch::pytorch-cuda=11.8
+  - conda-forge::cudatoolkit=11.8
+  - conda-forge::cudnn=8.9 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - pytorch::torchvision=0.18
+  - conda-forge::flash-attn=2.5.8
+  - conda-forge::deepspeed=*=cuda*
 
   # scikit-learn
   - scikit-learn
   - scikit-image
 
   # PyTorch
-  - pytorch
-  - torchvision
   - torchinfo
-  - pytorch-sparse
+  - pytorch-sparse~=0.6.18
+  - flash-attn
 
   # Huggingface
-  - transformers
-  - datasets
-  - accelerate
-  - evaluate
-  - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
-  - peft
+  - conda-forge::transformers
+  - conda-forge::datasets
+  - conda-forge::accelerate
+  - conda-forge::evaluate
+  - conda-forge::tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
+  - conda-forge::peft
 
   # Lightning
-  - lightning
-  - lightning-bolts
-  - torchmetrics # lighting metrics
+  - conda-forge::lightning~=2.2.5
+  - conda-forge::lightning-bolts
+  - conda-forge::torchmetrics # lighting metrics
 
   # utils
   - bayesian-optimization
@@ -108,8 +115,8 @@ dependencies:
       - build
       - datargs
       # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
-      - lightning[pytorch-extra]
-      - lightning-gpt
+      # - lightning[pytorch-extra] # the requirements are already included in the file
+      # - lightning-gpt
       - sourcery
       - torchopt
       - torch_optimizer
