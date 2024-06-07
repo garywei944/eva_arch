@@ -110,3 +110,8 @@ alias mmrn="micromamba env remove -y -n"
 alias mmcn="micromamba create -y -n"
 alias mmcf="micromamba env create -f"
 alias mmcfe="micromamba env create -f environment.yml"
+
+# micromamba update env by file
+# https://github.com/mamba-org/mamba/issues/1455
+alias mmif="micromamba install -f"
+alias mmife="micromamba install -f environment.yml"
