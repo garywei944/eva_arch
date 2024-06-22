@@ -103,6 +103,12 @@ fi
 # affix colons on either side of $PATH to simplify matching
 [ -d "$HOME/.cargo/bin" ] && __prepend_path "$HOME/.cargo/bin"
 
+# Ruby
+if [ -n "$(command -v gem)" ]; then
+  export GEM_HOME="$(gem env user_gemhome)"
+  __prepend_path "$GEM_HOME/bin"
+fi
+
 # wine
 [ -n "$(command -v wine)" ] && export WINEDEBUG=fixme-font
 
