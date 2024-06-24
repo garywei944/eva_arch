@@ -68,7 +68,6 @@ dependencies:
   # PyTorch
   - torchinfo
   - pytorch-sparse~=0.6.18
-  - flash-attn
 
   # Huggingface
   - conda-forge::transformers
