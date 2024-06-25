@@ -108,6 +108,8 @@ dependencies:
   - tox
   - coverage
   - sphinx # doc
+  - pre-commit # for git hooks
+  - pytest
 
   # If you need to install pip packages, don't do `pip install xxx`
   # Add the package here and run `mamba env update -f environment.yml --prune`
@@ -125,3 +127,5 @@ dependencies:
       - cd2root
       # Trial
       - omegaconf-argparse # to use omegaconf with argparse
+      - hydra-optuna-sweeper
+      - hydra-colorlog

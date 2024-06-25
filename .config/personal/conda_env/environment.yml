@@ -87,6 +87,7 @@ dependencies:
   - twine
   - blackd
   - bump2version
+  - pre-commit # for git hooks
 
   # Pwntools
   - pwntools
@@ -108,3 +109,5 @@ dependencies:
       - cd2root # cd to project root
       # Trial
       - omegaconf-argparse # to use omegaconf with argparse
+      - hydra-optuna-sweeper
+      - hydra-colorlog
