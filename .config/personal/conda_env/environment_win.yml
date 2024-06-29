@@ -1,0 +1,113 @@
+# Typical conda environment for a reproducible machine learning project
+# Use `mamba env create -f environment.yml`
+# or `conda env create -f environment.yml` to install the environment
+# Created and maintained by garywei944(garywei944@gmail.com)
+
+name: ml
+channels:
+  - nvidia
+  - pytorch
+  - pyg # for pytorch-sparse
+  - huggingface
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - python>=3.10
+  - pip>=24.0
+  - cython
+  # - pocl # for OpenCL
+
+  # Anaconda
+  - defaults::_anaconda_depends=2024.02
+
+  # pytorch with specific CUDA version
+  - pytorch::pytorch=2.*
+  - pytorch::pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
+  - pytorch::pytorch-cuda=11.8
+  - conda-forge::cudatoolkit=11.8
+  - conda-forge::cudnn=8.9 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - pytorch::torchvision=0.*
+  # - conda-forge::flash-attn=2.5.8
+  # - conda-forge::deepspeed=*=cuda*
+  # - conda-forge::triton=2.0.0
+
+  # essential functionality
+  - absl-py
+  - overrides
+  - python-dotenv
+  - typing_extensions
+
+  # argparse
+  - omegaconf # for config
+  - typed-argument-parser # for type hinting in argparse
+  - hydra-core # for config using CLI
+  - hydra-submitit-launcher # for submitting jobs to slurm
+  - jsonargparse # required by lightning[extra]
+  - typeshed-client>=2.1.0 # for jsonargparse[signatures] required by lightning[extra]
+
+  # Frameworks
+  - opencv
+  - pandarallel # for parallel computing panda dataframe
+  - einops # for einsum
+  - sentencepiece
+  # - bitsandbytes~=0.43.1
+  - torchinfo
+  - sdy623::bitsandbytes-windows
+
+  # - pyg::pyg # doesn't support pytorch 2.3
+  # - pyg::pytorch-sparse~=0.6.18
+
+  # Huggingface
+  - conda-forge::transformers
+  - conda-forge::datasets
+  - conda-forge::accelerate
+  - conda-forge::evaluate
+  - conda-forge::tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
+  - conda-forge::peft
+
+  # Lightning
+  - conda-forge::lightning
+  # - conda-forge::lightning-bolts~=0.7.0
+  - conda-forge::torchmetrics # lighting metrics
+
+  # utils
+  - bayesian-optimization
+  - singleton-decorator
+
+  # Visualization
+  - moviepy # for generating gif
+
+  # Development
+  - wandb
+  - tensorboardx
+
+  # PyPI common practice
+  - setuptools_scm
+  - twine
+  - blackd
+  - bump2version
+  - pre-commit # for git hooks
+
+  # Pwntools
+  # - pwntools
+
+  # If you need to install pip packages, don't do `pip install xxx`
+  # Add the package here and run `mamba env update -f environment.yml --prune`
+  # for dependency completeness.
+  - pip:
+      - build
+      - datargs
+      - arxiv-latex-cleaner
+      # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
+      # - lightning[pytorch-extra] # the requirements are already included in the file
+      # - lightning-gpt
+      - sourcery
+      - torchopt
+      - torch_optimizer
+      - separableconv-torch
+      - cd2root # cd to project root
+      # Trial
+      - omegaconf-argparse # to use omegaconf with argparse
+      - hydra-optuna-sweeper
+      - hydra-colorlog
