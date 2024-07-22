@@ -16,22 +16,21 @@ dependencies:
   - python>=3.10
   - pip>=24.0
   - cython
-  - pocl # for OpenCL
-  - nvtop
+  # - pocl # for OpenCL
 
   # Anaconda
-  - defaults::_anaconda_depends=2024.02=*openblas*
+  - defaults::_anaconda_depends=2024.02
 
   # pytorch with specific CUDA version
-  - conda-forge::pytorch=2.3
+  - pytorch::pytorch=2.*
   - pytorch::pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
   - pytorch::pytorch-cuda=11.8
   - conda-forge::cudatoolkit=11.8
   - conda-forge::cudnn=8.9 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
-  - conda-forge::torchvision=0.18
-  - conda-forge::flash-attn=2.5.8
-  - conda-forge::deepspeed=*=cuda*
-  - conda-forge::triton=2.0.0
+  - pytorch::torchvision=0.*
+  # - conda-forge::flash-attn=2.5.8
+  # - conda-forge::deepspeed=*=cuda*
+  # - conda-forge::triton=2.0.0
 
   # essential functionality
   - absl-py
@@ -52,11 +51,12 @@ dependencies:
   - pandarallel # for parallel computing panda dataframe
   - einops # for einsum
   - sentencepiece
-  - bitsandbytes~=0.43.1
+  # - bitsandbytes~=0.43.1
   - torchinfo
+  - sdy623::bitsandbytes-windows
 
   # - pyg::pyg # doesn't support pytorch 2.3
-  - pyg::pytorch-sparse~=0.6.18
+  # - pyg::pytorch-sparse~=0.6.18
 
   # Huggingface
   - conda-forge::transformers
@@ -67,7 +67,7 @@ dependencies:
   - conda-forge::peft
 
   # Lightning
-  - conda-forge::lightning~=2.2.5
+  - conda-forge::lightning
   # - conda-forge::lightning-bolts~=0.7.0
   - conda-forge::torchmetrics # lighting metrics
 
@@ -90,7 +90,7 @@ dependencies:
   - pre-commit # for git hooks
 
   # Pwntools
-  - pwntools
+  # - pwntools
 
   # If you need to install pip packages, don't do `pip install xxx`
   # Add the package here and run `mamba env update -f environment.yml --prune`

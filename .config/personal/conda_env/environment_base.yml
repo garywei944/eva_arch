@@ -56,7 +56,7 @@ dependencies:
   - pytorch::pytorch-cuda=11.8
   - conda-forge::cudatoolkit=11.8
   - conda-forge::cudnn=8.9 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
-  - pytorch::torchvision=0.18
+  - conda-forge::torchvision=0.18
   - conda-forge::flash-attn=2.5.8
   - conda-forge::deepspeed=*=cuda*
   - conda-forge::triton=2.0.0
