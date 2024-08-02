@@ -106,8 +106,6 @@ fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
 
-[[ -n $(command -v fd) ]] && plugins+=(fd)
-[[ -n $(command -v rg) ]] && plugins+=(ripgrep)
 [[ -n $(command -v fzf) ]] && plugins+=(fzf)
 [[ -n $(command -v procs) ]] && plugins+=(procs)
 [[ -n $(command -v docker) ]] && plugins+=(docker)
