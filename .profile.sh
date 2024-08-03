@@ -105,7 +105,12 @@ fi
 
 # Ruby
 if [ -n "$(command -v gem)" ]; then
-  export GEM_HOME="$(gem env user_gemhome)"
+  if [ "$(uname)" = "Darwin" ]; then
+    export GEM_HOME="$HOME/.gem"
+  else
+    GEM_HOME="$(gem env user_gemhome)"
+    export GEM_HOME
+  fi
   __prepend_path "$GEM_HOME/bin"
 fi
 
