@@ -83,17 +83,26 @@ fi
 for CONDA in anaconda3 miniconda3 mambaforge; do
   if [ -d "$HOME/$CONDA" ]; then
     export CONDA_PATH="$HOME/$CONDA"
+    break
   elif [ -d "/opt/$CONDA" ]; then
     export CONDA_PATH="/opt/$CONDA"
+    break
   fi
 done
-unset CONDA
-# MacOS `brew install mambaforge`
-if [ -d /usr/local/Caskroom/mambaforge/base ]; then
-  export CONDA_PATH=/usr/local/Caskroom/mambaforge/base
-elif [ -d /opt/homebrew/Caskroom/mambaforge/base ]; then
-  export CONDA_PATH=/opt/homebrew/Caskroom/mambaforge/base
+# Fix install mamba from brew
+if [ "$(uname)" = "Darwin" ]; then
+  for CONDA in miniforge mambaforge; do
+    # MacOS `brew install $CONDA`
+    if [ -d "/usr/local/Caskroom/$CONDA/base" ]; then
+      export CONDA_PATH="/usr/local/Caskroom/$CONDA/base"
+      break
+    elif [ -d "/opt/homebrew/Caskroom/$CONDA/base" ]; then
+      export CONDA_PATH="/opt/homebrew/Caskroom/$CONDA/base"
+      break
+    fi
+  done
 fi
+unset CONDA
 
 # SDKMAN
 [ -d "$HOME/.sdkman" ] && export SDKMAN_DIR="$HOME/.sdkman"
