@@ -106,6 +106,7 @@ fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
 
+[[ -n $(command -v lsd) ]] && plugins+=(lsd)
 [[ -n $(command -v fzf) ]] && plugins+=(fzf)
 [[ -n $(command -v procs) ]] && plugins+=(procs)
 [[ -n $(command -v docker) ]] && plugins+=(docker)
@@ -228,3 +229,6 @@ fi
 
 # broot init
 [[ -f "$HOME/.config/broot/launcher/bash/br" ]] && . "$HOME/.config/broot/launcher/bash/br"
+
+# fzf init
+[[ -f "$HOME/.fzf.zsh" ]] && . "$HOME/.fzf.zsh"
