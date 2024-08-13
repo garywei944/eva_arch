@@ -80,7 +80,7 @@ if [ -z "${JAVA_HOME+x}" ]; then
 fi
 
 # Conda, anaconda, or mambaforge
-for CONDA in anaconda3 miniconda3 mambaforge; do
+for CONDA in anaconda3 miniconda3 mambaforge miniforge3; do
   if [ -d "$HOME/$CONDA" ]; then
     export CONDA_PATH="$HOME/$CONDA"
     break
