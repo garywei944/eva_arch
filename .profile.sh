@@ -2,6 +2,9 @@
 
 # This file should support all the shell you use(bash, zsh, etc)
 
+# return if EVA is set
+[ -n "${EVA+x}" ] && return
+
 # inspired from https://unix.stackexchange.com/a/108933
 # WARNING: only remove path that fully match
 __remove_path() {
@@ -129,8 +132,8 @@ fi
 # Cisco Anyconnect
 [ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
 
-# Custom environment variable
-export EVA=ariseus
-
 unset -f __remove_path
 unset -f __prepend_path
+
+# Custom environment variable
+export EVA=ariseus

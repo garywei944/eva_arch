@@ -112,7 +112,8 @@ fi
 
 [[ -n $(command -v aws) ]] && is-at-least 5.3 && plugins+=(aws)
 [[ -n $(command -v heroku) ]] && plugins+=(heroku)
-[[ -n $(command -v gh) ]] && plugins+=(gh)
+# Gary: the bytedance devbox also has `gh` command but not GitHub CLI.
+# [[ -n $(command -v gh) ]] && plugins+=(gh)
 [[ -n $(command -v httpie) ]] && plugins+=(httpie)
 
 [[ -n $(command -v code) ]] && plugins+=(vscode)
