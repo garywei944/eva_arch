@@ -217,10 +217,10 @@ local dis_right = 1
 
 -- Change these values for assigning monitor index
 if screen:count() >= 2 then
-    dis_left = 2
+    dis_right = 2
 end
 if screen:count() >= 3 then
-    dis_right = 3
+    dis_left = 3
 end
 
 awful.screen.connect_for_each_screen(function(s)
