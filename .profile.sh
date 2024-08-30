@@ -17,17 +17,16 @@ __remove_path() {
   PATH=$(echo "$PATH" | sed 's/::/:/g')
   PATH=${PATH#:}
   PATH=${PATH%:}
-  export PATH
 }
 
 __prepend_path() {
   case ":${PATH}:" in
   *:"$1":*)
     __remove_path "$1"
-    export PATH="$1:$PATH"
+    PATH="$1:$PATH"
     ;;
   *)
-    export PATH="$1:$PATH"
+    PATH="$1:$PATH"
     ;;
   esac
 }
@@ -134,6 +133,8 @@ fi
 
 unset -f __remove_path
 unset -f __prepend_path
+
+export PATH
 
 # Custom environment variable
 export EVA=ariseus
