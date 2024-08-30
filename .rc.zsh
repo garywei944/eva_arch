@@ -1,8 +1,5 @@
 #!/bin/zsh
 
-# Load env for non-login shell
-[[ -z "$EVA" ]] && . "$HOME/.profile.sh"
-
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -89,19 +86,19 @@ autoload is-at-least
 plugins=()
 
 if [[ -n $(command -v pacman) ]]; then
-  plugins+=(archlinux)
+    plugins+=(archlinux)
 elif [[ -n $(command -v apt-get) ]]; then
-  plugins+=(ubuntu)
+    plugins+=(ubuntu)
 elif [[ -n $(command -v yum) ]]; then
-  plugins+=(yum)
+    plugins+=(yum)
 elif [[ -n $(command -v brew) ]]; then
-  plugins+=(brew macos iterm2)
+    plugins+=(brew macos iterm2)
 fi
 
 if [[ -n $(command -v zoxide) ]]; then
-  plugins+=(zoxide)
+    plugins+=(zoxide)
 else
-  plugins+=(z)
+    plugins+=(z)
 fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
@@ -123,69 +120,52 @@ fi
 [[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
 
 plugins+=(
-  # systemadmin
-  systemd tmux man screen gpg-agent systemadmin ssh ufw
-  # development
-  python pip pyenv pylint npm
-  # git
-  git gitignore git-flow git-flow-avh
-  # file
-  cp rsync qrcode torrent transfer encode64 urltools
-  extract universalarchive
-  # zsh
-  aliases history themes zsh-autosuggestions zsh-syntax-highlighting
-  emoji emotty safe-paste timer themes web-search
-  # formatting
-  isodate
-  # custom plugins
-  conda cmake
+    # systemadmin
+    systemd tmux man screen gpg-agent systemadmin ssh ufw
+    # development
+    python pip pyenv pylint npm
+    # git
+    git gitignore git-flow git-flow-avh
+    # file
+    cp rsync qrcode torrent transfer encode64 urltools
+    extract universalarchive
+    # zsh
+    aliases history themes zsh-autosuggestions zsh-syntax-highlighting
+    emoji emotty safe-paste timer themes web-search
+    # formatting
+    isodate
+    # custom plugins
+    conda cmake
 )
 
 . "$ZSH/oh-my-zsh.sh"
 
 # Box welcome message
 box_out() {
-  local s=("$@") b w
+    local s=("$@") b w
 
-  for l in "${s[@]}"; do
-    ((w < ${#l})) && {
-      b="$l"
-      w="${#l}"
-    }
-  done
-  tput setaf 3
+    for l in "${s[@]}"; do
+        ((w < ${#l})) && {
+            b="$l"
+            w="${#l}"
+        }
+    done
+    tput setaf 3
 
-  # Top line
-  echo " -${b//?/-}-
+    # Top line
+    echo " -${b//?/-}-
 | ${b//?/ } |"
 
-  # Print sentences
-  for l in "${s[@]}"; do
-    printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
-  done
+    # Print sentences
+    for l in "${s[@]}"; do
+        printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
+    done
 
-  #Bottom line
-  echo "| ${b//?/ } |
+    #Bottom line
+    echo "| ${b//?/ } |
  -${b//?/-}-"
-  tput sgr 0
+    tput sgr 0
 }
-
-# Welcome message
-if [[ -n $(command -v figlet) && -n $(command -v lolcat) ]]; then
-  echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
-elif is-at-least 5.8; then
-  if [[ -n $(command -v lolcat) ]]; then
-    box_out "Welcome back, ariseus." | lolcat
-  else
-    box_out "Welcome back, ariseus."
-  fi
-else
-  echo " ------------------------
-|                        |
-| Welcome back, ariseus. |
-|                        |
- ------------------------"
-fi
 
 ###############################################################################
 # After .zshrc
@@ -194,37 +174,37 @@ fi
 # >>> conda initialize >>>
 # conda initialization
 if [[ -n ${CONDA_PATH+x} ]]; then
-  __conda_setup="$("$CONDA_PATH/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)"
-  if [[ $? -eq 0 ]]; then
-    eval "$__conda_setup"
-  else
-    if [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]]; then
-      . "$CONDA_PATH/etc/profile.d/conda.sh"
+    __conda_setup="$("$CONDA_PATH/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)"
+    if [[ $? -eq 0 ]]; then
+        eval "$__conda_setup"
     else
-      export PATH="$CONDA_PATH/bin:$PATH"
+        if [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]]; then
+            . "$CONDA_PATH/etc/profile.d/conda.sh"
+        else
+            export PATH="$CONDA_PATH/bin:$PATH"
+        fi
     fi
-  fi
-  unset __conda_setup
+    unset __conda_setup
 fi
 # mamba initialization
 [[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
 # micromamba initialization
 if [[ -n $(command -v micromamba) ]]; then
-  export MAMBA_EXE="$(command -v micromamba)"
-  export MAMBA_ROOT_PREFIX="$HOME/.conda"
-  __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
-  if [ $? -eq 0 ]; then
-    eval "$__mamba_setup"
-  else
-    alias micromamba="$MAMBA_EXE" # Fallback on help from mamba activate
-  fi
-  unset __mamba_setup
+    export MAMBA_EXE="$(command -v micromamba)"
+    export MAMBA_ROOT_PREFIX="$HOME/.conda"
+    __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__mamba_setup"
+    else
+        alias micromamba="$MAMBA_EXE" # Fallback on help from mamba activate
+    fi
+    unset __mamba_setup
 fi
 # <<< conda initialize <<<
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
-  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
+    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
 fi
 
 # broot init

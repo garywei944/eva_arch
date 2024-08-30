@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This file should support both bash and zsh
+# This file should support all the shell you use(bash, zsh, etc)
 
 # inspired from https://unix.stackexchange.com/a/108933
 # WARNING: only remove path that fully match
@@ -132,5 +132,5 @@ fi
 # Custom environment variable
 export EVA=ariseus
 
-unset __remove_path
-unset __prepend_path
+unset -f __remove_path
+unset -f __prepend_path

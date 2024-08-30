@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# 08/29/2024: Some wierd issue happened for server that doesn't well support zsh because
+# the /etc/profile is loaded twice, the script is temporary change to noop.
+
+return
+
+# For servers that cannot change default login shell or changing default login
+# shell to non-bash is not well-supported, this script replace the login shell
+# to zsh
+
+[[ -n $(command -v zsh) && $- == *i* ]] || return
+
 li_shell() {
     exec bash -l -c 'zsh -li'
 }
@@ -17,15 +28,8 @@ spawn_shell() {
     fi
 }
 
-# For servers that cannot change default login shell or changing default login
-# shell to non-bash is not well-supported, this script replace the login shell
-# to zsh
-
-[[ -n $(command -v zsh) && $- == *i* ]] || return
-
-# if this is a login shell and this is an interactive shell, and zsh available
-# only replace shell when SHLVL=1
-if [[ $SHLVL -le 5 ]]; then
+# if the EVA_FIRST_SHELL is not set, spawn a new shell
+if [[ -z ${EVA_FIRST_SHELL+x} ]]; then
     spawn_shell
 fi
 
@@ -40,3 +44,5 @@ fi
 #     unset VSCODE_TERM
 #     spawn_shell
 # fi
+
+export EVA_FIRST_SHELL=${EVA_FIRST_SHELL:-0}
