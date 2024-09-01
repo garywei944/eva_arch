@@ -525,9 +525,9 @@ end, {
     description = "launch dolphin",
     group = "launcher"
 }), awful.key({modkey}, "KP_Left", function()
-    awful.spawn("netease-cloud-music")
+    awful.spawn("qqmusic")
 end, {
-    description = "launch netease cloud music",
+    description = "launch QQ Music",
     group = "launcher"
 }), awful.key({modkey}, "KP_Home", function()
     awful.spawn("wechat")
@@ -706,11 +706,11 @@ end, {
     description = "move to the previous screen",
     group = "screen"
 }), awful.key({}, "XF86AudioRaiseVolume", function()
-    volume_widget.inc()
+    volume_widget:inc(2)
 end), awful.key({}, "XF86AudioLowerVolume", function()
-    volume_widget.dec()
+    volume_widget:dec(2)
 end), awful.key({}, "XF86AudioMute", function()
-    volume_widget.toggle()
+    volume_widget:toggle(2)
 end), -- Media Keys
 awful.key({}, "XF86AudioPlay", function()
     awful.util.spawn("playerctl play-pause", false)
@@ -720,6 +720,12 @@ end), awful.key({}, "XF86AudioPrev", function()
     awful.util.spawn("playerctl previous", false)
 end), awful.key({}, "XF86AudioStop", function()
     awful.util.spawn("playerctl stop", false)
+end), awful.key({modkey}, "KP_Next", function()
+    awful.util.spawn("playerctl next", false)
+end), awful.key({modkey}, "KP_End", function()
+    awful.util.spawn("playerctl previous", false)
+end), awful.key({modkey}, "KP_Down", function()
+    awful.util.spawn("playerctl play-pause", false)
 end))
 
 -- Bind all key numbers to tags.
