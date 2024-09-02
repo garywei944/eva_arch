@@ -136,5 +136,5 @@ unset -f __prepend_path
 
 export PATH
 
-# Custom environment variable
-export EVA=ariseus
+# variable to track history
+export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.profile.sh"

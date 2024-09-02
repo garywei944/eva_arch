@@ -16,3 +16,6 @@ else
 |                        |
  ------------------------"
 fi
+
+# variable to track history
+export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.zlogin"

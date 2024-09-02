@@ -213,3 +213,6 @@ fi
 
 # fzf init
 [[ -f "$HOME/.fzf.zsh" ]] && . "$HOME/.fzf.zsh"
+
+# variable to track history
+export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.rc.zsh"
