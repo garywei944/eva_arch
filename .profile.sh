@@ -2,8 +2,9 @@
 
 # This file should support all the shell you use(bash, zsh, etc)
 
-# return if EVA is set
-[ -n "${EVA+x}" ] && return
+# No idea why but if this is presented tmux won't correctly load variables.
+# # return if EVA is set
+# [ -n "${EVA+x}" ] && return
 
 # inspired from https://unix.stackexchange.com/a/108933
 # WARNING: only remove path that fully match

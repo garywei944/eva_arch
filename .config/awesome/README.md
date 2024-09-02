@@ -17,6 +17,7 @@ make install
 
 or manually run the command
 ```shell
+git clone --depth 1 https://github.com/streetturtle/awesome-wm-widgets.git ~/.config/awesome/awesome-wm-widgets
 git clone --depth 1 https://github.com/lcpz/awesome-freedesktop.git ~/.config/awesome/freedesktop
 git clone --depth 1 https://github.com/lcpz/lain.git ~/.config/awesome/lain
 ```
