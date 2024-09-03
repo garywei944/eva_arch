@@ -40,10 +40,27 @@ __prepend_path "$HOME/.local/bin"
 [ -d "$HOME/.local/lib" ] &&
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
-# Fix brew
-[ -f /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+# Fix brew, copied from oh-my-zsh brew plugin
+if [ -z "$(command -v brew)" ]; then
+  if [ -x /opt/homebrew/bin/brew ]; then
+    BREW_LOCATION="/opt/homebrew/bin/brew"
+  elif [ -x /usr/local/bin/brew ]; then
+    BREW_LOCATION="/usr/local/bin/brew"
+  elif [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+    BREW_LOCATION="/home/linuxbrew/.linuxbrew/bin/brew"
+  elif [ -x "$HOME/.linuxbrew/bin/brew" ]; then
+    BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
+  fi
 
-[ -n "$(command -v brew)" ] && __prepend_path /usr/local/sbin
+  # Only add Homebrew installation to PATH, MANPATH, and INFOPATH if brew is
+  # not already on the path, to prevent duplicate entries. This aligns with
+  # the behavior of the brew installer.sh post-install steps.
+  eval "$("$BREW_LOCATION" shellenv)"
+  unset BREW_LOCATION
+
+  HOMEBREW_PREFIX="$(brew --prefix)"
+  export HOMEBREW_PREFIX
+fi
 
 # go
 [ -d /usr/local/go/bin ] && __prepend_path /usr/local/go/bin
@@ -99,8 +116,8 @@ if [ "$(uname)" = "Darwin" ]; then
     if [ -d "/usr/local/Caskroom/$CONDA/base" ]; then
       export CONDA_PATH="/usr/local/Caskroom/$CONDA/base"
       break
-    elif [ -d "/opt/homebrew/Caskroom/$CONDA/base" ]; then
-      export CONDA_PATH="/opt/homebrew/Caskroom/$CONDA/base"
+    elif [ -d "$HOMEBREW_PREFIX/Caskroom/$CONDA/base" ]; then
+      export CONDA_PATH="$HOMEBREW_PREFIX/Caskroom/$CONDA/base"
       break
     fi
   done
@@ -116,6 +133,9 @@ unset CONDA
 [ -d "$HOME/.cargo/bin" ] && __prepend_path "$HOME/.cargo/bin"
 
 # Ruby
+if [ -d "$HOMEBREW_PREFIX/lib/ruby/gems/3.3.0/bin" ]; then
+  __prepend_path "$HOMEBREW_PREFIX/lib/ruby/gems/3.3.0/bin"
+fi
 if [ -n "$(command -v gem)" ]; then
   if [ "$(uname)" = "Darwin" ]; then
     export GEM_HOME="$HOME/.gem"
