@@ -52,12 +52,16 @@ if [ -z "$(command -v brew)" ]; then
     BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
   fi
 
-  # Only add Homebrew installation to PATH, MANPATH, and INFOPATH if brew is
-  # not already on the path, to prevent duplicate entries. This aligns with
-  # the behavior of the brew installer.sh post-install steps.
-  eval "$("$BREW_LOCATION" shellenv)"
-  unset BREW_LOCATION
+  if [ -n "$BREW_LOCATION" ]; then
+    # Only add Homebrew installation to PATH, MANPATH, and INFOPATH if brew is
+    # not already on the path, to prevent duplicate entries. This aligns with
+    # the behavior of the brew installer.sh post-install steps.
+    eval "$("$BREW_LOCATION" shellenv)"
+    unset BREW_LOCATION
+  fi
+fi
 
+if [ -n "$(command -v brew)" ]; then
   HOMEBREW_PREFIX="$(brew --prefix)"
   export HOMEBREW_PREFIX
 fi
@@ -133,16 +137,26 @@ unset CONDA
 [ -d "$HOME/.cargo/bin" ] && __prepend_path "$HOME/.cargo/bin"
 
 # Ruby
-if [ -d "$HOMEBREW_PREFIX/lib/ruby/gems/3.3.0/bin" ]; then
-  __prepend_path "$HOMEBREW_PREFIX/lib/ruby/gems/3.3.0/bin"
+# check if ruby is install by brew
+if [ -n "$HOMEBREW_PREFIX" ]; then
+  if [ -d "$HOMEBREW_PREFIX/opt/ruby" ]; then
+    __prepend_path "$HOMEBREW_PREFIX/opt/ruby/bin"
+    export LDFLAGS="-L$HOMEBREW_PREFIX/opt/ruby/lib"
+    export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/ruby/include"
+    export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/ruby/lib/pkgconfig"
+  fi
 fi
 if [ -n "$(command -v gem)" ]; then
-  if [ "$(uname)" = "Darwin" ]; then
-    export GEM_HOME="$HOME/.gem"
-  else
+  # only gem 3.2.0 and above support GEM_HOME
+  required_version="3.2.0"
+  if [ "$(printf '%s\n' "$required_version" "$(gem --version)" | sort -V | head -n1)" = "$required_version" ]; then
     GEM_HOME="$(gem env user_gemhome)"
     export GEM_HOME
+  else
+    echo "[INFO] gem version $(gem --version) is lower than $required_version, GEM_HOME is set to $HOME/.gem"
+    export GEM_HOME="$HOME/.gem"
   fi
+  unset required_version
   __prepend_path "$GEM_HOME/bin"
 fi
 
