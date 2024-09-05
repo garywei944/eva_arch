@@ -166,6 +166,26 @@ fi
 # Cisco Anyconnect
 [ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
 
+# Set up ssh-agent, macOS is handled by keychain
+if [ ! "$(uname)" = "Darwin" ]; then
+  # get number of ssh-agent running
+  SSH_AGENT_COUNT=$(pgrep -u "$USER" ssh-agent | wc -l)
+  # if no ssh-agent running, start one
+  if [ "$SSH_AGENT_COUNT" -eq 0 ]; then
+    eval "$(ssh-agent -s)" >/dev/null
+  # else if only one ssh-agent running, use it
+  elif [ "$SSH_AGENT_COUNT" -eq 1 ]; then
+    SSH_AUTH_SOCK=$(find /tmp/ssh-*/ -user "$USER" -type s -name 'agent*' 2>/dev/null)
+    SSH_AGENT_PID=$(pgrep -u "$USER" ssh-agent)
+    export SSH_AUTH_SOCK SSH_AGENT_PID
+  # if more than one ssh-agent running, kill all and start a new one
+  else
+    pkill -u "$USER" ssh-agent
+    eval "$(ssh-agent -s)" >/dev/null
+  fi
+  unset SSH_AGENT_COUNT
+fi
+
 unset -f __remove_path
 unset -f __prepend_path
 
