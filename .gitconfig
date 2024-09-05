@@ -2,21 +2,33 @@
 	name = garywei944
 	email = 33930674+garywei944@users.noreply.github.com
 	signingkey = 5C3F438106CEB92685722EC49CB746AA84259A7A
+[includeIf "gitdir:~/byted/"]
+	path = ~/.byted.gitconfig
 [core]
 	editor = vim
 	autocrlf = input
 	pager = delta
 [interactive]
 	diffFilter = delta --color-only
-[delta]
-	navigate = true
-[merge]
-	conflictstyle = diff3
-[diff]
-	colorMoved = default
-[init]
-	defaultBranch = main
+[alias]
+    empty = "git commit --allow-empty"
+
+# Git commands
 [commit]
 	gpgsign = true
+[diff]
+	colorMoved = default
+[fetch]
+	prune = true
+[init]
+	defaultBranch = main
+[merge]
+	conflictstyle = diff3
+[status]
+	short = true
+
+# Tools
+[delta]
+	navigate = true
 [gpg]
 	program = gpg
