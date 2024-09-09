@@ -11,6 +11,7 @@
 [interactive]
 	diffFilter = delta --color-only
 [alias]
+	cl = "clone"
     empty = "git commit --allow-empty"
 
 # Git commands
