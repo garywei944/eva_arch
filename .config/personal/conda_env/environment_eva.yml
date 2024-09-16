@@ -22,6 +22,8 @@ dependencies:
 
   # utils
   - bayesian-optimization
+  - questionary
+  - distro
 
   # Visualization
 
@@ -31,6 +33,7 @@ dependencies:
   # Add the package here and run `mamba env update -f environment.yml --prune`
   # for dependency completeness.
   - pip:
+      - sh
       - pwntools
       - singleton-decorator
       - harmony

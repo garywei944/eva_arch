@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+
+from __future__ import print_function
+
+import json
+import locale
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import traceback
+
+ENABLE_LOGGING = True
+
+
+PASSTHROUGH_PREFIXES = [
+    ["run"],
+    ["create"],
+    ["install"],
+]
+
+
+def micromamba(cmd):
+    out = subprocess.check_output(["micromamba"] + cmd)
+    return out.decode(locale.getpreferredencoding())
+
+
+def micromamba_json(cmd):
+    return json.loads(micromamba(cmd + ["--json"]))
+
+
+def sort_envs(envs):
+    special_name = re.compile(r"(\.cache|conda-bld)[/\\]")
+    special_envs = [e for e in envs if special_name.search(e)]
+    non_special_envs = [e for e in envs if not special_name.search(e)]
+    return sorted(non_special_envs) + sorted(special_envs)
+
+
+def print_json(data):
+    print(json.dumps(data, indent=4))
+
+
+def main(args):
+    if args == ["self-check"]:
+        try:
+            micromamba(["--version"])
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            print("'micromamba' not found, is it on the $PATH?", file=sys.stderr)
+            return 1
+        micromamba(["info"])
+        print("Self-check successful.", file=sys.stderr)
+    elif args == ["info", "--envs", "--json"]:
+        base_env = micromamba_json(["info"])["base environment"]
+        print_json(
+            {
+                "envs_dirs": [base_env],
+                "conda_prefix": base_env,
+                "envs": sort_envs(micromamba_json(["env", "list"])["envs"]),
+            },
+        )
+    elif args == ["env", "list", "--json"]:
+        print_json({"envs": sort_envs(micromamba_json(["env", "list"])["envs"])})
+    elif args[0] == "list":
+        if args[-1] == "-e":
+            out = micromamba_json(args[:-1])
+            print(
+                "\n".join(
+                    "{name}={version}={build_string}".format(**pkg) for pkg in out
+                )
+            )
+        else:
+            out = micromamba(args)
+            lines = (
+                line.strip()
+                for line in out.splitlines()
+                if line.startswith(" ") and not line.startswith("  Name")
+            )
+            print("\n".join(lines))
+    elif any(args[: len(prefix)] == prefix for prefix in PASSTHROUGH_PREFIXES):
+        os.execlp(
+            "micromamba",
+            "micromamba",
+            *(arg for arg in args if arg != "--no-capture-output")
+        )
+    else:
+        raise NotImplementedError(str(args))
+
+    return 0
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+
+    if ENABLE_LOGGING:
+        cache_home = os.path.expanduser(os.getenv("XDG_CACHE_HOME") or "~/.cache")
+        try:
+            os.makedirs(cache_home)
+        except OSError:
+            pass
+        logfile = os.path.join(cache_home, "micromamba-pycharm.log")
+        open(logfile, "a").write("Attempting to run: " + str(args) + "\n")
+
+    try:
+        sys.exit(main(args))
+    except Exception:
+        if ENABLE_LOGGING:
+            open(logfile, "a").write(traceback.format_exc())
+        raise

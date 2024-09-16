@@ -74,6 +74,8 @@ dependencies:
   # utils
   - bayesian-optimization
   - singleton-decorator
+  - questionary
+  - distro
 
   # Visualization
   - moviepy # for generating gif

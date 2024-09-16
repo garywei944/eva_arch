@@ -74,6 +74,8 @@ dependencies:
   # utils
   - bayesian-optimization
   - singleton-decorator
+  - questionary
+  - distro
 
   # Visualization
   - moviepy # for generating gif
@@ -98,6 +100,7 @@ dependencies:
   - pip:
       - build
       - datargs
+      - sh
       - arxiv-latex-cleaner
       # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
       # - lightning[pytorch-extra] # the requirements are already included in the file
