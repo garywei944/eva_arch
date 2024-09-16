@@ -32,6 +32,9 @@ __prepend_path() {
   esac
 }
 
+# set up local variables
+__uname=$(uname)
+
 __prepend_path "$HOME/bin"
 __prepend_path "$HOME/.local/bin"
 
@@ -104,6 +107,9 @@ if [ -z "${JAVA_HOME+x}" ]; then
 fi
 
 # Conda, anaconda, or mambaforge
+# if micromamba installed, add $HOME/.conda as base
+[ -n "$(command -v micromamba)" ] && export MAMBA_ROOT_PREFIX="$HOME/.conda"
+
 for CONDA in anaconda3 miniconda3 mambaforge miniforge3; do
   if [ -d "$HOME/$CONDA" ]; then
     export CONDA_PATH="$HOME/$CONDA"
@@ -111,11 +117,8 @@ for CONDA in anaconda3 miniconda3 mambaforge miniforge3; do
   elif [ -d "/opt/$CONDA" ]; then
     export CONDA_PATH="/opt/$CONDA"
     break
-  fi
-done
-# Fix install mamba from brew
-if [ "$(uname)" = "Darwin" ]; then
-  for CONDA in miniforge mambaforge; do
+  # Fix install mamba from brew
+  elif [ "$__uname" = "Darwin" ]; then
     # MacOS `brew install $CONDA`
     if [ -d "/usr/local/Caskroom/$CONDA/base" ]; then
       export CONDA_PATH="/usr/local/Caskroom/$CONDA/base"
@@ -123,9 +126,12 @@ if [ "$(uname)" = "Darwin" ]; then
     elif [ -d "$HOMEBREW_PREFIX/Caskroom/$CONDA/base" ]; then
       export CONDA_PATH="$HOMEBREW_PREFIX/Caskroom/$CONDA/base"
       break
+    elif [ -d "$HOMEBREW_PREFIX/$CONDA" ]; then
+      export CONDA_PATH="$HOMEBREW_PREFIX/$CONDA"
+      break
     fi
-  done
-fi
+  fi
+done
 unset CONDA
 
 # SDKMAN
@@ -167,7 +173,7 @@ fi
 [ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
 
 # Set up ssh-agent, macOS is handled by keychain
-if [ ! "$(uname)" = "Darwin" ]; then
+if [ ! "$__uname" = "Darwin" ]; then
   # get number of ssh-agent running
   SSH_AGENT_COUNT=$(pgrep -u "$USER" ssh-agent | wc -l)
   # if no ssh-agent running, start one
@@ -188,6 +194,8 @@ fi
 
 unset -f __remove_path
 unset -f __prepend_path
+
+unset __uname
 
 export PATH
 

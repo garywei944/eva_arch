@@ -172,36 +172,11 @@ box_out() {
 # After .zshrc
 # ##############################################################################
 
-# >>> conda initialize >>>
-# conda initialization
-if [[ -n ${CONDA_PATH+x} ]]; then
-    __conda_setup="$("$CONDA_PATH/bin/conda" 'shell.zsh' 'hook' 2>/dev/null)"
-    if [[ $? -eq 0 ]]; then
-        eval "$__conda_setup"
-    else
-        if [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]]; then
-            . "$CONDA_PATH/etc/profile.d/conda.sh"
-        else
-            export PATH="$CONDA_PATH/bin:$PATH"
-        fi
-    fi
-    unset __conda_setup
-fi
-# mamba initialization
+# conda & mamba initialization
+[[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]] && . "$CONDA_PATH/etc/profile.d/conda.sh"
 [[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
 # micromamba initialization
-if [[ -n $(command -v micromamba) ]]; then
-    export MAMBA_EXE="$(command -v micromamba)"
-    export MAMBA_ROOT_PREFIX="$HOME/.conda"
-    __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2>/dev/null)"
-    if [ $? -eq 0 ]; then
-        eval "$__mamba_setup"
-    else
-        alias micromamba="$MAMBA_EXE" # Fallback on help from mamba activate
-    fi
-    unset __mamba_setup
-fi
-# <<< conda initialize <<<
+[[ -n $(command -v micromamba) ]] && eval "$(micromamba shell hook --shell zsh)"
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
