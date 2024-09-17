@@ -144,7 +144,7 @@ unset CONDA
 
 # Ruby
 # check if ruby is install by brew
-if [ -n "$HOMEBREW_PREFIX" ]; then
+if [ -n "$HOMEBREW_PREFIX" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   if [ -d "$HOMEBREW_PREFIX/opt/ruby" ]; then
     __prepend_path "$HOMEBREW_PREFIX/opt/ruby/bin"
     export LDFLAGS="-L$HOMEBREW_PREFIX/opt/ruby/lib"
