@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# This file should support all the shell you use(bash, zsh, etc)
+# This script is sourced by all POSIX-compliant shells upon startup
+
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
 
 ################################################################################
 # Set up environment
@@ -35,8 +39,8 @@ __prepend_path() {
 # set up local variables
 __uname=$(uname)
 
-__prepend_path "$HOME/bin"
 __prepend_path "$HOME/.local/bin"
+__prepend_path "$HOME/bin"
 
 [ -d /opt/cuda/lib64 ] &&
   export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
@@ -44,7 +48,7 @@ __prepend_path "$HOME/.local/bin"
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
 # Fix brew, copied from oh-my-zsh brew plugin
-if [ -z "$(command -v brew)" ]; then
+if ! command_exists brew; then
   if [ -x /opt/homebrew/bin/brew ]; then
     BREW_LOCATION="/opt/homebrew/bin/brew"
   elif [ -x /usr/local/bin/brew ]; then
@@ -64,7 +68,7 @@ if [ -z "$(command -v brew)" ]; then
   fi
 fi
 
-if [ -n "$(command -v brew)" ]; then
+if command_exists brew; then
   HOMEBREW_PREFIX="$(brew --prefix)"
   export HOMEBREW_PREFIX
 fi
@@ -101,7 +105,7 @@ fi
 
 # Conda, anaconda, or mambaforge
 # if micromamba installed, add $HOME/.conda as base
-[ -n "$(command -v micromamba)" ] && export MAMBA_ROOT_PREFIX="$HOME/.conda"
+command_exists micromamba && export MAMBA_ROOT_PREFIX="$HOME/.conda"
 
 for CONDA in anaconda3 miniconda3 mambaforge miniforge3; do
   if [ -d "$HOME/$CONDA" ]; then
@@ -145,7 +149,7 @@ if [ -n "$HOMEBREW_PREFIX" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
     export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/ruby/lib/pkgconfig"
   fi
 fi
-if [ -n "$(command -v gem)" ]; then
+if command_exists gem; then
   # only gem 3.2.0 and above support GEM_HOME
   required_version="3.2.0"
   if [ "$(printf '%s\n' "$required_version" "$(gem --version)" | sort -V | head -n1)" = "$required_version" ]; then
@@ -160,7 +164,7 @@ if [ -n "$(command -v gem)" ]; then
 fi
 
 # wine
-[ -n "$(command -v wine)" ] && export WINEDEBUG=fixme-font
+command_exists wine && export WINEDEBUG=fixme-font
 
 # Cisco Anyconnect
 [ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
@@ -188,26 +192,25 @@ fi
 unset -f __remove_path
 unset -f __prepend_path
 
-unset __uname
-
 export PATH
 
-# Preferred editor for local and remote sessions
-if [ -n "${SSH_CONNECTION+x}" ]; then
-  export EDITOR=vim
+# Always assume vim is installed
+EDITOR="$(command -v vim)"
+# if we have code, not in an SSH term, and the X11 display number is under 10
+if command -v code &&
+  [ "$SSH_TTY$DISPLAY" = "${DISPLAY#*:[1-9][0-9]}" ]; then
+  VISUAL="$(command -v code) --wait"
+  SUDO_EDITOR="$VISUAL"
 else
-  export EDITOR=code
+  VISUAL="$EDITOR"
+  SUDO_EDITOR="$EDITOR"
 fi
-
-# Try to launch Visual Studio Code
-if command -v code >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
-  code --wait "$@"
-else
-  # Fallback to vim
-  vim "$@"
-fi
+export EDITOR VISUAL SUDO_EDITOR
 
 export LANG=en_US.UTF-8
+
+unset -f command_exists
+unset __uname
 
 # variable to track history
 export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.profile.sh"

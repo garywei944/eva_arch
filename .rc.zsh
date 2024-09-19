@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -85,17 +89,17 @@ autoload is-at-least
 
 plugins=()
 
-if [[ -n $(command -v pacman) ]]; then
+if command_exists pacman; then
     plugins+=(archlinux)
 elif [[ -n $(command -v apt-get) ]]; then
     plugins+=(ubuntu)
-elif [[ -n $(command -v yum) ]]; then
+elif command_exists yum; then
     plugins+=(yum)
-elif [[ -n $(command -v brew) ]]; then
+elif command_exists brew; then
     plugins+=(brew macos iterm2)
 fi
 
-if [[ -n $(command -v zoxide) ]]; then
+if command_exists zoxide; then
     plugins+=(zoxide)
 else
     plugins+=(z)
@@ -103,22 +107,22 @@ fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
 
-[[ -n $(command -v lsd) ]] && plugins+=(lsd)
-[[ -n $(command -v fzf) ]] && plugins+=(fzf)
-[[ -n $(command -v procs) ]] && plugins+=(procs)
-[[ -n $(command -v docker) ]] && plugins+=(docker)
-[[ -n $(command -v vagrant) ]] && plugins+=(vagrant)
-[[ -n $(command -v snap) ]] && plugins+=(snap)
+command_exists lsd && plugins+=(lsd)
+command_exists fzf && plugins+=(fzf)
+command_exists procs && plugins+=(procs)
+command_exists docker && plugins+=(docker)
+command_exists vagrant && plugins+=(vagrant)
+command_exists snap && plugins+=(snap)
 
-[[ -n $(command -v aws) ]] && is-at-least 5.3 && plugins+=(aws)
-[[ -n $(command -v heroku) ]] && plugins+=(heroku)
+command_exists aws && is-at-least 5.3 && plugins+=(aws)
+command_exists heroku && plugins+=(heroku)
 # Gary: the bytedance devbox also has `gh` command but not GitHub CLI.
-# [[ -n $(command -v gh) ]] && plugins+=(gh)
-[[ -n $(command -v httpie) ]] && plugins+=(httpie)
+# command_exists gh && plugins+=(gh)
+command_exists httpie && plugins+=(httpie)
 
-[[ -n $(command -v code) ]] && plugins+=(vscode)
-[[ -n $(command -v subl) ]] && plugins+=(sublime)
-[[ -n $(command -v smerge) ]] && plugins+=(sublime-merge)
+command_exists code && plugins+=(vscode)
+command_exists subl && plugins+=(sublime)
+command_exists smerge && plugins+=(sublime-merge)
 
 plugins+=(
     # systemadmin
@@ -176,7 +180,7 @@ box_out() {
 [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]] && . "$CONDA_PATH/etc/profile.d/conda.sh"
 [[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
 # micromamba initialization
-[[ -n $(command -v micromamba) ]] && eval "$(micromamba shell hook --shell zsh)"
+command_exists micromamba && eval "$(micromamba shell hook --shell zsh)"
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
@@ -196,6 +200,22 @@ export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.rc.zsh"
 # Login message
 # ##############################################################################
 
-if [[ -o login ]]; then
-    box_out "Welcome to your Zsh shell!"
+[[ -o login ]] || return
+
+if command_exists figlet && command_exists lolcat; then
+    echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
+elif is-at-least 5.8; then
+    if command_exists lolcat; then
+        box_out "Welcome back, ariseus." | lolcat
+    else
+        box_out "Welcome back, ariseus."
+    fi
+else
+    cat <<EOF
+ ------------------------
+|                        |
+| Welcome back, ariseus. |
+|                        |
+ ------------------------
+EOF
 fi
