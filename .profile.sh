@@ -170,7 +170,7 @@ command_exists wine && export WINEDEBUG=fixme-font
 [ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
 
 # Set up ssh-agent, macOS is handled by keychain
-if [ ! "$__uname" = "Darwin" ]; then
+if [ ! "$__uname" = "Darwin" ] && [ ! -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   # get number of ssh-agent running
   SSH_AGENT_COUNT=$(pgrep -u "$USER" ssh-agent | wc -l)
   # if no ssh-agent running, start one
@@ -197,7 +197,7 @@ export PATH
 # Always assume vim is installed
 EDITOR="$(command -v vim)"
 # if we have code, not in an SSH term, and the X11 display number is under 10
-if command -v code &&
+if command_exists code &&
   [ "$SSH_TTY$DISPLAY" = "${DISPLAY#*:[1-9][0-9]}" ]; then
   VISUAL="$(command -v code) --wait"
   SUDO_EDITOR="$VISUAL"
