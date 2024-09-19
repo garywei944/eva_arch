@@ -2,9 +2,9 @@
 
 # This file should support all the shell you use(bash, zsh, etc)
 
-# No idea why but if this is presented tmux won't correctly load variables.
-# # return if EVA is set
-# [ -n "${EVA+x}" ] && return
+################################################################################
+# Set up environment
+################################################################################
 
 # inspired from https://unix.stackexchange.com/a/108933
 # WARNING: only remove path that fully match
@@ -86,13 +86,6 @@ else
   export NOSUDO=1
 fi
 unset __sudo
-
-# Preferred editor for local and remote sessions
-if [ -n "${SSH_CONNECTION+x}" ]; then
-  export EDITOR=vim
-else
-  export EDITOR=code
-fi
 
 # JAVA
 if [ -z "${JAVA_HOME+x}" ]; then
@@ -198,6 +191,23 @@ unset -f __prepend_path
 unset __uname
 
 export PATH
+
+# Preferred editor for local and remote sessions
+if [ -n "${SSH_CONNECTION+x}" ]; then
+  export EDITOR=vim
+else
+  export EDITOR=code
+fi
+
+# Try to launch Visual Studio Code
+if command -v code >/dev/null 2>&1 && [ -n "$DISPLAY" ]; then
+  code --wait "$@"
+else
+  # Fallback to vim
+  vim "$@"
+fi
+
+export LANG=en_US.UTF-8
 
 # variable to track history
 export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.profile.sh"

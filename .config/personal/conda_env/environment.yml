@@ -105,7 +105,6 @@ dependencies:
       # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
       # - lightning[pytorch-extra] # the requirements are already included in the file
       # - lightning-gpt
-      - sourcery
       - torchopt
       - torch_optimizer
       - separableconv-torch
