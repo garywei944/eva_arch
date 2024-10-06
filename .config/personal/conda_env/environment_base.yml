@@ -19,6 +19,7 @@ dependencies:
 
   # System utils
   - psutil
+  - nvtop
 
   # essential functionality
   - overrides
@@ -48,19 +49,19 @@ dependencies:
   - pandarallel # for parallel computing panda dataframe
   - einops
   - sentencepiece
-  - bitsandbytes~=0.44.1
+  - bitsandbytes~=0.43.1 # with CUDA 11.8
 
   # pytorch with specific CUDA version
-  - conda-forge::pytorch~=2.4
+  - conda-forge::pytorch=2.3
   - pytorch::pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
-  - pytorch::pytorch-cuda=12.4
-  - conda-forge::cudatoolkit=12.4
-  - conda-forge::cudnn=9.1 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
-  - conda-forge::torchvision~=0.19
-  - conda-forge::flash-attn~=2.6.1
+  - pytorch::pytorch-cuda=11.8
+  - conda-forge::cudatoolkit=11.8
+  - conda-forge::cudnn=8.9 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - conda-forge::torchvision=0.18
+  - conda-forge::flash-attn=2.5.8
   - conda-forge::deepspeed=*=cuda*
-  - conda-forge::torchtriton=3.0.0
   - conda-forge::triton=2.0.0
+  - pytorch::torchtriton=3.0.0
 
   # scikit-learn
   - scikit-learn
@@ -79,7 +80,7 @@ dependencies:
   - conda-forge::peft
 
   # Lightning
-  - conda-forge::lightning~=2.4.0
+  - conda-forge::lightning~=2.2.5
   - conda-forge::lightning-bolts
   - conda-forge::torchmetrics # lighting metrics
 
