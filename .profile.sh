@@ -107,7 +107,7 @@ fi
 # if micromamba installed, add $HOME/.conda as base
 command_exists micromamba && export MAMBA_ROOT_PREFIX="$HOME/.conda"
 
-for CONDA in anaconda3 miniconda3 mambaforge miniforge3; do
+for CONDA in anaconda3 miniconda3 mambaforge miniforge3 miniforge; do
   if [ -d "$HOME/$CONDA" ]; then
     export CONDA_PATH="$HOME/$CONDA"
     break
