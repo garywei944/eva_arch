@@ -101,6 +101,7 @@ dependencies:
       - build
       - datargs
       - sh
+      - morecontext
       - arxiv-latex-cleaner
       # https://github.com/Lightning-AI/pytorch-lightning/blob/master/requirements/pytorch/extra.txt
       # - lightning[pytorch-extra] # the requirements are already included in the file
