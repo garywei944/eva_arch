@@ -9,10 +9,10 @@ channels:
   - pytorch
   - huggingface
   - conda-forge
-  - anaconda
-  - defaults
+  # - anaconda
+  # - defaults
 dependencies:
-  - python>=3.9
+  - python>=3.10
   - pip
   - cudatoolkit=11.8
   - cuda-nvcc
@@ -20,16 +20,17 @@ dependencies:
 
   # Anaconda
   - anaconda
-  - _anaconda_depends=2022.10
+  - _anaconda_depends=2024.10
 
   # Frameworks
-  - jax=0.4.8
-  - jaxlib=0.4.7=*cuda*
+  - jax~=0.4.34
+  - jaxlib~=0.4.34=*cuda*
   - opencv
   - pandarallel # for parallel computing panda dataframe
 
   # utils
   - bayesian-optimization
+  - typed-argument-parser # for type hinting in argparse
 
   # Visualization
 
@@ -41,3 +42,5 @@ dependencies:
   # for dependency completeness.
   - pip:
       - singleton-decorator
+      - sh
+      - morecontext
