@@ -44,6 +44,10 @@ __prepend_path "$HOME/bin"
 
 [ -d /opt/cuda/lib64 ] &&
   export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+if [ -d /usr/local/cuda ]; then
+  export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  __prepend_path /usr/local/cuda/bin
+fi
 [ -d "$HOME/.local/lib" ] &&
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
