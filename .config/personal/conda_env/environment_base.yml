@@ -97,7 +97,7 @@ dependencies:
 
   # Development
   - jupyter
-  - wandb
+  - wandb>=0.17
   - tensorboardx
 
   # PyPI common practice
