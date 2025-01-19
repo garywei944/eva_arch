@@ -42,8 +42,14 @@ __uname=$(uname)
 __prepend_path "$HOME/.local/bin"
 __prepend_path "$HOME/bin"
 
+# Cuda
 [ -d /opt/cuda/lib64 ] &&
   export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+if [ -d /opt/cuda ]; then
+  __prepend_path /opt/cuda/bin
+  __prepend_path /opt/cuda/nsight_compute
+  __prepend_path /opt/cuda/nsight_systems/bin
+fi
 [ -d "$HOME/.local/lib" ] &&
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
@@ -104,6 +110,10 @@ if [ -z "${JAVA_HOME+x}" ]; then
 fi
 
 # Conda, anaconda, or mambaforge
+
+# Fix miniconda OpenSSL 3.0 legacy provider failed to load issue
+export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
+
 # if micromamba installed, add $HOME/.conda as base
 command_exists micromamba && export MAMBA_ROOT_PREFIX="$HOME/.conda"
 

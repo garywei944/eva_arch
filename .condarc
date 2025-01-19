@@ -7,5 +7,5 @@ channels:
   - pytorch
   - huggingface
   - conda-forge
-  - anaconda
-  - default
+  # - anaconda
+  # - default

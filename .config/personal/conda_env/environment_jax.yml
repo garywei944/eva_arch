@@ -5,27 +5,31 @@
 
 name: jax
 channels:
-  - nvidia # for CUDA
   - pytorch
   - huggingface
   - conda-forge
+  - nvidia # for CUDA
   # - anaconda
   # - defaults
 dependencies:
   - python>=3.10
   - pip
-  - cudatoolkit=11.8
-  - cuda-nvcc
+  - conda-forge::cudatoolkit=11.8
+  - conda-forge::cudnn~=8.9
+  - nvidia::cuda-nvcc
   - python-dotenv
+  - conda-forge::triton=2.0.0
 
   # Anaconda
   - anaconda
   - _anaconda_depends=2024.10
 
   # Frameworks
-  - jax~=0.4.34
-  - jaxlib~=0.4.34=*cuda*
+  - conda-forge::jaxlib=0.4.25=*cuda* # 0.4.26 doesn't support cuda 11.8
+  - conda-forge::jax=0.4.25
+  - conda-forge::torchvision~=0.18
   - opencv
+  - einops # for einsum
   - pandarallel # for parallel computing panda dataframe
 
   # utils
