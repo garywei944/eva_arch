@@ -50,6 +50,10 @@ if [ -d /opt/cuda ]; then
   __prepend_path /opt/cuda/nsight_compute
   __prepend_path /opt/cuda/nsight_systems/bin
 fi
+if [ -d /usr/local/cuda ]; then
+  export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  __prepend_path /usr/local/cuda/bin
+fi
 [ -d "$HOME/.local/lib" ] &&
   export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
