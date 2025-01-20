@@ -39,6 +39,8 @@ dependencies:
   - conda-forge::jaxlib=0.4.25=*cuda* # 0.4.26 doesn't support cuda 11.8
   - conda-forge::jax=0.4.25
   - conda-forge::flax
+  - conda-forge::equinox
+  - conda-forge::jaxtyping
 
   # Other ML libraries
   - conda-forge::triton=2.0.0
