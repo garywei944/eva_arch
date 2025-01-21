@@ -50,6 +50,8 @@ dependencies:
   - overrides
   - python-dotenv
   - typing_extensions
+  - typeguard
+  - beartype
 
   # argparse
   - omegaconf # for config
