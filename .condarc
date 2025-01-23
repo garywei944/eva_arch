@@ -1,5 +1,5 @@
 auto_activate_base: false
-# channel_priority: strict
+#channel_priority: strict
 channel_priority: flexible
 show_channel_urls: true
 channels:

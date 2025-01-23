@@ -10,8 +10,8 @@ channels:
   - pyg # for pytorch-sparse
   - huggingface
   - conda-forge
-  # - anaconda
-  # - defaults
+  - anaconda
+  - defaults
 dependencies:
   - python>=3.10
   - pip>=24.0
@@ -20,50 +20,52 @@ dependencies:
   # - nvtop
 
   # Anaconda
-  - defaults::_anaconda_depends=2024.10=*openblas*
+  - _anaconda_depends=2024.10=*openblas*
 
   # Nvidia cuda drivers
-  - pytorch::pytorch-cuda=11.8
-  - conda-forge::cudatoolkit=11.8
-  - nvidia::cuda-nvcc
-  - conda-forge::cudnn=8.9 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - cuda=12.4.1
+  - cuda-runtime=12.4.1
+  - cuda-toolkit=12.4.1
+  - cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - pytorch-cuda=12.4
 
   # pytorch with specific CUDA version
-  - conda-forge::pytorch~=2.3
-  - pytorch::pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
-  - conda-forge::torchvision~=0.18
-  - conda-forge::flash-attn~=2.5.8
-  - conda-forge::deepspeed=*=cuda*
-  # - pyg::pyg # doesn't support pytorch 2.3
-  - pyg::pytorch-sparse
+  - pytorch=2.4.1
+  - pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
+  - torchvision
+  - torchtriton=3.1.0
+  - flash-attn=2.6.3
+  # - deepspeed=*=cuda*
+  - pyg=2.6.1=*cu*
+  - pytorch-sparse=0.6.18=*cu*
 
   # Huggingface
-  - conda-forge::transformers
-  - conda-forge::datasets
-  - conda-forge::accelerate
-  - conda-forge::evaluate
-  - conda-forge::tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
-  - conda-forge::peft
+  - transformers
+  - datasets
+  - accelerate
+  - evaluate
+  - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
+  - peft
 
   # JAX
-  - conda-forge::jaxlib=0.4.25=*cuda* # 0.4.26 doesn't support cuda 11.8
-  - conda-forge::jax=0.4.25
-  - conda-forge::flax
-  - conda-forge::equinox
-  - conda-forge::jaxtyping
+  - jaxlib=0.4.31=*cuda* # 0.4.26 doesn't support cuda 11.8
+  - jax=0.4.31
+  - flax
+  - equinox
+  - jaxtyping
 
   # Tensorflow
-  - tensorflow=2.17.0
+  - tensorflow-gpu=2.17.0
   - tf-keras=2.17.0 # huggingface import tf_keras
   - tensorflow-datasets
 
   # Other ML libraries
-  - conda-forge::triton=2.0.0
+  - triton=2.0.0
 
   # Lightning
-  - conda-forge::lightning
-  # - conda-forge::lightning-bolts~=0.7.0
-  - conda-forge::torchmetrics # lighting metrics
+  - lightning
+  # - lightning-bolts~=0.7.0
+  - torchmetrics # lighting metrics
 
   # essential functionality
   - absl-py

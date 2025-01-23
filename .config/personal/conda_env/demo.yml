@@ -1,0 +1,64 @@
+# Typical conda environment for a reproducible machine learning project
+# Use `mamba env create -f environment.yml`
+# or `conda env create -f environment.yml` to install the environment
+# Created and maintained by garywei944(garywei944@gmail.com)
+
+name: demo124
+channels:
+  - nvidia
+  - pytorch
+  - pyg # for pytorch-sparse
+  - huggingface
+  - conda-forge
+  # - anaconda
+  # - defaults
+dependencies:
+  - python>=3.10
+  - pip>=24.0
+  # - cython
+  # - pocl # for OpenCL
+  # - nvtop
+
+  # Anaconda
+  # - _anaconda_depends=2024.10=*openblas*
+
+  # Nvidia cuda drivers
+  - cuda=12.4.1
+  - cuda-runtime=12.4.1
+  - cuda-toolkit=12.4.1
+  - cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - pytorch-cuda=12.4
+
+  # pytorch with specific CUDA version
+  - pytorch=2.4.1
+  - pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
+  - torchvision
+  - torchtriton=3.1.0
+  - flash-attn=2.6.3
+  # - deepspeed=*=cuda* # deepspeed need either cuda 12.6 or 11.8
+  - pyg=2.6.1=*cu*
+  - pytorch-sparse=0.6.18=*cu*
+
+  # # Huggingface
+  # - transformers
+  # - datasets
+  # - accelerate
+  # - evaluate
+  # - tokenizers>=0.13.1 # https://stackoverflow.com/a/74386742
+  # - peft
+
+  # JAX
+  - jaxlib=0.4.31=*cuda*
+  - jax=0.4.31
+  - flax
+
+  # # Tensorflow
+  - tensorflow-gpu=2.17.0
+  - tf-keras=2.17.0 # huggingface import tf_keras
+  - tensorflow-datasets
+
+  # Other ML libraries
+  - triton=2.0.0
+
+  # Lightning
+  - lightning
