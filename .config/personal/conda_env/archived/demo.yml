@@ -3,7 +3,7 @@
 # or `conda env create -f environment.yml` to install the environment
 # Created and maintained by garywei944(garywei944@gmail.com)
 
-name: demo124
+name: demo
 channels:
   - nvidia
   - pytorch
@@ -23,20 +23,19 @@ dependencies:
   # - _anaconda_depends=2024.10=*openblas*
 
   # Nvidia cuda drivers
-  - cuda=12.4.1
-  - cuda-runtime=12.4.1
-  - cuda-toolkit=12.4.1
-  - cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
-  - pytorch-cuda=12.4
+  - nvidia/label/cuda-11.8.0::cuda
+  - nvidia/label/cudnn-9.3.0::cudnn=9.3.0.75=cuda11.8 # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - conda-forge::cudatoolkit=11.8.0
+  - pytorch::pytorch-cuda=11.8
 
   # pytorch with specific CUDA version
-  - pytorch=2.4.1
-  - pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
-  - torchvision
-  - torchtriton=3.1.0
-  - flash-attn=2.6.3
+  - pytorch::pytorch>=2.3.1=*cuda*
+  - pytorch::pytorch-mutex=*=cuda # This line sets the mutex for CUDA-enabled PyTorch
+  - torchvision=*=*cu*
+  - pytorch::torchtriton
+  # - flash-attn
   # - deepspeed=*=cuda* # deepspeed need either cuda 12.6 or 11.8
-  - pyg=2.6.1=*cu*
+  # - pyg=*=*cu*
   - pytorch-sparse=0.6.18=*cu*
 
   # # Huggingface
@@ -48,13 +47,13 @@ dependencies:
   # - peft
 
   # JAX
-  - jaxlib=0.4.31=*cuda*
-  - jax=0.4.31
+  - jaxlib=0.4.25=*cuda*
+  - jax=0.4.25
   - flax
 
   # # Tensorflow
-  - tensorflow-gpu=2.17.0
-  - tf-keras=2.17.0 # huggingface import tf_keras
+  - tensorflow
+  - tf-keras # huggingface import tf_keras
   - tensorflow-datasets
 
   # Other ML libraries

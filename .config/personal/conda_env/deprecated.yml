@@ -1,5 +1,0 @@
-dependencies:
-  - typed-argument-parser # for type hinting in argparse
-  - hydra-core # for config using CLI
-  - pip:
-      - omegaconf-argparse # to use omegaconf with argparse

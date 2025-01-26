@@ -43,15 +43,16 @@ __prepend_path "$HOME/.local/bin"
 __prepend_path "$HOME/bin"
 
 # Cuda
-[ -d /opt/cuda/lib64 ] &&
-  export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 if [ -d /opt/cuda ]; then
+  export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  export CPATH="/opt/cuda/include${CPATH:+:${CPATH}}"
   __prepend_path /opt/cuda/bin
   __prepend_path /opt/cuda/nsight_compute
   __prepend_path /opt/cuda/nsight_systems/bin
 fi
 if [ -d /usr/local/cuda ]; then
   export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  export CPATH="/usr/local/cuda/include${CPATH:+:${CPATH}}"
   __prepend_path /usr/local/cuda/bin
 fi
 [ -d "$HOME/.local/lib" ] &&
