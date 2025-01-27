@@ -35,8 +35,8 @@ dependencies:
   - pytorch::torchtriton
   - flash-attn
   - deepspeed=*=cuda*
-  # - pyg=*=*cu*
-  # - pytorch-sparse=*=*cu*
+  - conda-forge::pytorch_geometric=2.6.1
+  - conda-forge::pytorch_sparse=0.6.18
 
   # Huggingface
   - transformers

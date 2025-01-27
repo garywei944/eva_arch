@@ -34,9 +34,8 @@ dependencies:
   - conda-forge::flash-attn=2.6.3
   - conda-forge::deepspeed=0.15.3=cuda*
   - conda-forge::bitsandbytes=0.45.0=cuda*
-  # since temperately pyg's conda channel is broken, please build from source
-  # - pyg=2.6.1=*cu*
-  # - pytorch-sparse=0.6.18=*cu*
+  - conda-forge::pytorch_geometric=2.6.1
+  - conda-forge::pytorch_sparse=0.6.18
 
   # Huggingface
   - conda-forge::transformers
