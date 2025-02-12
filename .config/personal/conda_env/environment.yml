@@ -73,6 +73,8 @@ dependencies:
 
   # argparse
   - typed-argument-parser # for type hinting in argparse
+  - jsonargparse # required by lightning[extra]
+  - typeshed-client>=2.1.0 # for jsonargparse[signatures] required by lightning[extra]
 
   # Frameworks
   - opencv
