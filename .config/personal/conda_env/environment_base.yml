@@ -7,7 +7,7 @@ name: ml-base
 channels:
   - nvidia # for CUDA
   - pytorch
-  - pyg # for pytorch-sparse
+  # - pyg # for pytorch-sparse
   # - huggingface
   - conda-forge
   - anaconda

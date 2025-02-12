@@ -7,7 +7,7 @@ name: ml
 channels:
   - nvidia
   - pytorch
-  - pyg # for pytorch-sparse
+  # - pyg # for pytorch-sparse
   # - huggingface
   - conda-forge
   - anaconda
