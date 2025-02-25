@@ -146,6 +146,9 @@ for CONDA in anaconda3 miniconda3 mambaforge miniforge3 miniforge; do
 done
 unset CONDA
 
+# fzf and fd
+export FZF_DEFAULT_COMMAND=fd
+
 # SDKMAN
 [ -d "$HOME/.sdkman" ] && export SDKMAN_DIR="$HOME/.sdkman"
 
