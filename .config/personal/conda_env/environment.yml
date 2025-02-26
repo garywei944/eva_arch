@@ -113,7 +113,7 @@ dependencies:
   - pip:
       - build
       - datargs
-      - sh
+      - sh>=2.2.2
       - morecontext
       - arxiv-latex-cleaner
       - torchopt
