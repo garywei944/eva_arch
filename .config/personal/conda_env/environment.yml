@@ -89,6 +89,7 @@ dependencies:
   - questionary
   - distro
   - pyprojroot
+  - httpie
 
   # Visualization
   - moviepy # for generating gif

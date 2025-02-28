@@ -86,6 +86,7 @@ dependencies:
   - questionary
   - distro
   - pyprojroot
+  - httpie
 
   # Visualization
   - matplotlib
