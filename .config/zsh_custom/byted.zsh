@@ -4,7 +4,14 @@ alias ctlag="code tunnel --name lagrange-tf"
 alias ctorch="code tunnel --name torch"
 
 black-erdos() {
-    for _path in trainer/common/launcher trainer/worker norbert/driver/coordinator; do
+    _paths=(
+        "trainer/common/launcher"
+        "trainer/worker"
+        "norbert/driver/coordinator"
+        "trainer/runner"
+    )
+
+    for _path in $_paths; do
         bash black-format.sh "$_path"
     done
 }
