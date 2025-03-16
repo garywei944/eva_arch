@@ -6,69 +6,108 @@ command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Function: Remove duplicate paths, keep the first occurrence.
+remove_duplicates() {
+  # Usage: new_list=$(remove_duplicates "$list")
+  old_IFS=$IFS
+  IFS=:
+  set -- $1
+  IFS=$old_IFS
+  unique=""
+  for p in "$@"; do
+    case ":$unique:" in
+    *":$p:"*) ;; # already seen, skip
+    *) unique=${unique:+$unique:}$p ;;
+    esac
+  done
+  echo "$unique"
+}
+
+# Function: Prepend a path, removing any existing occurrences.
+path_prepend() {
+  # Usage: new_list=$(path_prepend "/new/path" "$list")
+  target=$1
+  list=$2
+  old_IFS=$IFS
+  IFS=:
+  newlist=""
+  for p in $list; do
+    if [ "$p" = "$target" ]; then
+      continue
+    fi
+    newlist=${newlist:+$newlist:}$p
+  done
+  IFS=$old_IFS
+  echo "$target${newlist:+:$newlist}"
+}
+
+# Function: Append a path, if it doesn't already exist.
+path_append() {
+  # Usage: new_list=$(path_append "/new/path" "$list")
+  target=$1
+  list=$2
+  old_IFS=$IFS
+  IFS=:
+  for p in $list; do
+    if [ "$p" = "$target" ]; then
+      IFS=$old_IFS
+      echo "$list" # already exists, return unchanged
+      return
+    fi
+  done
+  IFS=$old_IFS
+  echo "${list:+$list:}$target"
+}
+
 ################################################################################
 # Set up environment
 ################################################################################
 
-# inspired from https://unix.stackexchange.com/a/108933
-# WARNING: only remove path that fully match
-__remove_path() {
-  PATH=":$PATH:"
-  #  PATH=${PATH//":"/"::"}
-  #  PATH=${PATH//":$1:"/}
-  #  PATH=${PATH//"::"/":"}
-  PATH=$(echo "$PATH" | sed 's/:/::/g')
-  PATH=$(echo "$PATH" | sed "s|:$1:||g")
-  PATH=$(echo "$PATH" | sed 's/::/:/g')
-  PATH=${PATH#:}
-  PATH=${PATH%:}
-}
+PATH=$(remove_duplicates "$PATH")
+LD_LIBRARY_PATH=$(remove_duplicates "$LD_LIBRARY_PATH")
+CPATH=$(remove_duplicates "$CPATH")
 
-__prepend_path() {
-  case ":${PATH}:" in
-  *:"$1":*)
-    __remove_path "$1"
-    PATH="$1:$PATH"
-    ;;
-  *)
-    PATH="$1:$PATH"
-    ;;
-  esac
-}
+for p in "$HOME/.local/bin" \
+  "$HOME/bin" \
+  /usr/local/go/bin \
+  "$HOME/.cargo/bin"; do
+  [ -d "$p" ] && PATH=$(path_prepend "$p" "$PATH")
+done
 
-# set up local variables
-__uname=$(uname)
+# Set up LD_LIBRARY_PATH
+for p in "$HOME/.local/lib" \
+  /usr/lib/x86_64-linux-gnu; do
+  [ -d "$p" ] && LD_LIBRARY_PATH=$(path_append "$p" "$LD_LIBRARY_PATH")
+done
 
-__prepend_path "$HOME/.local/bin"
-__prepend_path "$HOME/bin"
+# CUDA
+for CUDA_HOME in /usr/local/cuda /opt/cuda; do
+  if [ -d "$CUDA_HOME" ]; then
+    export CUDA_HOME
+    CPATH=$(path_prepend "$CUDA_HOME/include" "$CPATH")
 
-# Cuda
-if [ -d /opt/cuda ]; then
-  export LD_LIBRARY_PATH="/opt/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-  export CPATH="/opt/cuda/include${CPATH:+:${CPATH}}"
-  __prepend_path /opt/cuda/bin
-  __prepend_path /opt/cuda/nsight_compute
-  __prepend_path /opt/cuda/nsight_systems/bin
-fi
-if [ -d /usr/local/cuda ]; then
-  export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-  export CPATH="/usr/local/cuda/include${CPATH:+:${CPATH}}"
-  __prepend_path /usr/local/cuda/bin
-fi
-[ -d "$HOME/.local/lib" ] &&
-  export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    for SUBDIR in bin nsight_compute nsight_systems/bin; do
+      [ -d "$CUDA_HOME/$SUBDIR" ] && PATH=$(path_prepend "$CUDA_HOME/$SUBDIR" "$PATH")
+    done
+    for SUBDIR in lib64 extras/CUPTI/lib64; do
+      [ -d "$CUDA_HOME/$SUBDIR" ] &&
+        LD_LIBRARY_PATH=$(path_append "$CUDA_HOME/$SUBDIR" "$LD_LIBRARY_PATH")
+    done
+    break
+  fi
+done
 
 # Fix brew, copied from oh-my-zsh brew plugin
 if ! command_exists brew; then
-  if [ -x /opt/homebrew/bin/brew ]; then
-    BREW_LOCATION="/opt/homebrew/bin/brew"
-  elif [ -x /usr/local/bin/brew ]; then
-    BREW_LOCATION="/usr/local/bin/brew"
-  elif [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-    BREW_LOCATION="/home/linuxbrew/.linuxbrew/bin/brew"
-  elif [ -x "$HOME/.linuxbrew/bin/brew" ]; then
-    BREW_LOCATION="$HOME/.linuxbrew/bin/brew"
-  fi
+  for p in /opt/homebrew/bin/brew \
+    /usr/local/bin/brew \
+    /home/linuxbrew/.linuxbrew/bin/brew \
+    "$HOME/.linuxbrew/bin/brew"; do
+    if [ -x "$p" ]; then
+      BREW_LOCATION="$p"
+      break
+    fi
+  done
 
   if [ -n "$BREW_LOCATION" ]; then
     # Only add Homebrew installation to PATH, MANPATH, and INFOPATH if brew is
@@ -84,13 +123,10 @@ if command_exists brew; then
   export HOMEBREW_PREFIX
 fi
 
-# go
-[ -d /usr/local/go/bin ] && __prepend_path /usr/local/go/bin
-
 # SUDO
 # https://superuser.com/a/1281228
 # https://github.com/koalaman/shellcheck/wiki/SC2181
-if __sudo=$(sudo -nv 2>&1); then
+if __sudo="$(sudo -nv 2>&1)"; then
   # has sudo access w/o password
   :
 elif echo "$__sudo" | grep -q '^sudo:'; then
@@ -104,14 +140,14 @@ unset __sudo
 
 # JAVA
 if [ -z "${JAVA_HOME+x}" ]; then
-  if [ -d /usr/lib/jvm/default ]; then
-    export JAVA_HOME=/usr/lib/jvm/default
-  elif [ -d /usr/lib/jvm/default-java ]; then
-    export JAVA_HOME=/usr/lib/jvm/default-java
-  # MacOS `brew install java`
-  elif [ -d /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home ]; then
-    export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home
-  fi
+  for JAVA_HOME in /usr/lib/jvm/default \
+    /usr/lib/jvm/default-java \
+    /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home; do
+    if [ -d "$JAVA_HOME" ]; then
+      export JAVA_HOME
+      break
+    fi
+  done
 fi
 
 # Conda, anaconda, or mambaforge
@@ -123,26 +159,16 @@ export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
 command_exists micromamba && export MAMBA_ROOT_PREFIX="$HOME/.conda"
 
 for CONDA in anaconda3 miniconda3 mambaforge miniforge3 miniforge; do
-  if [ -d "$HOME/$CONDA" ]; then
-    export CONDA_PATH="$HOME/$CONDA"
-    break
-  elif [ -d "/opt/$CONDA" ]; then
-    export CONDA_PATH="/opt/$CONDA"
-    break
-  # Fix install mamba from brew
-  elif [ "$__uname" = "Darwin" ]; then
-    # MacOS `brew install $CONDA`
-    if [ -d "/usr/local/Caskroom/$CONDA/base" ]; then
-      export CONDA_PATH="/usr/local/Caskroom/$CONDA/base"
-      break
-    elif [ -d "$HOMEBREW_PREFIX/Caskroom/$CONDA/base" ]; then
-      export CONDA_PATH="$HOMEBREW_PREFIX/Caskroom/$CONDA/base"
-      break
-    elif [ -d "$HOMEBREW_PREFIX/$CONDA" ]; then
-      export CONDA_PATH="$HOMEBREW_PREFIX/$CONDA"
-      break
+  for p in "$HOME/$CONDA" \
+    "/opt/$CONDA" \
+    /usr/local/Caskroom/$CONDA/base \
+    "$HOMEBREW_PREFIX/Caskroom/$CONDA/base" \
+    "$HOMEBREW_PREFIX/$CONDA"; do
+    if [ -d "$p" ]; then
+      export CONDA_PATH="$p"
+      break 2
     fi
-  fi
+  done
 done
 unset CONDA
 
@@ -151,11 +177,6 @@ export FZF_DEFAULT_COMMAND=fd
 
 # SDKMAN
 [ -d "$HOME/.sdkman" ] && export SDKMAN_DIR="$HOME/.sdkman"
-
-# Cargo
-# rustup shell setup
-# affix colons on either side of $PATH to simplify matching
-[ -d "$HOME/.cargo/bin" ] && __prepend_path "$HOME/.cargo/bin"
 
 # Ruby
 # check if ruby is install by brew
@@ -207,10 +228,7 @@ if [ ! "$__uname" = "Darwin" ] && [ ! -f /proc/sys/fs/binfmt_misc/WSLInterop ]; 
   unset SSH_AGENT_COUNT
 fi
 
-unset -f __remove_path
-unset -f __prepend_path
-
-export PATH
+export PATH LD_LIBRARY_PATH CPATH
 
 # Always assume vim is installed
 EDITOR="$(command -v vim)"
@@ -227,8 +245,7 @@ export EDITOR VISUAL SUDO_EDITOR
 
 export LANG=en_US.UTF-8
 
-unset -f command_exists
-unset __uname
+unset -f command_exists remove_duplicates path_prepend path_append
 
 # variable to track history
 export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.profile.sh"

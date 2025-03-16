@@ -136,7 +136,7 @@ plugins+=(
     extract universalarchive
     # zsh
     aliases history themes zsh-autosuggestions zsh-syntax-highlighting
-    emoji emotty safe-paste timer themes web-search
+    emoji emotty safe-paste timer themes web-search colorize
     # formatting
     isodate
     # custom plugins
@@ -144,33 +144,6 @@ plugins+=(
 )
 
 . "$ZSH/oh-my-zsh.sh"
-
-# Box welcome message
-box_out() {
-    local s=("$@") b w
-
-    for l in "${s[@]}"; do
-        ((w < ${#l})) && {
-            b="$l"
-            w="${#l}"
-        }
-    done
-    tput setaf 3
-
-    # Top line
-    echo " -${b//?/-}-
-| ${b//?/ } |"
-
-    # Print sentences
-    for l in "${s[@]}"; do
-        printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
-    done
-
-    #Bottom line
-    echo "| ${b//?/ } |
- -${b//?/-}-"
-    tput sgr 0
-}
 
 ################################################################################
 # Environment setup
@@ -201,6 +174,33 @@ export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.rc.zsh"
 # ##############################################################################
 
 [[ -o login ]] || return
+
+# Box welcome message
+box_out() {
+    local s=("$@") b w
+
+    for l in "${s[@]}"; do
+        ((w < ${#l})) && {
+            b="$l"
+            w="${#l}"
+        }
+    done
+    tput setaf 3
+
+    # Top line
+    echo " -${b//?/-}-
+| ${b//?/ } |"
+
+    # Print sentences
+    for l in "${s[@]}"; do
+        printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
+    done
+
+    #Bottom line
+    echo "| ${b//?/ } |
+ -${b//?/-}-"
+    tput sgr 0
+}
 
 if command_exists figlet && command_exists lolcat; then
     echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
