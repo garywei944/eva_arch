@@ -70,7 +70,8 @@ CPATH=$(remove_duplicates "$CPATH")
 for p in "$HOME/.local/bin" \
   "$HOME/bin" \
   /usr/local/go/bin \
-  "$HOME/.cargo/bin"; do
+  "$HOME/.cargo/bin \
+  /opt/cisco/anyconnect/bin"; do
   [ -d "$p" ] && PATH=$(path_prepend "$p" "$PATH")
 done
 
@@ -182,7 +183,7 @@ export FZF_DEFAULT_COMMAND=fd
 # check if ruby is install by brew
 if [ -n "$HOMEBREW_PREFIX" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   if [ -d "$HOMEBREW_PREFIX/opt/ruby" ]; then
-    __prepend_path "$HOMEBREW_PREFIX/opt/ruby/bin"
+    PATH=$(path_prepend "$HOMEBREW_PREFIX/opt/ruby/bin" "$PATH")
     export LDFLAGS="-L$HOMEBREW_PREFIX/opt/ruby/lib"
     export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/ruby/include"
     export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/ruby/lib/pkgconfig"
@@ -199,17 +200,14 @@ if command_exists gem; then
     export GEM_HOME="$HOME/.gem"
   fi
   unset required_version
-  __prepend_path "$GEM_HOME/bin"
+  PATH=$(path_prepend "$GEM_HOME/bin" "$PATH")
 fi
 
 # wine
 command_exists wine && export WINEDEBUG=fixme-font
 
-# Cisco Anyconnect
-[ -d /opt/cisco/anyconnect/bin ] && __prepend_path /opt/cisco/anyconnect/bin
-
 # Set up ssh-agent, macOS is handled by keychain
-if [ ! "$__uname" = "Darwin" ] && [ ! -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+if [ ! "$(uname)" = "Darwin" ] && [ ! -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   # get number of ssh-agent running
   SSH_AGENT_COUNT=$(pgrep -u "$USER" ssh-agent | wc -l)
   # if no ssh-agent running, start one
