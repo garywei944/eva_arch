@@ -190,17 +190,12 @@ if [ -n "$HOMEBREW_PREFIX" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   fi
 fi
 if command_exists gem; then
-  # only gem 3.2.0 and above support GEM_HOME
-  required_version="3.2.0"
-  if [ "$(printf '%s\n' "$required_version" "$(gem --version)" | sort -V | head -n1)" = "$required_version" ]; then
-    GEM_HOME="$(gem env user_gemhome)"
-    export GEM_HOME
+  if ! GEM_HOME="$(gem env user_gemhome 2>/dev/null)" || [ -z "$GEM_HOME" ]; then
+    [ -d "$HOME/.gem" ] && export GEM_HOME="$HOME/.gem"
   else
-    echo "[INFO] gem version $(gem --version) is lower than $required_version, GEM_HOME is set to $HOME/.gem"
-    export GEM_HOME="$HOME/.gem"
+    export GEM_HOME
   fi
-  unset required_version
-  PATH=$(path_prepend "$GEM_HOME/bin" "$PATH")
+  [ -n "$GEM_HOME" ] && PATH=$(path_prepend "$GEM_HOME/bin" "$PATH")
 fi
 
 # wine
