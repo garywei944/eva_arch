@@ -155,6 +155,9 @@ plugins+=(
 # micromamba initialization
 command_exists micromamba && eval "$(micromamba shell hook --shell zsh)"
 
+# pyenv initialization
+[[ -n "$PYENV_ROOT" ]] && eval "$(pyenv init --path)"
+
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
     [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
