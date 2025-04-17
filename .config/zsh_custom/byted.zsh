@@ -7,8 +7,10 @@ black-erdos() {
     _paths=(
         "trainer/common/launcher"
         "trainer/worker"
-        "norbert/driver/coordinator"
         "trainer/runner"
+        "trainer/dispatcher"
+        "trainer/producer"
+        "norbert/driver/coordinator"
     )
 
     for _path in $_paths; do
