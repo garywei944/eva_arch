@@ -149,6 +149,9 @@ plugins+=(
 # Environment setup
 # ##############################################################################
 
+# cargo
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
 # conda & mamba initialization
 [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]] && . "$CONDA_PATH/etc/profile.d/conda.sh"
 [[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
