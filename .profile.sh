@@ -70,8 +70,8 @@ CPATH=$(remove_duplicates "$CPATH")
 for p in "$HOME/.local/bin" \
   "$HOME/bin" \
   /usr/local/go/bin \
-  "$HOME/.cargo/bin \
-  /opt/cisco/anyconnect/bin"; do
+  "$HOME/.cargo/bin" \
+  /opt/cisco/anyconnect/bin; do
   [ -d "$p" ] && PATH=$(path_prepend "$p" "$PATH")
 done
 
