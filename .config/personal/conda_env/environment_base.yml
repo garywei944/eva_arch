@@ -23,8 +23,8 @@ dependencies:
   - nvtop
 
   # Nvidia cuda drivers
-  - nvidia/label/cuda-12.8.0::cuda
-  - nvidia/label/cudnn-9.3.0::cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - nvidia::cuda
+  - conda-forge::cudnn
   - conda-forge::nccl
 
   # essential functionality
@@ -53,13 +53,17 @@ dependencies:
   - einops
   - sentencepiece
   - bitsandbytes
+  - tiktoken
 
   # pytorch with specific CUDA version
-  - conda-forge::pytorch=2.4.1=*cuda*
+  - conda-forge::pytorch=*=*cuda*
   - conda-forge::torchvision=*=*cuda*
-  - pytorch::torchtriton=3.1.0
-  - conda-forge::flash-attn=2.6.3
-  - conda-forge::deepspeed=0.15.3=cuda*
+  - pytorch::torchtriton
+  - conda-forge::flash-attn
+  - conda-forge::deepspeed=*=cuda*
+  - conda-forge::bitsandbytes=*=cuda*
+  - conda-forge::pytorch_geometric
+  - conda-forge::pytorch_sparse
 
   # scikit-learn
   - scikit-learn
@@ -67,7 +71,6 @@ dependencies:
 
   # PyTorch
   - torchinfo
-  # - pytorch-sparse
 
   # Huggingface
   - conda-forge::transformers
@@ -75,6 +78,13 @@ dependencies:
   - conda-forge::accelerate
   - conda-forge::evaluate
   - conda-forge::peft
+
+  # JAX
+  - conda-forge::jaxlib~=0.6.0=*cuda* # flax <- tensorstore <- libprotobuf breaks higher version?
+  - conda-forge::jax=0.6.0
+  - conda-forge::flax
+  - conda-forge::equinox
+  - conda-forge::jaxtyping
 
   # Lightning
   - conda-forge::lightning

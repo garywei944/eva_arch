@@ -3,9 +3,9 @@ auto_activate_base: false
 channel_priority: flexible
 show_channel_urls: true
 channels:
-  - nvidia # for CUDA
-  - pytorch
-  - huggingface
+  # - nvidia # for CUDA
+  # - pytorch
+  # - huggingface
   - conda-forge
   # - anaconda
   # - default

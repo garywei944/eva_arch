@@ -6,36 +6,33 @@
 name: ml
 channels:
   - nvidia
-  - pytorch
-  # - pyg # for pytorch-sparse
-  # - huggingface
   - conda-forge
   - anaconda
-  - defaults
+  - pytorch
 dependencies:
-  - python=3.12
+  - python>=3.12
   - pip>=24.0
   - cython
   - pocl # for OpenCL
-  # - nvtop
+  - nvtop
 
   # Anaconda
   - _anaconda_depends=2024.10=*openblas*
 
   # Nvidia cuda drivers
-  - nvidia/label/cuda-12.8.0::cuda
-  - nvidia/label/cudnn-9.3.0::cudnn # https://docs.nvidia.com/deeplearning/cudnn/support-matrix/index.html
+  - nvidia::cuda
+  - conda-forge::cudnn
   - conda-forge::nccl
 
   # pytorch with specific CUDA version
-  - conda-forge::pytorch=2.4.1=*cuda*
+  - conda-forge::pytorch>=2.7.0=*cuda*
   - conda-forge::torchvision=*=*cuda*
-  - pytorch::torchtriton=3.1.0
-  - conda-forge::flash-attn=2.6.3
-  - conda-forge::deepspeed=0.15.3=cuda*
-  - conda-forge::bitsandbytes=0.45.0=cuda*
-  - conda-forge::pytorch_geometric=2.6.1
-  - conda-forge::pytorch_sparse=0.6.18
+  - pytorch::torchtriton
+  - conda-forge::flash-attn
+  - conda-forge::deepspeed=*=cuda*
+  - conda-forge::bitsandbytes=*=cuda*
+  - conda-forge::pytorch_geometric
+  - conda-forge::pytorch_sparse
 
   # Huggingface
   - conda-forge::transformers
@@ -45,19 +42,20 @@ dependencies:
   - conda-forge::peft
 
   # JAX
-  - conda-forge::jaxlib=0.4.31=*cuda* # flax <- tensorstore <- libprotobuf breaks higher version?
-  - conda-forge::jax=0.4.31
+  - conda-forge::jaxlib~=0.6.0=*cuda* # flax <- tensorstore <- libprotobuf breaks higher version?
+  - conda-forge::jax=0.6.0
   - conda-forge::flax
   - conda-forge::equinox
   - conda-forge::jaxtyping
 
   # Tensorflow
-  - conda-forge::tensorflow-gpu=2.17.0
-  - conda-forge::tf-keras=2.17.0 # huggingface import tf_keras
-  - conda-forge::tensorflow-datasets
+  # - conda-forge::tensorflow-gpu=2.17.0
+  # - conda-forge::tf-keras=2.17.0 # huggingface import tf_keras
+  # - conda-forge::tensorflow-datasets
 
   # Other ML libraries
-  - conda-forge::triton=3.1.0
+  - conda-forge::triton
+  - conda-forge::tiktoken
 
   # Lightning
   - lightning
@@ -120,4 +118,3 @@ dependencies:
       - torchopt
       - torch_optimizer
       - separableconv-torch
-

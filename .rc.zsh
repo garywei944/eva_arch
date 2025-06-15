@@ -154,12 +154,12 @@ plugins+=(
 
 # conda & mamba initialization
 [[ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]] && . "$CONDA_PATH/etc/profile.d/conda.sh"
-[[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
+# [[ -f "$CONDA_PATH/etc/profile.d/mamba.sh" ]] && . "$CONDA_PATH/etc/profile.d/mamba.sh"
 # micromamba initialization
 command_exists micromamba && eval "$(micromamba shell hook --shell zsh)"
 
 # pyenv initialization
-[[ -n "$PYENV_ROOT" ]] && eval "$(pyenv init --path)"
+command_exists pyenv && eval "$(pyenv init --path)"
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
