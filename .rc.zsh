@@ -128,7 +128,8 @@ plugins+=(
     # systemadmin
     systemd tmux man screen gpg-agent systemadmin ssh ufw
     # development
-    python pip pyenv pylint npm
+    # deprecate: pyenv
+    python pip pylint npm
     # git
     git gitignore git-flow git-flow-avh
     # file
@@ -159,7 +160,7 @@ plugins+=(
 command_exists micromamba && eval "$(micromamba shell hook --shell zsh)"
 
 # pyenv initialization
-command_exists pyenv && eval "$(pyenv init --path)"
+# command_exists pyenv && eval "$(pyenv init --path)"
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
