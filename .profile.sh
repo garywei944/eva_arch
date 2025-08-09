@@ -8,20 +8,20 @@ command_exists() {
 
 remove_duplicates() {
   # Usage: new_list=$(remove_duplicates "$list")
-  /usr/bin/env python3 - "$1" "${2:-:}" <<'PY'
+  python - "$1" "${2:-:}" <<'PY'
 import os, sys
 from pathlib import Path
 
-path_list = sys.argv[1] if len(sys.argv) > 1 else ""
-sep = sys.argv[2] if len(sys.argv) > 2 else os.pathsep
-seen = set()
-ans = []
-for seg in path_list.split(sep):
-    seg = Path(seg).as_posix()
-    if seg not in seen:
-        seen.add(seg)
-        ans.append(seg)
-print(sep.join(ans))
+path_list, sep = sys.argv[1], sys.argv[2]
+if path_list:
+    seen = set()
+    ans = []
+    for seg in path_list.split(sep):
+        seg = Path(seg).as_posix()
+        if seg not in seen:
+            seen.add(seg)
+            ans.append(seg)
+    print(sep.join(ans))
 PY
 }
 
