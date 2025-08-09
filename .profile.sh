@@ -9,19 +9,19 @@ command_exists() {
 remove_duplicates() {
   # Usage: new_list=$(remove_duplicates "$list")
   python - "$1" "${2:-:}" <<'PY'
-import os, sys
+import sys
 from pathlib import Path
 
 path_list, sep = sys.argv[1], sys.argv[2]
-if path_list:
-    seen = set()
-    ans = []
-    for seg in path_list.split(sep):
+seen = set()
+ans = []
+for seg in path_list.split(sep):
+    if seg:
         seg = Path(seg).as_posix()
         if seg not in seen:
             seen.add(seg)
             ans.append(seg)
-    print(sep.join(ans))
+print(sep.join(ans))
 PY
 }
 
