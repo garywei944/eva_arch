@@ -154,7 +154,6 @@ done
 unset CONDA
 
 # pyenv
-<<<<<<< HEAD
 # for p in "$HOME/.pyenv" \
 #   "/usr/local/pyenv"; do
 #   if [ -d "$p" ]; then
@@ -163,25 +162,6 @@ unset CONDA
 #     break
 #   fi
 # done
-||||||| 1ae7ba9
-for p in "$HOME/.pyenv" \
-  "/usr/local/pyenv"; do
-  if [ -d "$p" ]; then
-    export PYENV_ROOT="$p"
-    PATH=$(path_prepend "$PYENV_ROOT/bin" "$PATH")
-    break
-  fi
-done
-=======
-# for p in "$HOME/.pyenv" \
-#   "/usr/local/pyenv"; do
-#   if [ -d "$p" ]; then
-#     export PYENV_ROOT="$p"
-#     PATH=$(path_prepend "$PYENV_ROOT/bin" "$PATH")
-#     break
-#   fi
-# done
->>>>>>> 177c50f41fd3e265b26db2812d127e3a1d0e3196
 
 # fzf and fd
 export FZF_DEFAULT_COMMAND=fd
