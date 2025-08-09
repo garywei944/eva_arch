@@ -6,57 +6,35 @@ command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
-# Function: Remove duplicate paths, keep the first occurrence.
 remove_duplicates() {
   # Usage: new_list=$(remove_duplicates "$list")
-  old_IFS=$IFS
-  IFS=:
-  set -- $1
-  IFS=$old_IFS
-  unique=""
-  for p in "$@"; do
-    case ":$unique:" in
-    *":$p:"*) ;; # already seen, skip
-    *) unique=${unique:+$unique:}$p ;;
-    esac
-  done
-  echo "$unique"
+  /usr/bin/env python3 - "$1" "${2:-:}" <<'PY'
+import os, sys
+from pathlib import Path
+
+path_list = sys.argv[1] if len(sys.argv) > 1 else ""
+sep = sys.argv[2] if len(sys.argv) > 2 else os.pathsep
+seen = set()
+ans = []
+for seg in path_list.split(sep):
+    seg = Path(seg).as_posix()
+    if seg not in seen:
+        seen.add(seg)
+        ans.append(seg)
+print(sep.join(ans))
+PY
 }
 
 # Function: Prepend a path, removing any existing occurrences.
-path_prepend() {
-  # Usage: new_list=$(path_prepend "/new/path" "$list")
-  target=$1
-  list=$2
-  old_IFS=$IFS
-  IFS=:
-  newlist=""
-  for p in $list; do
-    if [ "$p" = "$target" ]; then
-      continue
-    fi
-    newlist=${newlist:+$newlist:}$p
-  done
-  IFS=$old_IFS
-  echo "$target${newlist:+:$newlist}"
+prepend_path() {
+  # Usage: new_list=$(prepend_path "/new/path" "$list")
+  remove_duplicates "$1:$2"
 }
 
 # Function: Append a path, if it doesn't already exist.
-path_append() {
-  # Usage: new_list=$(path_append "/new/path" "$list")
-  target=$1
-  list=$2
-  old_IFS=$IFS
-  IFS=:
-  for p in $list; do
-    if [ "$p" = "$target" ]; then
-      IFS=$old_IFS
-      echo "$list" # already exists, return unchanged
-      return
-    fi
-  done
-  IFS=$old_IFS
-  echo "${list:+$list:}$target"
+append_path() {
+  # Usage: new_list=$(append_path "/new/path" "$list")
+  remove_duplicates "$2:$1"
 }
 
 ################################################################################
@@ -73,27 +51,28 @@ for p in "$HOME/.local/bin" \
   "$HOME/.local/opt/go/bin" \
   "$HOME/.cargo/bin" \
   /opt/cisco/anyconnect/bin; do
-  [ -d "$p" ] && PATH=$(path_prepend "$p" "$PATH")
+  [ -d "$p" ] && PATH=$(prepend_path "$p" "$PATH")
 done
 
 # Set up LD_LIBRARY_PATH
-for p in "$HOME/.local/lib" \
-  /usr/lib/x86_64-linux-gnu; do
-  [ -d "$p" ] && LD_LIBRARY_PATH=$(path_append "$p" "$LD_LIBRARY_PATH")
+for p in /usr/lib/x86_64-linux-gnu \
+  /usr/local/lib64 \
+  "$HOME/.local/lib"; do
+  [ -d "$p" ] && LD_LIBRARY_PATH=$(prepend_path "$p" "$LD_LIBRARY_PATH")
 done
 
 # CUDA
 for CUDA_HOME in /usr/local/cuda /opt/cuda; do
   if [ -d "$CUDA_HOME" ]; then
     export CUDA_HOME
-    CPATH=$(path_prepend "$CUDA_HOME/include" "$CPATH")
+    CPATH=$(prepend_path "$CUDA_HOME/include" "$CPATH")
 
     for SUBDIR in bin nsight_compute nsight_systems/bin; do
-      [ -d "$CUDA_HOME/$SUBDIR" ] && PATH=$(path_prepend "$CUDA_HOME/$SUBDIR" "$PATH")
+      [ -d "$CUDA_HOME/$SUBDIR" ] && PATH=$(prepend_path "$CUDA_HOME/$SUBDIR" "$PATH")
     done
     for SUBDIR in lib64 extras/CUPTI/lib64; do
       [ -d "$CUDA_HOME/$SUBDIR" ] &&
-        LD_LIBRARY_PATH=$(path_append "$CUDA_HOME/$SUBDIR" "$LD_LIBRARY_PATH")
+        LD_LIBRARY_PATH=$(append_path "$CUDA_HOME/$SUBDIR" "$LD_LIBRARY_PATH")
     done
     break
   fi
@@ -175,14 +154,14 @@ done
 unset CONDA
 
 # pyenv
-for p in "$HOME/.pyenv" \
-  "/usr/local/pyenv"; do
-  if [ -d "$p" ]; then
-    export PYENV_ROOT="$p"
-    PATH=$(path_prepend "$PYENV_ROOT/bin" "$PATH")
-    break
-  fi
-done
+# for p in "$HOME/.pyenv" \
+#   "/usr/local/pyenv"; do
+#   if [ -d "$p" ]; then
+#     export PYENV_ROOT="$p"
+#     PATH=$(prepend_path "$PYENV_ROOT/bin" "$PATH")
+#     break
+#   fi
+# done
 
 # fzf and fd
 export FZF_DEFAULT_COMMAND=fd
@@ -194,7 +173,7 @@ export FZF_DEFAULT_COMMAND=fd
 # check if ruby is install by brew
 if [ -n "$HOMEBREW_PREFIX" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
   if [ -d "$HOMEBREW_PREFIX/opt/ruby" ]; then
-    PATH=$(path_prepend "$HOMEBREW_PREFIX/opt/ruby/bin" "$PATH")
+    PATH=$(prepend_path "$HOMEBREW_PREFIX/opt/ruby/bin" "$PATH")
     export LDFLAGS="-L$HOMEBREW_PREFIX/opt/ruby/lib"
     export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/ruby/include"
     export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/ruby/lib/pkgconfig"
@@ -206,7 +185,7 @@ if command_exists gem; then
   else
     export GEM_HOME
   fi
-  [ -n "$GEM_HOME" ] && PATH=$(path_prepend "$GEM_HOME/bin" "$PATH")
+  [ -n "$GEM_HOME" ] && PATH=$(prepend_path "$GEM_HOME/bin" "$PATH")
 fi
 
 # wine
@@ -249,7 +228,7 @@ export EDITOR VISUAL SUDO_EDITOR
 
 export LANG=en_US.UTF-8
 
-unset -f command_exists remove_duplicates path_prepend path_append
+unset -f command_exists remove_duplicates prepend_path append_path
 
 # variable to track history
-export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.profile.sh"
+export EVA_HISTORY="${EVA_HISTORY:+${EVA_HISTORY} -> }~/.profile.sh"

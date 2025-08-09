@@ -11,13 +11,13 @@ channels:
   - pytorch
 dependencies:
   - python>=3.12
-  - pip>=24.0
+  - pip>=25.1
   - cython
   - pocl # for OpenCL
   - nvtop
 
   # Anaconda
-  - _anaconda_depends=2024.10=*openblas*
+  - _anaconda_depends=2025.06=*openblas*
 
   # Nvidia cuda drivers
   - nvidia::cuda
@@ -43,7 +43,7 @@ dependencies:
 
   # JAX
   - conda-forge::jaxlib~=0.6.0=*cuda* # flax <- tensorstore <- libprotobuf breaks higher version?
-  - conda-forge::jax=0.6.0
+  - conda-forge::jax~=0.6.0
   - conda-forge::flax
   - conda-forge::equinox
   - conda-forge::jaxtyping
