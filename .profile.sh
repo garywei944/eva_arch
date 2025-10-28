@@ -8,33 +8,34 @@ command_exists() {
 
 remove_duplicates() {
   # Usage: new_list=$(remove_duplicates "$list")
-  python - "$1" "${2:-:}" <<'PY'
-import sys
+  python3 - "$1" "${2:-:}" <<'PY'
+import os, sys
 from pathlib import Path
 
-path_list, sep = sys.argv[1], sys.argv[2]
+val = sys.argv[1] if len(sys.argv) > 1 else ""
+sep = sys.argv[2] if len(sys.argv) > 2 else os.pathsep
 seen = set()
-ans = []
-for seg in path_list.split(sep):
+out = []
+for seg in val.split(sep):
     if seg:
         seg = Path(seg).as_posix()
         if seg not in seen:
             seen.add(seg)
-            ans.append(seg)
-print(sep.join(ans))
+            out.append(seg)
+print(sep.join(out))
 PY
 }
 
 # Function: Prepend a path, removing any existing occurrences.
 prepend_path() {
   # Usage: new_list=$(prepend_path "/new/path" "$list")
-  remove_duplicates "$1:$2"
+  remove_duplicates "$1${2:+:$2}"
 }
 
 # Function: Append a path, if it doesn't already exist.
 append_path() {
   # Usage: new_list=$(append_path "/new/path" "$list")
-  remove_duplicates "$2:$1"
+  remove_duplicates "${2:+$2:}$1"
 }
 
 ################################################################################
