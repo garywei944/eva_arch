@@ -904,5 +904,17 @@ beautiful.useless_gap = dpi(5)
 beautiful.menu_height = dpi(15)
 
 -- Autostart
-awful.spawn.with_shell(
-    "~/.config/autostart.sh </dev/null >/dev/null 2>&1 & disown")
+-- awful.spawn.with_shell(
+--     "~/.config/autostart.sh </dev/null >/dev/null 2>&1 & disown")
+-- Autostart
+local function run_once(cmd) awful.spawn.once(cmd, {rule = {class = cmd}}) end
+
+run_once("numlockx on")
+run_once("waw")
+run_once("picom -b")
+run_once("fcitx5")
+run_once("albert")
+
+run_once("google-chrome-stable --password-store=gnome --no-startup-window")
+run_once("insync start")
+run_once("betterbird")
