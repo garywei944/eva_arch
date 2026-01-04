@@ -5,6 +5,7 @@
 
 # files
 !.condarc
+!.editorconfig
 !.eva.gitignore
 !.gitconfig
 !.profile.sh
