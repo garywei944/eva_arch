@@ -1,8 +1,8 @@
 #!/bin/zsh
 
 spawn() {
-  ($@ </dev/null &>/dev/null) &
-  disown
+    ($@ </dev/null &>/dev/null) &
+    disown
 }
 
 # Shortcuts
@@ -15,7 +15,7 @@ alias rgh='rg --hidden'
 alias rghi='rg --hidden --no-ignore'
 alias ftree='fd | as-tree'
 alias ncore='grep -m 1 "cpu cores" /proc/cpuinfo | sed "s/[^0-9]*//g"'
-alias s='neofetch'
+alias s='fastfetch'
 
 # Time
 #alias isodate='date +%F'
@@ -54,5 +54,5 @@ alias sra='sudo -E ranger'
 
 # Check CUDA version
 cudaver() {
-  nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
+    nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
 }
