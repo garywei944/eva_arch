@@ -12,10 +12,7 @@ indent_size = 4
 [*.py]
 indent_size = 4
 
-[*.yml]
-indent_size = 2
-
-[*.yaml]
+[*.{json,toml,yml,yaml}]
 indent_size = 2
 
 [*.sh]
