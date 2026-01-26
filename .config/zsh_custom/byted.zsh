@@ -23,7 +23,7 @@ _checkline() {
     cd ~/byted/torch.blade/torch
 
     ADD_LIMIT=200 \
-        INPUT_EXCLUDES='[".codebase/**","**/*.md","docs/**","**/*test*","tests/csrc/BUILD","tests/csrc/build.sh","bytedance/auto/**/*.yaml","tests/lagrange_torch/ops/bench/**","bytedance/auto/**/*generated*","bytedance/auto/**/go.sum","bytedance/lagrange_torch/csrc/device/cuda/nova/**","bytedance/lagrange_torch/nova/sparse/native/**","bytedance/lagrange_torch/csrc/torch_extension/native/","bytedance/nodus/csrc/service/**","bytedance/lagrange_torch/common/gen_pb.py","bytedance/**/*.pyi"]' \
+        INPUT_EXCLUDES='[".codebase/**","**/*.md","docs/**","**/*test*","tests/csrc/BUILD","tests/csrc/build.sh","tests/**mock**.py","tests/**fixtures**.py","tests/**/mocks/**/*.py","bytedance/auto/**/*.yaml","tests/lagrange_torch/ops/bench/**","bytedance/auto/**/*generated*","bytedance/auto/**/go.sum","bytedance/lagrange_torch/csrc/device/cuda/nova/**","bytedance/lagrange_torch/nova/sparse/native/**","bytedance/lagrange_torch/csrc/torch_extension/native/","bytedance/nodus/csrc/service/**","bytedance/lagrange_torch/common/gen_pb.py","bytedance/**/*.pyi"]' \
         py ~/byted/line_checker/main.py
 }
 
