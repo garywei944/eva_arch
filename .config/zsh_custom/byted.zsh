@@ -28,6 +28,7 @@ _checkline() {
 }
 
 alias checkline="(_checkline)"
+alias cl=checkline
 
 # staircase
 alias pc="pre-commit"
