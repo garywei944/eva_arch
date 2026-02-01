@@ -5,7 +5,7 @@ command_exists() {
 }
 
 # Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
+export ZSH="${HOME}/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -91,7 +91,7 @@ plugins=()
 
 if command_exists pacman; then
     plugins+=(archlinux)
-elif [[ -n $(command -v apt-get) ]]; then
+elif command_exists apt-get; then
     plugins+=(ubuntu)
 elif command_exists yum; then
     plugins+=(yum)
