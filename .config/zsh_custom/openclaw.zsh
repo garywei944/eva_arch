@@ -8,5 +8,6 @@ fi
 alias oca='openclaw agent'
 alias ocas='openclaw agents'
 alias ocg='openclaw gateway'
+alias ocgrs='openclaw gateway restart'
 alias oct='openclaw tui'
 alias ocmsg='openclaw message'
