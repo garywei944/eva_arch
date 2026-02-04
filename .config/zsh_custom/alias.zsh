@@ -56,3 +56,20 @@ alias sra='sudo -E ranger'
 cudaver() {
     nvcc -V | sed -ne 's/.* V\(.*\..*\)\..*/\1/p'
 }
+
+# autossh port forwarding helper
+# usage: aports <host> <ports...>
+aports() {
+    if [[ $# -lt 2 ]]; then
+        echo "usage: aports <host> <ports...>" >&2
+        return 2
+    fi
+    local host="$1"
+    shift
+    local ports=("$@")
+    local args=("-M" "0" "-N")
+    for p in "${ports[@]}"; do
+        args+=("-L" "${p}:localhost:${p}")
+    done
+    autossh "${args[@]}" "$host"
+}
