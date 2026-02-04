@@ -45,3 +45,6 @@ alias srbuo="st rebase --upstack --onto"
 alias srs="st restack && st submit"
 alias scont="st continue"
 alias sabort="st abort"
+
+# ssh-agent for bytedance key
+alias sshkeybyted="eval \"$(ssh-agent -s)\" && ssh-add ~/.ssh/bytedance"
