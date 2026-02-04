@@ -5,6 +5,8 @@ spawn() {
     disown
 }
 
+gfb() { git fetch origin "$1" && git switch -c "$1" FETCH_HEAD; }
+
 # Shortcuts
 alias c='clear' # use `clr` in systemadmin plugin
 alias t='tmux'
