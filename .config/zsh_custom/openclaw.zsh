@@ -5,6 +5,7 @@ if [[ -f "${HOME}/.npm-global/bin/openclaw" ]]; then
 else
     alias openclaw="openclaw"
 fi
+alias oc="openclaw"
 alias oca='openclaw agent'
 alias ocas='openclaw agents'
 alias ocg='openclaw gateway'
