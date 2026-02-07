@@ -187,7 +187,7 @@ local tasklist_buttons = gears.table.join(
 -- Load third-party widgets
 local cpu_widget = require("awesome-wm-widgets.cpu-widget.cpu-widget")
 local ram_widget = require("awesome-wm-widgets.ram-widget.ram-widget")
-local volume_widget = require('awesome-wm-widgets.volume-widget.volume')
+local volume_widget = require('awesome-wm-widgets.pactl-widget.volume')
 local calendar_widget = require("awesome-wm-widgets.calendar-widget.calendar")
 
 local cw = calendar_widget({
@@ -218,8 +218,8 @@ awful.screen.connect_for_each_screen(function(s)
     if screen:count() >= 2 and s.index == dis_right then
         -- Support screen
         tags = {
-            "1|Web", "2|Chat", "3|Smerge", "4|Doc", "5|App", "6|Code",
-            "7|Music", "8|Terminal", "9|Reserve"
+            "1|Web", "2|Chat", "3|Git", "4|Doc", "5|App", "6|Code", "7|Music",
+            "8|Terminal", "9|Reserve"
         }
     else
         -- Primary screen
