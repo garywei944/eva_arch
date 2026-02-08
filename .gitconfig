@@ -16,7 +16,7 @@
 
 # Git commands
 [commit]
-	gpgsign = true
+	gpgsign = false
 [diff]
 	colorMoved = default
 [fetch]
