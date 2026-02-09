@@ -4,6 +4,8 @@ local gears = require("gears")
 local awful = require("awful")
 local hotkeys_popup = require("awful.hotkeys_popup")
 
+-- alt-tab popup removed (fallback to basic focus cycling)
+
 return function(apps, menu, widgets)
     -- {{{ Mouse bindings
     root.buttons(
@@ -68,6 +70,12 @@ return function(apps, menu, widgets)
                 client.focus:raise()
             end
         end, { description = "focus with next client by index", group = "client" }),
+        awful.key({ "Mod1", "Shift" }, "Tab", function()
+            awful.client.focus.history.previous()
+            if client.focus then
+                client.focus:raise()
+            end
+        end, { description = "go back", group = "client" }),
         awful.key({ apps.modkey }, "comma", function()
             awful.screen.focus_bydirection("right")
         end, { description = "focus the next screen", group = "screen" }),
@@ -81,12 +89,6 @@ return function(apps, menu, widgets)
         awful.key({ apps.modkey }, "Escape", awful.tag.history.restore, { description = "go back", group = "tag" }),
         awful.key({ apps.modkey }, "u", awful.client.urgent.jumpto,
             { description = "jump to urgent client", group = "client" }),
-        awful.key({ "Mod1", "Shift" }, "Tab", function()
-            awful.client.focus.history.previous()
-            if client.focus then
-                client.focus:raise()
-            end
-        end, { description = "go back", group = "client" }),
 
         -- Layout manipulation
         awful.key({ apps.modkey, "Control" }, "h", function()

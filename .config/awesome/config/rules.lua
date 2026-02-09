@@ -131,6 +131,14 @@ return function(keys, screenmap)
                 place_on_tag(c, screenmap.dis_main, 5)
             end,
         },
+
+        -- Common apps (more robust matching by class/name)
+        {
+            rule_any = { class = { "discord", "Discord" }, instance = { "discord" } },
+            callback = function(c)
+                place_on_tag(c, screenmap.dis_right, 2)
+            end,
+        },
         {
             rule = { instance = "wechat.exe" },
             callback = function(c)

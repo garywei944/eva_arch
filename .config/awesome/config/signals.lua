@@ -76,5 +76,28 @@ return function()
     client.connect_signal("unfocus", function(c)
         c.border_color = beautiful.border_normal
     end)
+
+    -- Smart borders: remove borders when there is only one tiled client visible.
+    -- (Does not affect floating/maximized/fullscreen clients.)
+    screen.connect_signal("arrange", function(s)
+        local only_one = #s.tiled_clients == 1
+
+        -- Smart gaps: remove gaps when there is only one tiled client.
+        local t = s.selected_tag
+        if t then
+            local base_gap = beautiful.useless_gap or 0
+            t.gap = only_one and 0 or base_gap
+        end
+
+        -- Smart borders: remove borders when there is only one tiled client visible.
+        -- (Does not affect floating/maximized/fullscreen clients.)
+        for _, c in pairs(s.clients) do
+            if only_one and not c.floating and not c.maximized and not c.fullscreen then
+                c.border_width = 0
+            else
+                c.border_width = beautiful.border_width
+            end
+        end
+    end)
     -- }}}
 end

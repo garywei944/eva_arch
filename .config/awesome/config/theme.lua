@@ -9,14 +9,20 @@ local M = {}
 
 function M.init()
     local themes = {
-        -- "copland",
+        "blackburn",
+        "copland",
         "dremora",
+        "holo",
         "multicolor",
+        -- "powerarrow",
+        -- "rainbow",
         "steamburn",
+        -- "vertex"
     }
 
     math.randomseed(os.time())
     local chosen_theme = themes[math.random(#themes)]
+    -- local chosen_theme = "vertex"
 
     beautiful.init(gears.filesystem.get_configuration_dir() .. "themes/" .. chosen_theme .. "/theme.lua")
 
