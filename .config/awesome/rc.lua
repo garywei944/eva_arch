@@ -203,30 +203,70 @@ mytextclock:connect_signal("button::press", function(_, _, _, button)
     if button == 1 then cw.toggle() end
 end)
 
--- Don't change these for assign monitor index
-local dis_main = 1
-local dis_left = 1
-local dis_right = 1
+-- Screen assignment
+-- Old config hard-coded screen indices (1/2/3). That breaks easily when
+-- monitors are hot-plugged or Xrandr reorders screens. We compute indices
+-- from geometry and screen.primary instead.
+local dis_main = (screen.primary and screen.primary.index) or 1
+local dis_left = dis_main
+local dis_right = dis_main
+local dis_right_exists = false
 
--- Change these values for assigning monitor index
-if screen:count() >= 2 then dis_right = 2 end
-if screen:count() >= 3 then dis_left = 3 end
+local function recompute_display_indices()
+    local screens = {}
+    for s in screen do
+        table.insert(screens, s)
+    end
+    if #screens == 0 then
+        dis_main, dis_left, dis_right = 1, 1, 1
+        dis_right_exists = false
+        return
+    end
+
+    local primary = screen.primary or screens[1]
+    dis_main = primary.index
+
+    table.sort(screens, function(a, b) return a.geometry.x < b.geometry.x end)
+
+    -- Support screen is the one immediately to the RIGHT of primary.
+    -- If there is no right screen, we do NOT assign any support layout.
+    local right, left = nil, nil
+    for _, s in ipairs(screens) do
+        if s.geometry.x > primary.geometry.x then
+            if (not right) or (s.geometry.x < right.geometry.x) then right = s end
+        elseif s.geometry.x < primary.geometry.x then
+            if (not left) or (s.geometry.x > left.geometry.x) then left = s end
+        end
+    end
+
+    dis_right_exists = (right ~= nil)
+    dis_right = (right and right.index) or dis_main
+    dis_left = (left and left.index) or dis_main
+end
+
+recompute_display_indices()
+
+-- Best-effort: keep indices fresh on hotplug / layout changes.
+screen.connect_signal("added", recompute_display_indices)
+screen.connect_signal("removed", recompute_display_indices)
+screen.connect_signal("property::geometry", recompute_display_indices)
 
 awful.screen.connect_for_each_screen(function(s)
     -- -- Wallpaper
     -- set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    -- Hardcoded Primary screen.
+    -- Only the screen to the RIGHT of primary uses the "support" tag set.
+    -- Primary and left screens use the "primary" tag set.
     local tags
-    if screen:count() >= 2 and s.index == dis_right then
-        -- Support screen
+    if dis_right_exists and s.index == dis_right then
+        -- Support (right) screen
         tags = {
             "1|Web", "2|Chat", "3|Git", "4|Doc", "5|App", "6|Code", "7|Music",
             "8|Terminal", "9|Reserve"
         }
     else
-        -- Primary screen
+        -- Primary layout
         tags = {
             "1|Code", "2|Web", "3|Folder", "4|Doc", "5|App", "6|Code", "7|Web",
             "8|Terminal", "9|Reserve"
@@ -672,6 +712,29 @@ root.keys(globalkeys)
 -- Workaround Thunderbird show a windows at start up
 local __tb_started = false
 
+-- Helpers for rules
+local function get_tag(screen_index, tag_index)
+    local s = screen[screen_index]
+    return (s and s.tags and s.tags[tag_index]) or nil
+end
+
+-- Be gentle: always place the window on the desired tag, but only switch the
+-- *view* when you're already focused on that screen and this isn't startup.
+local function maybe_view_only(t)
+    if not t then return end
+    if awesome.startup then return end
+    if awful.screen.focused() ~= t.screen then return end
+    if t.selected then return end
+    t:view_only()
+end
+
+local function place_on_tag(c, screen_index, tag_index)
+    local t = get_tag(screen_index, tag_index)
+    if not t then return end
+    c:move_to_tag(t)
+    maybe_view_only(t)
+end
+
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = { -- All clients will match this rule.
@@ -732,105 +795,84 @@ awful.rules.rules = { -- All clients will match this rule.
     {
         rule = {instance = "Msgcompose", class = "betterbird"},
         callback = function(c)
-            local t = screen[dis_main].tags[4]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_main].tags[4]}
+            place_on_tag(c, dis_main, 4)
+        end
     }, {
         rule = {instance = "Mail", class = "betterbird"},
         callback = function(c)
+            local t = get_tag(dis_main, 5)
+            if not t then return end
+
+            c:move_to_tag(t)
+
+            -- Don't steal focus during startup; also avoid switching on the very
+            -- first Thunderbird window (old workaround).
             if __tb_started then
-                local t = screen[dis_main].tags[5]
-                t:view_only()
+                maybe_view_only(t)
             else
                 __tb_started = true
             end
-        end,
-        properties = {tag = screen[dis_main].tags[5]}
+        end
     }, {
         rule = {instance = "filezilla"},
         callback = function(c)
-            local t = screen[dis_main].tags[5]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_main].tags[5]}
+            place_on_tag(c, dis_main, 5)
+        end
     }, {
         rule = {instance = "wechat.exe"},
         callback = function(c)
-            local t = screen[dis_right].tags[2]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[2]}
+            place_on_tag(c, dis_right, 2)
+        end
     }, {
         rule = {instance = "discord"},
         callback = function(c)
-            local t = screen[dis_right].tags[2]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[2]}
+            place_on_tag(c, dis_right, 2)
+        end
     }, {
         rule = {instance = "sublime_merge"},
         callback = function(c)
-            local t = screen[dis_right].tags[3]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[3]}
+            place_on_tag(c, dis_right, 3)
+        end
     }, {
         rule = {instance = "youdao-dict"},
         callback = function(c)
-            local t = screen[dis_right].tags[5]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[5]}
+            place_on_tag(c, dis_right, 5)
+        end
     }, {
         rule = {instance = "jetbrains-pycharm", name = "SciView - "},
         callback = function(c)
-            local t = screen[dis_right].tags[6]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[6]}
+            place_on_tag(c, dis_right, 6)
+        end
     }, {
         rule = {instance = "jetbrains-pycharm", name = "Run - "},
         callback = function(c)
-            local t = screen[dis_right].tags[6]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[6]}
+            place_on_tag(c, dis_right, 6)
+        end
     }, {
         rule = {instance = "jetbrains-pycharm", name = "Jupyter - "},
         callback = function(c)
-            local t = screen[dis_right].tags[6]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[6]}
+            place_on_tag(c, dis_right, 6)
+        end
     }, {
         rule = {instance = "jetbrains-pycharm", name = "Documentation - "},
         callback = function(c)
-            local t = screen[dis_right].tags[6]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[6]}
+            place_on_tag(c, dis_right, 6)
+        end
     }, {
         rule = {instance = "qqmusic"},
         callback = function(c)
-            local t = screen[dis_right].tags[7]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[7]}
+            place_on_tag(c, dis_right, 7)
+        end
     }, {
         rule = {instance = "netease-cloud-music"},
         callback = function(c)
-            local t = screen[dis_right].tags[7]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[7]}
+            place_on_tag(c, dis_right, 7)
+        end
     }, {
         rule = {instance = "plasma-systemmonitor"},
         callback = function(c)
-            local t = screen[dis_right].tags[8]
-            t:view_only()
-        end,
-        properties = {tag = screen[dis_right].tags[8]}
+            place_on_tag(c, dis_right, 8)
+        end
     }
 }
 -- }}}
