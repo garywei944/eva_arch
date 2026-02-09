@@ -10,7 +10,7 @@ local M = {}
 function M.init()
     local themes = {
         "blackburn",
-        "copland",
+        -- "copland",
         "dremora",
         "holo",
         "multicolor",
