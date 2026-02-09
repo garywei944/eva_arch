@@ -10,6 +10,7 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+local dpi = require("beautiful.xresources").apply_dpi
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -66,10 +67,13 @@ local themes = { -- "copland",
 }
 
 math.randomseed(os.time())
-local chosen_theme = themes[math.random(3)]
--- beautiful.init(gears.filesystem.get_configuration_dir().."themes/"..chosen_theme.."/theme.lua")
-beautiful.init(string.format("%s/.config/awesome/themes/%s/theme.lua",
-                             os.getenv("HOME"), chosen_theme))
+local chosen_theme = themes[math.random(#themes)]
+beautiful.init(gears.filesystem.get_configuration_dir() .. "themes/" .. chosen_theme .. "/theme.lua")
+
+-- Theme overrides (must be set BEFORE constructing menus/wibars)
+beautiful.font = "Hack Nerd Font Mono 10"
+beautiful.useless_gap = dpi(5)
+beautiful.menu_height = dpi(15)
 
 -- This is used later as the default terminal and editor to run.
 -- terminal = "x-terminal-emulator"
@@ -161,8 +165,8 @@ local tasklist_buttons = gears.table.join(
         else
             c:emit_signal("request::activate", "tasklist", {raise = true})
         end
-    end), wibox.widget {widget = wibox.widget.separator}, awful.button({}, 3,
-                                                                       function()
+    end),
+                             awful.button({}, 3, function()
         awful.menu.client_list({theme = {width = 250}})
     end), awful.button({}, 4, function() awful.client.focus.byidx(-1) end),
                              awful.button({}, 5, function()
@@ -294,7 +298,7 @@ awful.screen.connect_for_each_screen(function(s)
             ram_widget({timeout = 1}),
             volume_widget(),
             mykeyboardlayout,
-            wibox.widget.systray(),
+            (s == screen.primary and wibox.widget.systray() or wibox.widget.textbox()),
             mytextclock,
             s.mylayoutbox
         }
@@ -897,24 +901,27 @@ client.connect_signal("unfocus",
                       function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
--- -- Theme
-local dpi = require("beautiful.xresources").apply_dpi
-beautiful.font = "Hack Nerd Font Mono 10"
-beautiful.useless_gap = dpi(5)
-beautiful.menu_height = dpi(15)
-
 -- Autostart
 -- awful.spawn.with_shell(
 --     "~/.config/autostart.sh </dev/null >/dev/null 2>&1 & disown")
--- Autostart
-local function run_once(cmd) awful.spawn.once(cmd, {rule = {class = cmd}}) end
 
-run_once("numlockx on")
-run_once("waw")
-run_once("picom -b")
-run_once("fcitx5")
-run_once("albert")
+-- NOTE: awful.spawn.once() only works reliably for windowed clients (it matches
+-- on existing clients). For daemons like picom/fcitx5, use a pgrep gate.
+local function spawn_once(cmd, pgrep_pattern)
+    local pat = pgrep_pattern or cmd
+    awful.spawn.with_shell(string.format("pgrep -u $USER -f '%s' >/dev/null || (%s)", pat, cmd))
+end
 
-run_once("google-chrome-stable --password-store=gnome --no-startup-window")
-run_once("insync start")
-run_once("betterbird")
+-- Only run autostarts on initial WM startup (avoid duplicating on awesome.restart())
+if awesome.startup then
+    spawn_once("numlockx on", "numlockx")
+    spawn_once("waw", "waw")
+    spawn_once("picom -b", "picom")
+    spawn_once("fcitx5", "fcitx5")
+    spawn_once("albert", "albert")
+
+    spawn_once("google-chrome-stable --password-store=gnome --no-startup-window",
+              "google-chrome")
+    spawn_once("insync start", "insync")
+    spawn_once("betterbird", "betterbird")
+end
