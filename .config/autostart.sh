@@ -30,14 +30,14 @@ run_once() {
 
 # Always-okay toggles
 run "numlockx on"
+run "waw"
 
 # Daemons / services
 run_once picom -- "picom -b"
-run_once fcitx5 -- "fcitx5"
+run_once fcitx5 -- "fcitx5 -d"
 run_once albert -- "albert"
 run_once insync -- "insync start"
 run_once betterbird -- "betterbird"
-run_once waw -- "waw"
 
 # Chrome: process name is usually 'chrome', but start command is google-chrome-stable
 # Gate on 'chrome' to avoid spawning multiple.
