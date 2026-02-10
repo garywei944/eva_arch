@@ -256,10 +256,10 @@ return function(apps, menu, widgets)
         end, { description = "send focused client to next tag", group = "tag" }),
 
         -- move client to screen
-        awful.key({ apps.modkey, "Shift" }, "comma", function(c)
+        awful.key({ apps.modkey, "Shift" }, "m", function(c)
             c:move_to_screen(c.screen.index - 1)
         end, { description = "move to the next screen", group = "screen" }),
-        awful.key({ apps.modkey, "Shift" }, "m", function(c)
+        awful.key({ apps.modkey, "Shift" }, "comma", function(c)
             c:move_to_screen(c.screen.index + 1)
         end, { description = "move to the previous screen", group = "screen" }),
         awful.key({}, "XF86AudioRaiseVolume", function()
