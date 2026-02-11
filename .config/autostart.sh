@@ -1,43 +1,44 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-# __spawn() {
-# 	([[ -z $(pgrep "$1") ]] && "${@:2}" </dev/null >/dev/null 2>&1) &
-# 	disown
-# }
-
-# __nokde_spawn() {
-# 	(
-# 		unset KDE_FULL_SESSION XDG_CURRENT_DESKTOP
-# 		__spawn "$@"
-# 	) &
-# 	disown
-# }
-
-# numlockx on
-# waw
-# __spawn picom picom -b
-# __spawn fcitx5 fcitx5
-# __spawn albert albert
-
-# # sleep 1
-
-# #__spawn qv2ray qv2ray
-# __spawn chrome google-chrome-stable --password-store=gnome --no-startup-window
-# __spawn insync insync start
-# # __spawn deja-dup deja-dup --gapplication-service
-# # __nokde_spawn birdtrap birdtray
-# __spawn betterbird betterbird
+# Simple, explicit autostart for AwesomeWM.
+# Notes:
+# - This runs once per Awesome start (rc.lua), not per terminal.
+# - We gate each program with pgrep so it works for daemons (picom/fcitx5/etc).
 
 run() {
-	command -v "$1" >/dev/null || return
-	pgrep -xu "$USER" "$1" >/dev/null || "$@" &
+  # Run a command in background, fully detached.
+  nohup bash -lc "$*" >/dev/null 2>&1 &
 }
 
-run numlockx on
-run waw
-run picom --experimental-backends
-run fcitx5
-run albert
-run google-chrome-stable --password-store=gnome --no-startup-window
-run insync start
-run betterbird
+run_once() {
+  # Usage: run_once <pgrep-pattern> -- <command...>
+  local pat="$1"; shift
+  if [[ "${1:-}" == "--" ]]; then shift; fi
+
+  # Avoid the pgrep-matches-itself issue by not using -f with the literal pattern present.
+  # We use -x when possible; fall back to -f with the [p]attern trick.
+  if pgrep -u "$USER" -x "$pat" >/dev/null 2>&1; then
+    return 0
+  fi
+  if pgrep -u "$USER" -f "[${pat:0:1}]${pat:1}" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  run "$*"
+}
+
+# Always-okay toggles
+run "numlockx on"
+run "waw"
+
+# Daemons / services
+run_once picom -- "picom -b"
+run_once fcitx5 -- "fcitx5 -d"
+run_once albert -- "albert"
+run_once insync -- "insync start"
+run_once betterbird -- "betterbird"
+
+# Chrome: process name is usually 'chrome', but start command is google-chrome-stable
+# Gate on 'chrome' to avoid spawning multiple.
+run_once chrome -- "google-chrome-stable --password-store=gnome --no-startup-window"
