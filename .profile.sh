@@ -102,7 +102,7 @@ if command_exists brew; then
   HOMEBREW_PREFIX="$(brew --prefix)"
   export HOMEBREW_PREFIX
 
-  prepend_path "${HOMEBREW_PREFIX}/bin" "${PATH}"
+  PATH=$(prepend_path "${HOMEBREW_PREFIX}/bin" "${PATH}")
 fi
 
 # SUDO
