@@ -12,6 +12,9 @@ insert_final_newline = true
 [*.{html,css,js,json,sh,yml,yaml}]
 indent_size = 2
 
+[*.{sh,zsh}]
+indent_size = 2
+
 [*.bat]
 indent_style = tab
 end_of_line = crlf
