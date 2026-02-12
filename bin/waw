@@ -1,9 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-DIR=~/Pictures/Wallpapers
+DIR="${HOME}/Pictures/Wallpapers"
 
-i=0
-ls $DIR | shuf -n 3 | while read pic; do
-	nitrogen --force-setter=xinerama --head=$i --set-zoom-fill $DIR/$pic
-	i=$(($i+1))
-done
+# 随机选 3 张图（顺序即 monitor 顺序）
+mapfile -t pics < <(ls "$DIR" | shuf -n 3)
+
+feh --no-fehbg \
+    --bg-fill "$DIR/${pics[0]}" \
+    --bg-fill "$DIR/${pics[1]}" \
+    --bg-fill "$DIR/${pics[2]}"

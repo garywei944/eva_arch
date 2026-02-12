@@ -106,19 +106,17 @@ fi
 # SUDO
 # https://superuser.com/a/1281228
 # https://github.com/koalaman/shellcheck/wiki/SC2181
-if command_exists sudo && [ -t 0 ]; then
-  if __sudo="$(sudo -nv 2>&1)"; then
-    # has sudo access w/o password
-    :
-  elif echo "${__sudo}" | grep -q '^sudo:'; then
-    # has sudo access need password
-    :
-  else
-    # no sudo access
-    export NOSUDO=1
-  fi
-  unset __sudo
+if __sudo="$(sudo -nv 2>&1)"; then
+  # has sudo access w/o password
+  :
+elif echo "$__sudo" | grep -q '^sudo:'; then
+  # has sudo access need password
+  :
+else
+  # no sudo access
+  export NOSUDO=1
 fi
+unset __sudo
 
 # JAVA
 if [ -z "${JAVA_HOME+x}" ]; then
