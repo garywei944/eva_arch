@@ -23,19 +23,13 @@ dedupe_list() {
 # Function: Prepend a path if it doesn't already exist.
 prepend_path() {
   # Usage: new_list=$(prepend_path "/new/path" "${list}")
-  case ":${2}:" in
-  *":${1}:"*) printf '%s' "${2}" ;;
-  *) printf '%s' "${1}${2:+:${2}}" ;;
-  esac
+  printf '%s' "${1}${2:+:${2}}"
 }
 
 # Function: Append a path if it doesn't already exist.
 append_path() {
   # Usage: new_list=$(append_path "/new/path" "${list}")
-  case ":${2}:" in
-  *":${1}:"*) printf '%s' "${2}" ;;
-  *) printf '%s' "${2:+${2}:}${1}" ;;
-  esac
+  printf '%s' "${2}${2:+:}${1}"
 }
 
 ################################################################################
@@ -101,6 +95,8 @@ fi
 if command_exists brew; then
   HOMEBREW_PREFIX="$(brew --prefix)"
   export HOMEBREW_PREFIX
+
+  PATH=$(prepend_path "${HOMEBREW_PREFIX}/bin" "${PATH}")
 fi
 
 # SUDO
