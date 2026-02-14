@@ -20,13 +20,11 @@ dedupe_list() {
   }'
 }
 
-# Function: Prepend a path if it doesn't already exist.
 prepend_path() {
   # Usage: new_list=$(prepend_path "/new/path" "${list}")
   printf '%s' "${1}${2:+:${2}}"
 }
 
-# Function: Append a path if it doesn't already exist.
 append_path() {
   # Usage: new_list=$(append_path "/new/path" "${list}")
   printf '%s' "${2}${2:+:}${1}"
@@ -35,8 +33,6 @@ append_path() {
 ################################################################################
 # Set up environment
 ################################################################################
-
-# (dedupe performed near the end)
 
 for p in "${HOME}/.local/bin" \
   "${HOME}/bin" \
