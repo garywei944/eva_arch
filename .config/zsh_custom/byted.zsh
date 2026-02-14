@@ -3,6 +3,7 @@
 alias ctlag="code tunnel --name lagrange-tf"
 alias ctorch="code tunnel --name torch"
 alias blade-clean-erdos="fd . -d1 --hidden --exclude .vscode --exclude erdos --exclude BLADE_ROOT --exclude BLADE_ROOT.local -x rm -rf"
+alias blade-clean-torch="fd . -d1 --hidden --exclude .vscode --exclude torch --exclude BLADE_ROOT --exclude BLADE_ROOT.local -x rm -rf"
 
 black-erdos() {
     _paths=(
