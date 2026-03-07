@@ -40,11 +40,14 @@ line-length = 120
 target-version = "py314"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "B", "I", "UP"]
 ignore = []
 
 [tool.ruff.lint.isort]
 known-first-party = ["eden", "evakit"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 # [tool.ruff.lint.per-file-ignores]
 # "eden/__main__.py" = ["E402"]
