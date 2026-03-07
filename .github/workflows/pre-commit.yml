@@ -6,6 +6,18 @@ on:
     branches: [main]
 
 jobs:
+  commit-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install commitizen
+        run: pip install commitizen
+
+      - name: Check commits
+        run: cz check --rev-range origin/main..HEAD
+
   pre-commit:
     runs-on: ubuntu-latest
 
