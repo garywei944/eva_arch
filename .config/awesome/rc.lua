@@ -32,19 +32,19 @@ local menu = require("config.menu")(apps)
 local widgets = require("config.widgets")()
 
 -- Screen mapping
-local screenmap = require("config.screenmap")
+local monitors = require("config.monitors")
 
 -- Keys + mouse bindings
 local keys = require("config.keys")(apps, menu, widgets)
 
 -- UI (tags + wibars)
-require("config.ui")(apps, menu, widgets, screenmap)
+require("config.ui")(apps, menu, widgets, monitors)
 
 -- Rules
-require("config.rules")(keys, screenmap)
+require("config.rules")(keys, monitors)
 
 -- Signals
-require("config.signals")()
+require("config.display")()
 
 -- Autostart
 require("config.autostart")()
