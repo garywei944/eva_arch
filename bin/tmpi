@@ -9,8 +9,8 @@ mpirun_cmd=${MPIRUN:-mpirun}
 reptyr_cmd=${REPTYR:-reptyr}
 
 check_mpirun() {
-    mpich=$(${mpirun_cmd} --version |grep -i -e HYDRA -e Intel)
-    openmpi=$(${mpirun_cmd} --version |grep -i "Open MPI")
+    mpich=$(${mpirun_cmd} --version | grep -i -e HYDRA -e Intel)
+    openmpi=$(${mpirun_cmd} --version | grep -i "Open MPI")
 
     if [ -z "${mpich}" ] && [ -z "${openmpi}" ]; then
         echo "Unknown MPI implementation. Only MPICH (and its derivatives) and OpenMPI are supported!"
@@ -36,7 +36,7 @@ usage() {
 
 check_tools() {
     # reptyr must be last in the following list
-    tools=( tmux ${mpirun_cmd} ${reptyr_cmd} )
+    tools=(tmux ${mpirun_cmd} ${reptyr_cmd})
 
     for tool in "${tools[@]}"; do
         if !(type ${tool} > /dev/null 2>&1); then
@@ -67,7 +67,7 @@ if [[ -z ${TMUX+x} ]]; then
     exec tmux ${TMPI_TMUX_OPTIONS} -L ${socket} new-session "${0} ${*}"
 fi
 
-if [[ ${1} == runmpi ]] ; then
+if [[ ${1} == runmpi ]]; then
     # we are being started as one of many processes by mpirun.
     has_reptyr=${2}
     # the next two will contain "1" in case has_reptyr is false (i.e. 1)
@@ -88,7 +88,7 @@ if [[ ${1} == runmpi ]] ; then
     # this avoids races, as we have to push the variables in tmux' environment.
     # it has the nice side-effect that the panes are also ordered by rank.
     sleep 0.02
-    while [[ $(cat /tmp/tmpi_${USER}.lock) -ne ${mpi_rank} ]] ; do
+    while [[ $(cat /tmp/tmpi_${USER}.lock) -ne ${mpi_rank} ]]; do
         if [[ $(cat /tmp/tmpi_${USER}.lock) -eq -1 ]]; then
             echo "Error during mpi startup"
             exit -1
@@ -111,8 +111,8 @@ if [[ ${1} == runmpi ]] ; then
             mpi_env="-e MPI -e OPAL -e PMIX"
         fi
         # get all the variables that mpirun starts us with so that we can pass them through.
-        mpi_vars=( $( env | grep ${mpi_env} | cut -d '=' -f1 ) )
-        mpi_vars+=( "${additional_vars[@]}" )
+        mpi_vars=($(env | grep ${mpi_env} | cut -d '=' -f1))
+        mpi_vars+=("${additional_vars[@]}")
 
         # add the variables to tmux' session environment.
         # we can't just export them because the process will be started as a child of tmux, not us.
@@ -120,7 +120,7 @@ if [[ ${1} == runmpi ]] ; then
             tmux set-environment -t ${session} "${var}" "${!var}"
         done
 
-        x=( $(tmux split-window -P -F '#{pane_pid} #{pane_id}' -t ${window} "${*}") )
+        x=($(tmux split-window -P -F '#{pane_pid} #{pane_id}' -t ${window} "${*}"))
         pid=${x[0]}
         pane=${x[1]}
 
@@ -130,15 +130,15 @@ if [[ ${1} == runmpi ]] ; then
     fi
 
     # kill the dummy pane that opened the new window
-    [[ ${mpi_rank} -eq 0 ]] && tmux kill-pane -t ${dummy} &> /dev/null
+    [[ ${mpi_rank} -eq 0 ]] && tmux kill-pane -t ${dummy} &>/dev/null
 
     # set the window to tiled mode.
     # have to do this after every new pane is spawned because otherwise the splits get
     # smaller and smaller until tmux refuses to open new panes, despite plenty of space being left.
-    tmux select-layout -t ${pane} tiled &> /dev/null
+    tmux select-layout -t ${pane} tiled &>/dev/null
 
     # let the next process start
-    echo $((mpi_rank+1)) > /tmp/tmpi_${USER}.lock
+    echo $((mpi_rank + 1)) >/tmp/tmpi_${USER}.lock
 
     if [ ${has_reptyr} = 0 ]; then
         # Put quotes correctly in the command
@@ -152,10 +152,10 @@ if [[ ${1} == runmpi ]] ; then
         commands="(echo; "${cmds[@]}")"
 
         # Barrier
-        while [[ $(cat /tmp/tmpi_${USER}.lock) -ne $((processes+mpi_rank)) ]] ; do
+        while [[ $(cat /tmp/tmpi_${USER}.lock) -ne $((processes + mpi_rank)) ]]; do
             sleep 0.02
         done
-        echo $((processes+mpi_rank+1)) > /tmp/tmpi_${USER}.lock
+        echo $((processes + mpi_rank + 1)) >/tmp/tmpi_${USER}.lock
 
         # '--follow=name' rather than '-f' to exit when the file is deleted
         tail --follow=name ${ptsfile} |
@@ -220,17 +220,17 @@ EOF
     fi
 
     # create an empty new dummy window which we sill later split up for the mpi processes.
-    x=( $(tmux new-window -P -F '#{pane_id} #{window_id} #{session_id}') )
+    x=($(tmux new-window -P -F '#{pane_id} #{window_id} #{session_id}'))
     export dummy=${x[0]}
     export window=${x[1]}
     export session=${x[2]}
 
     # syncronize input to all panes.
-    tmux set-window-option -t ${window} synchronize-panes on &> /dev/null
-    tmux set-window-option -t ${window} remain-on-exit on &> /dev/null
+    tmux set-window-option -t ${window} synchronize-panes on &>/dev/null
+    tmux set-window-option -t ${window} remain-on-exit on &>/dev/null
 
     # always start with rank 0.
-    echo 0 > /tmp/tmpi_${USER}.lock
+    echo 0 >/tmp/tmpi_${USER}.lock
     trap "rm -f /tmp/tmpi_${USER}.lock" EXIT
 
     mpi_arg=""
@@ -244,7 +244,7 @@ EOF
     echo ${mpirun_cmd} -n ${processes} ${mpi_arg} ${self} runmpi ${has_reptyr} ${has_reptyr/0/${processes}} ${has_reptyr/0/${setpty_cmd}} "${@}"
     ${mpirun_cmd} -n ${processes} ${mpi_arg} ${self} runmpi ${has_reptyr} ${has_reptyr/0/${processes}} ${has_reptyr/0/${setpty_cmd}} "${@}"
     if [[ $? -ne 0 ]]; then
-        echo -1 > /tmp/tmpi_${USER}.lock
-        tmux kill-pane -t ${dummy} &> /dev/null
+        echo -1 >/tmp/tmpi_${USER}.lock
+        tmux kill-pane -t ${dummy} &>/dev/null
     fi
 fi

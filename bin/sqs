@@ -2,7 +2,7 @@
 if echo $* | grep -e "-h" -q
 then
   echo 'Usage: sqs is a simplified NERSC wrapper for the Slurm command "squeue" with a chosen default format below:'
-  echo '           squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M   %20V %15q %20S %14f %15R" ' 
+  echo '           squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M   %20V %15q %20S %14f %15R" '
   echo '       Without any flag, it displays queued jobs for the logged-in user.'
   echo '       sqs takes any flag that is accepted by squeue as well, such as: '
   echo '           -a, --all           display all jobs in queue '
@@ -23,4 +23,3 @@ else
 #  squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M  %20V %15q %20S %14f %15R" -u $(eval echo \$\{USER\}) $@
   squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M  %20V %15q %20S %14f %15R" --me "$@"
 fi
-

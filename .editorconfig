@@ -12,7 +12,7 @@ insert_final_newline = true
 [*.{html,css,js,json,sh,yml,yaml}]
 indent_size = 2
 
-[*.{sh,zsh}]
+[*.{sh,bash,zsh}]
 indent_size = 2
 
 [*.bat]

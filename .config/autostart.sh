@@ -13,15 +13,18 @@ run() {
 
 run_once() {
   # Usage: run_once <pgrep-pattern> -- <command...>
-  local pat="$1"; shift
-  if [[ "${1:-}" == "--" ]]; then shift; fi
+  local pat="$1"
+  shift
+  if [[ "${1:-}" == "--" ]]; then
+    shift
+  fi
 
   # Avoid the pgrep-matches-itself issue by not using -f with the literal pattern present.
   # We use -x when possible; fall back to -f with the [p]attern trick.
-  if pgrep -u "$USER" -x "$pat" >/dev/null 2>&1; then
+  if pgrep -u "${USER}" -x "${pat}" >/dev/null 2>&1; then
     return 0
   fi
-  if pgrep -u "$USER" -f "[${pat:0:1}]${pat:1}" >/dev/null 2>&1; then
+  if pgrep -u "${USER}" -f "[${pat:0:1}]${pat:1}" >/dev/null 2>&1; then
     return 0
   fi
 

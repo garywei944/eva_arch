@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+  command -v "$1" >/dev/null 2>&1
 }
 
 # Path to your oh-my-zsh installation.
@@ -90,19 +90,19 @@ autoload is-at-least
 plugins=()
 
 if command_exists pacman; then
-    plugins+=(archlinux)
+  plugins+=(archlinux)
 elif command_exists apt-get; then
-    plugins+=(ubuntu)
+  plugins+=(ubuntu)
 elif command_exists yum; then
-    plugins+=(yum)
+  plugins+=(yum)
 elif command_exists brew; then
-    plugins+=(brew macos iterm2)
+  plugins+=(brew macos iterm2)
 fi
 
 if command_exists zoxide; then
-    plugins+=(zoxide)
+  plugins+=(zoxide)
 else
-    plugins+=(z)
+  plugins+=(z)
 fi
 
 [[ -z ${NOSUDO+x} ]] && plugins+=(sudo)
@@ -125,23 +125,23 @@ command_exists subl && plugins+=(sublime)
 command_exists smerge && plugins+=(sublime-merge)
 
 plugins+=(
-    # systemadmin
-    systemd tmux man screen gpg-agent systemadmin ssh ufw
-    # development
-    # deprecate: pyenv
-    python pip pylint npm
-    # git
-    git gitignore git-flow git-flow-avh
-    # file
-    cp rsync qrcode torrent transfer encode64 urltools
-    extract universalarchive
-    # zsh
-    aliases history themes zsh-autosuggestions zsh-syntax-highlighting
-    emoji emotty safe-paste timer themes web-search colorize
-    # formatting
-    isodate
-    # custom plugins
-    conda cmake
+  # systemadmin
+  systemd tmux man screen gpg-agent systemadmin ssh ufw
+  # development
+  # deprecate: pyenv
+  python pip pylint npm
+  # git
+  git gitignore git-flow git-flow-avh
+  # file
+  cp rsync qrcode torrent transfer encode64 urltools
+  extract universalarchive
+  # zsh
+  aliases history themes zsh-autosuggestions zsh-syntax-highlighting
+  emoji emotty safe-paste timer themes web-search colorize
+  # formatting
+  isodate
+  # custom plugins
+  conda cmake
 )
 
 . "$ZSH/oh-my-zsh.sh"
@@ -164,7 +164,7 @@ command_exists micromamba && eval "$(micromamba shell hook --shell zsh)"
 
 # SDKMAN init
 if [[ -n ${SDKMAN_DIR+x} ]]; then
-    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
+  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && . "$SDKMAN_DIR/bin/sdkman-init.sh"
 fi
 
 # broot init
@@ -184,41 +184,47 @@ export EVA_HISTORY="${EVA_HISTORY:+$EVA_HISTORY -> }~/.rc.zsh"
 
 # Box welcome message
 box_out() {
-    local s=("$@") b w
+  local s=("$@") b w
 
-    for l in "${s[@]}"; do
-        ((w < ${#l})) && {
-            b="$l"
-            w="${#l}"
-        }
-    done
-    tput setaf 3
+  # for l in "${s[@]}"; do
+  #   ((w < ${#l})) && {
+  #     b="$l"
+  #     w="${#l}"
+  #   }
+  # done
+  for l in "${s[@]}"; do
+    if ((w < ${#l})); then
+      b="$l"
+      w=${#l}
+    fi
+  done
+  tput setaf 3
 
-    # Top line
-    echo " -${b//?/-}-
+  # Top line
+  echo " -${b//?/-}-
 | ${b//?/ } |"
 
-    # Print sentences
-    for l in "${s[@]}"; do
-        printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
-    done
+  # Print sentences
+  for l in "${s[@]}"; do
+    printf '| %s%*s%s |\n' "$(tput setaf 4)" "-$w" "$l" "$(tput setaf 3)"
+  done
 
-    #Bottom line
-    echo "| ${b//?/ } |
+  #Bottom line
+  echo "| ${b//?/ } |
  -${b//?/-}-"
-    tput sgr 0
+  tput sgr 0
 }
 
 if command_exists figlet && command_exists lolcat; then
-    echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
+  echo "$(echo "ariseus" | figlet)\nWelcome back, ariseus." | lolcat
 elif is-at-least 5.8; then
-    if command_exists lolcat; then
-        box_out "Welcome back, ariseus." | lolcat
-    else
-        box_out "Welcome back, ariseus."
-    fi
+  if command_exists lolcat; then
+    box_out "Welcome back, ariseus." | lolcat
+  else
+    box_out "Welcome back, ariseus."
+  fi
 else
-    cat <<EOF
+  cat <<EOF
  ------------------------
 |                        |
 | Welcome back, ariseus. |

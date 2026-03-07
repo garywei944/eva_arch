@@ -4,9 +4,13 @@ set -euo pipefail
 DIR="${HOME}/Pictures/Wallpapers"
 
 # 随机选 3 张图（顺序即 monitor 顺序）
-mapfile -t pics < <(ls "$DIR" | shuf -n 3)
+# mapfile -t pics < <(find "$DIR" -type f | shuf -n 3)
+mapfile -d '' -t pics < <(
+    find "${DIR}" -type f -print0 |
+        shuf -z -n 3
+)
 
 feh --no-fehbg \
-    --bg-fill "$DIR/${pics[0]}" \
-    --bg-fill "$DIR/${pics[1]}" \
-    --bg-fill "$DIR/${pics[2]}"
+    --bg-fill "${DIR}/${pics[0]}" \
+    --bg-fill "${DIR}/${pics[1]}" \
+    --bg-fill "${DIR}/${pics[2]}"

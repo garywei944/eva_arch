@@ -8,6 +8,8 @@
 !.editorconfig
 !.eva.gitignore
 !.gitconfig
+!.github
+!.pre-commit-config.yaml
 !.profile.sh
 !.rc.zsh
 !.tmux.conf
@@ -16,8 +18,10 @@
 !.zsh.bashrc
 !arch_neofetch_v3.png
 !LICENSE
-!Vagrantfile
+!pyproject.toml
 !README.md
+!renovate.json
+!Vagrantfile
 
 # .config
 !.config

@@ -1,0 +1,89 @@
+[project]
+name = "eva_arch"
+description = "Arch Linux dotfiles"
+requires-python = ">=3.14"
+license = "MIT"
+authors = [{ name = "Gary Wei", email = "garywei944@gmail.com" }]
+readme = "README.md"
+classifiers = [
+    #    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dynamic = ["version"]
+
+# The best practice:
+# For libraries, use >= together with < to avoid breaking changes in dependencies.
+#     ~=a.b is equivalent to >=a.b, ==a.*
+#     ~=a.b.c is equivalent to >=a.b.c, ==a.b.* (PEP 440 compatible)
+# For applications, use exact versions to ensure reproducibility.
+# If a dependency is an open-source library which releases frequent updates, only
+#     specify the major version to get the latest features and bug fixes, e.g. requests~=2.25.
+
+# Please maintain this list in alphabetical order, per group.
+dependencies = []
+
+# ---------------- Black ----------------
+[tool.black]
+line-length = 120
+target-version = ["py314"]
+
+# ---------------- Ruff ----------------
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["eden", "evakit"]
+
+# [tool.ruff.lint.per-file-ignores]
+# "eden/__main__.py" = ["E402"]
+
+# ---------------- mypy ----------------
+[tool.mypy]
+python_version = "3.14"
+strict = false
+
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+check_untyped_defs = true
+implicit_optional = false
+
+pretty = true
+show_error_codes = true
+
+# Allow gradual typing (important for personal projects)
+ignore_missing_imports = true
+
+[tool.pylint.typecheck]
+confidence = [
+    "HIGH",
+    "CONTROL_FLOW",
+    "INFERENCE",
+    "INFERENCE_FAILURE",
+    "UNDEFINED",
+]
+generated-members = ["sh"]
+
+# ---------------- Commitizen ----------------
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+update_changelog_on_bump = false
+version = "0.1.0"
+version_files = ["__version__.py:__version__"]
