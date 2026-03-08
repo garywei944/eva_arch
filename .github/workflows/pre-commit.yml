@@ -18,7 +18,8 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y zsh luacheck
+          sudo apt-get install -y zsh lua5.4 liblua5.4-dev luarocks
+          luarocks install luacheck
 
       - name: Set up Python
         uses: actions/setup-python@v6
