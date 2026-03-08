@@ -1,5 +1,3 @@
--- config/autostart.lua
-
 local awful = require("awful")
 
 return function()

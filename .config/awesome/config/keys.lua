@@ -23,9 +23,14 @@ return function(apps, menu, widgets)
 
     -- {{{ Key bindings
     local globalkeys = gears.table.join(
-    -- awesome features
+        -- awesome features
         awful.key({ apps.modkey }, "s", hotkeys_popup.show_help, { description = "show help", group = "awesome" }),
-        awful.key({ apps.modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
+        awful.key(
+            { apps.modkey, "Control" },
+            "r",
+            awesome.restart,
+            { description = "reload awesome", group = "awesome" }
+        ),
         awful.key({ "Control", "Mod1" }, "Delete", awesome.quit, { description = "quit awesome", group = "awesome" }),
         awful.key({ apps.modkey }, "x", function()
             awful.prompt.run({
@@ -87,8 +92,12 @@ return function(apps, menu, widgets)
         awful.key({ apps.modkey }, "p", awful.tag.viewprev, { description = "view previous", group = "tag" }),
         awful.key({ apps.modkey }, "n", awful.tag.viewnext, { description = "view next", group = "tag" }),
         awful.key({ apps.modkey }, "Escape", awful.tag.history.restore, { description = "go back", group = "tag" }),
-        awful.key({ apps.modkey }, "u", awful.client.urgent.jumpto,
-            { description = "jump to urgent client", group = "client" }),
+        awful.key(
+            { apps.modkey },
+            "u",
+            awful.client.urgent.jumpto,
+            { description = "jump to urgent client", group = "client" }
+        ),
 
         -- Layout manipulation
         awful.key({ apps.modkey, "Control" }, "h", function()
@@ -125,7 +134,7 @@ return function(apps, menu, widgets)
             if t then
                 last_tag = t
                 t.selected = false
-            else
+            elseif last_tag then
                 last_tag.selected = true
             end
         end, { description = "Show Desktop", group = "launcher" }),
@@ -159,9 +168,7 @@ return function(apps, menu, widgets)
 
         -- Screenshots
         awful.key({ apps.modkey }, "Print", function()
-            awful.util.spawn(
-                "scrot 'ArcoLinuxD-%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f $$(xdg-user-dir PICTURES)'"
-            )
+            awful.util.spawn("scrot 'ArcoLinuxD-%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f $$(xdg-user-dir PICTURES)'")
         end, { description = "scrot screenshot", group = "screenshots" }),
         awful.key({}, "Print", function()
             awful.util.spawn("flameshot gui")
@@ -182,8 +189,12 @@ return function(apps, menu, widgets)
         awful.key({ apps.modkey }, "w", function(c)
             c:kill()
         end, { description = "close", group = "client" }),
-        awful.key({ apps.modkey, "Control" }, "space", awful.client.floating.toggle,
-            { description = "toggle floating", group = "client" }),
+        awful.key(
+            { apps.modkey, "Control" },
+            "space",
+            awful.client.floating.toggle,
+            { description = "toggle floating", group = "client" }
+        ),
         awful.key({ apps.modkey }, "Return", function(c)
             c:swap(awful.client.getmaster())
         end, { description = "move to master", group = "client" }),

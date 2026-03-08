@@ -1,4 +1,3 @@
--- config/screenmap.lua
 -- Compute stable screen assignments based on screen.primary + geometry.
 
 local M = {

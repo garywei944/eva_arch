@@ -6,12 +6,12 @@
 
 --]]
 
-local gears  = require("gears")
-local wibox  = require("wibox")
-local dpi    = require("beautiful.xresources").apply_dpi
-local date   = os.date
+local gears = require("gears")
+local wibox = require("wibox")
+local dpi = require("beautiful.xresources").apply_dpi
+local date = os.date
 local ipairs = ipairs
-local math   = math
+local math = math
 local select = select
 local string = string
 
@@ -43,15 +43,15 @@ end
 local function factory(args)
     local args = args or {}
 
-    binclock.width          = args.width or dpi(42)
-    binclock.height         = args.height or dpi(18)
-    binclock.show_seconds   = args.show_seconds or false
-    binclock.color_active   = args.color_active or "#CCCCCC"
+    binclock.width = args.width or dpi(42)
+    binclock.height = args.height or dpi(18)
+    binclock.show_seconds = args.show_seconds or false
+    binclock.color_active = args.color_active or "#CCCCCC"
     binclock.color_inactive = args.color_inactive or "#444444"
-    binclock.dotsize        = math.floor(binclock.height / 5)
-    binclock.step           = math.floor(binclock.dotsize / 3)
+    binclock.dotsize = math.floor(binclock.height / 5)
+    binclock.step = math.floor(binclock.dotsize / 3)
 
-    binclock.widget = wibox.widget {
+    binclock.widget = wibox.widget({
         fit = function(self, context, width, height)
             return binclock.width, binclock.height
         end,
@@ -59,8 +59,8 @@ local function factory(args)
             local t = date("*t")
 
             local hour = string.format("%02d", t.hour)
-            local min  = string.format("%02d", t.min)
-            local sec  = string.format("%02d", t.sec)
+            local min = string.format("%02d", t.min)
+            local sec = string.format("%02d", t.sec)
 
             local col_count = 4
             if binclock.show_seconds then
@@ -79,16 +79,16 @@ local function factory(args)
                 binclock.paintdot(cr, string.sub(sec, 2, 2), binclock.dotsize * 5 + 8 * step)
             end
         end,
-        layout = wibox.widget.base.make_widget
-    }
+        layout = wibox.widget.base.make_widget,
+    })
 
-    binclock.timer = gears.timer {
-        autostart  = true,
-        timeout    = binclock.show_seconds and 1 or 60,
-        callback   = function()
+    binclock.timer = gears.timer({
+        autostart = true,
+        timeout = binclock.show_seconds and 1 or 60,
+        callback = function()
             binclock.widget:emit_signal("widget::redraw_needed")
-        end
-    }
+        end,
+    })
 
     return binclock
 end

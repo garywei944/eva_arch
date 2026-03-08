@@ -115,6 +115,19 @@ repos:
         files: \.zsh$
 
   # ----------------------------------------
+  # Lua
+  # ----------------------------------------
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: v2.4.0
+    hooks:
+      - id: stylua
+
+  - repo: https://github.com/Calinou/pre-commit-luacheck
+    rev: v1.0.0
+    hooks:
+      - id: luacheck
+        exclude: ^\.config/awesome/themes/
+  # ----------------------------------------
   # Commit message
   # ----------------------------------------
   - repo: https://github.com/commitizen-tools/commitizen

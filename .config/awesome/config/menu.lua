@@ -1,5 +1,3 @@
--- config/menu.lua
-
 local awful = require("awful")
 local beautiful = require("beautiful")
 local freedesktop = require("freedesktop")
@@ -8,15 +6,21 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 
 return function(apps)
     local myawesomemenu = {
-        { "hotkeys", function()
-            return false, hotkeys_popup.show_help
-        end },
-        { "manual",      apps.terminal .. " -e 'man awesome'" },
+        {
+            "hotkeys",
+            function()
+                return false, hotkeys_popup.show_help
+            end,
+        },
+        { "manual", apps.terminal .. " -e 'man awesome'" },
         { "edit config", apps.editor_cmd .. " ~/.config/awesome/rc.lua" },
-        { "restart",     awesome.restart },
-        { "quit", function()
-            awesome.quit()
-        end },
+        { "restart", awesome.restart },
+        {
+            "quit",
+            function()
+                awesome.quit()
+            end,
+        },
     }
 
     local mainmenu = freedesktop.menu.build({
@@ -27,12 +31,15 @@ return function(apps)
         },
         after = {
             { "Terminal", apps.terminal },
-            { "Log out", function()
-                awesome.quit()
-            end },
-            { "Sleep",    "systemctl suspend" },
-            { "Restart",  "systemctl reboot" },
-            { "Exit",     "systemctl poweroff" },
+            {
+                "Log out",
+                function()
+                    awesome.quit()
+                end,
+            },
+            { "Sleep", "systemctl suspend" },
+            { "Restart", "systemctl reboot" },
+            { "Exit", "systemctl poweroff" },
             -- other triads can be put here
         },
     })

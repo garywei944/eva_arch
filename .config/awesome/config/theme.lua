@@ -1,28 +1,29 @@
--- config/theme.lua
--- Theme selection + beautiful initialization
-
 local gears = require("gears")
 local beautiful = require("beautiful")
 local dpi = require("beautiful.xresources").apply_dpi
+local logging = require("logging")
+
+local logger = logging.get_logger("theme")
+
+local THEMES = {
+    "blackburn",
+    -- "copland",
+    "dremora",
+    "holo",
+    "multicolor",
+    -- "powerarrow",
+    -- "rainbow",
+    "steamburn",
+    -- "vertex"
+}
 
 local M = {}
 
 function M.init()
-    local themes = {
-        "blackburn",
-        -- "copland",
-        "dremora",
-        "holo",
-        "multicolor",
-        -- "powerarrow",
-        -- "rainbow",
-        "steamburn",
-        -- "vertex"
-    }
-
     math.randomseed(os.time())
-    local chosen_theme = themes[math.random(#themes)]
+    local chosen_theme = THEMES[math.random(#THEMES)]
     -- local chosen_theme = "vertex"
+    logger.info("Chosen theme: " .. chosen_theme)
 
     beautiful.init(gears.filesystem.get_configuration_dir() .. "themes/" .. chosen_theme .. "/theme.lua")
 
