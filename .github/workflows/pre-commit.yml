@@ -25,24 +25,25 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Setup Commitizen CLI
-        # This action sets up the cz CLI in your workflow
-        uses: commitizen-tools/setup-cz@v1
-
-      - name: Validate all commits in the push
-        run: |
-          # Use 'cz check' with a range to validate commits
-          # The range below checks commits from the default branch up to HEAD
-          cz check --use-default-range
-
       - name: Cache pre-commit
         uses: actions/cache@v4
         with:
           path: ~/.cache/pre-commit
           key: precommit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Install pre-commit
-        run: pip install pre-commit
+      - name: Install dependencies
+        run: pip install pre-commit commitizen
+
+      - name: Check commit messages (cz)
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # PRs: Check all commits between base and head
+            cz check --rev-range ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            # Pushes: Check all commits between the previous state and the new state
+            # Handles multiple commits in a single push
+            cz check --rev-range ${{ github.event.before }}..${{ github.event.after }}
+          fi
 
       - name: Run pre-commit
         run: |
