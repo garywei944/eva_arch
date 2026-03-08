@@ -29,7 +29,13 @@ jobs:
         run: pip install commitizen
 
       - name: Check commits
-        run: cz check --rev-range origin/main..HEAD
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            cz check --rev-range \
+            ${{ github.event.pull_request.base.sha }}..${{ github.sha }}
+          else
+            cz check --rev-range origin/main..HEAD
+          fi
 
       - name: Cache pre-commit
         uses: actions/cache@v4
