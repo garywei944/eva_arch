@@ -18,7 +18,7 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y zsh
+          sudo apt-get install -y zsh luacheck
 
       - name: Set up Python
         uses: actions/setup-python@v6
