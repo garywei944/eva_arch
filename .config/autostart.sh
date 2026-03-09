@@ -31,10 +31,6 @@ run_once() {
   run "$@"
 }
 
-# Always-okay toggles
-run numlockx on
-run setxkbmap -option caps:ctrl_modifier
-run xcape -e 'Control_L=Escape'
 run waw
 
 # Daemons / services

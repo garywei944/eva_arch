@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
-DIR="${HOME}/Pictures/Wallpapers"
+DIR="${HOME}/Pictures/Wallpapers/"
 
 # 随机选 3 张图（顺序即 monitor 顺序）
 # mapfile -t pics < <(find "$DIR" -type f | shuf -n 3)
@@ -10,7 +10,12 @@ mapfile -d '' -t pics < <(
         shuf -z -n 3
 )
 
+if ((${#pics[@]} < 3)); then
+    echo "Need at least 3 wallpapers in $DIR"
+    exit 1
+fi
+
 feh --no-fehbg \
-    --bg-fill "${DIR}/${pics[0]}" \
-    --bg-fill "${DIR}/${pics[1]}" \
-    --bg-fill "${DIR}/${pics[2]}"
+    --bg-fill "${pics[0]}" \
+    --bg-fill "${pics[1]}" \
+    --bg-fill "${pics[2]}"
