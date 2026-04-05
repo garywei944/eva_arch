@@ -168,10 +168,10 @@ return function(apps, menu, widgets)
 
         -- Screenshots
         awful.key({ apps.modkey }, "Print", function()
-            awful.util.spawn("scrot 'ArcoLinuxD-%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f $$(xdg-user-dir PICTURES)'")
+            awful.spawn("scrot 'ArcoLinuxD-%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f $$(xdg-user-dir PICTURES)'")
         end, { description = "scrot screenshot", group = "screenshots" }),
         awful.key({}, "Print", function()
-            awful.util.spawn("flameshot gui")
+            awful.spawn("flameshot gui")
         end, { description = "flameshot screenshot", group = "screenshots" })
     )
 
@@ -285,25 +285,25 @@ return function(apps, menu, widgets)
 
         -- Media Keys
         awful.key({}, "XF86AudioPlay", function()
-            awful.util.spawn("playerctl play-pause", false)
+            awful.spawn("playerctl play-pause", false)
         end),
         awful.key({}, "XF86AudioNext", function()
-            awful.util.spawn("playerctl next", false)
+            awful.spawn("playerctl next", false)
         end),
         awful.key({}, "XF86AudioPrev", function()
-            awful.util.spawn("playerctl previous", false)
+            awful.spawn("playerctl previous", false)
         end),
         awful.key({}, "XF86AudioStop", function()
-            awful.util.spawn("playerctl stop", false)
+            awful.spawn("playerctl stop", false)
         end),
         awful.key({ apps.modkey }, "KP_Next", function()
-            awful.util.spawn("playerctl next", false)
+            awful.spawn("playerctl next", false)
         end),
         awful.key({ apps.modkey }, "KP_End", function()
-            awful.util.spawn("playerctl previous", false)
+            awful.spawn("playerctl previous", false)
         end),
         awful.key({ apps.modkey }, "KP_Down", function()
-            awful.util.spawn("playerctl play-pause", false)
+            awful.spawn("playerctl play-pause", false)
         end)
     )
 

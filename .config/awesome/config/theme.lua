@@ -28,7 +28,8 @@ function M.init()
     beautiful.init(gears.filesystem.get_configuration_dir() .. "themes/" .. chosen_theme .. "/theme.lua")
 
     -- Theme overrides (must be set BEFORE constructing menus/wibars)
-    beautiful.font = "Hack Nerd Font Mono 10"
+    -- beautiful.font = "Hack Nerd Font Mono 10"
+    beautiful.font = "DejaVu Sans Mono 10"
     beautiful.useless_gap = dpi(5)
     beautiful.menu_height = dpi(15)
 
