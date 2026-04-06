@@ -28,6 +28,7 @@
 !.config
 .config/*
 !.config/awesome
+!.config/keyd
 !.config/neofetch
 !.config/personal
 !.config/scripts
