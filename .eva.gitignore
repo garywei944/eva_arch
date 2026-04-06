@@ -28,6 +28,8 @@
 !.config
 .config/*
 !.config/awesome
+!.config/etc
+!.config/kanata
 !.config/neofetch
 !.config/personal
 !.config/scripts
