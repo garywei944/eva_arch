@@ -9,9 +9,8 @@
 ;;
 ;; This configuration includes:
 ;; - Standard Colemak-DH layout optimized for matrix keyboards
-;; - Colemak-DHk variant (k and m swapped)
 ;; - Optional Extend layer for navigation and function keys
-;; - Layer switching via Caps Lock + number keys
+;; - Layer switching via Right Alt + number keys
 ;;
 
 (defcfg
@@ -40,7 +39,7 @@
   caps    a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft    z    x    c    v    b    n    m    ,    .    /    rsft
   lctl    lmet lalt           spc            ralt rmet menu rctl
-  pause
+  slck
 )
 
 ;; Colemak Mod-DH main layer (optimized for matrix keyboards)
@@ -54,23 +53,12 @@
   @toq
 )
 
-;; Colemak Mod-DHk variant for matrix keyboards (k and m positions swapped)
-(deflayer colemak-dhk
-  @ec     f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv     1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab     q    w    f    p    b    j    l    u    y    ;    [    ]    \
-  @cap    a    r    s    t    g    k    n    e    i    o    '    ret
-  lsft    z    x    c    d    v    m    h    ,    .    /    rsft
-  lctl    lmet lalt           spc            @ext rmet menu rctl
-  @toq
-)
-
 ;; QWERTY layer for comparison/fallback
 (deflayer qwerty
   @ec     f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv     1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab     q    w    e    r    t    y    u    i    o    p    [    ]    \
-  @cap    a    s    d    f    g    h    j    k    l    ;    '    ret
+  @cap    a    s    d    f    g    h    j    k    l ;    '    ret
   lsft    z    x    c    v    b    n    m    ,    .    /    rsft
   lctl    lmet lalt           spc            @ext rmet menu rctl
   @toc
@@ -79,10 +67,10 @@
 ;; Extend layer for navigation, function keys, and layer switching
 ;; Optimized for matrix keyboard usage patterns
 (deflayer extend
-  _       @lq  @lh  @lm  _    _    _    _    _    _    _    _    _
-  _       @lq  @lh  @lm  _    _    _    _    _    _    _    _    _    _
-  _       esc  @bk  @fnd @fw  ins  pgup home up   end  menu _    slck _
-  _       lalt lmet lsft lctl ralt pgdn lft  down rght del  caps _
+  _       @lq  @lh  _    _    _    _    _    _    _    _    _    _
+  _       @lq  @lh  _    _    _    _    _    _    _    _    _    _    _
+  _       esc  @bk  @fnd @fw  ins  pgup _    home end  pgup _    slck _
+  _       lalt lmet lsft lctl ralt lft  down up   rght del  caps _
   _       @cut @cpy tab  @pst @udo pgdn bspc lsft lctl menu _
   _       _    _              ret            _    _    _    _
   _
@@ -91,7 +79,7 @@
 ;; Layer switching layer
 (deflayer layers
   _       _    _    _    _    _    _    _    _    _    _    _    _
-  _       @lq  @lh  @lm  _    _    _    _    _    _    _    _    _    _
+  _       @lq  @lh  _    _    _    _    _    _    _    _    _    _    _
   _       _    _    _    _    _    _    _    _    _    _    _    _    _
   _       _    _    _    _    _    _    _    _    _    _    _    _
   _       _    _    _    _    _    _    _    _    _    _    _
@@ -109,12 +97,10 @@
   ext  (tap-hold 200 200 ralt (layer-toggle extend))
   toq  (layer-switch qwerty)
   toc  (layer-switch colemak-dh)
-  tok  (layer-switch colemak-dhk)
 
   ;; Layer switching aliases
   lq   (layer-switch qwerty)        ;; Switch to QWERTY Matrix
   lh   (layer-switch colemak-dh)    ;; Switch to Colemak-DH Matrix
-  lm   (layer-switch colemak-dhk)   ;; Switch to Colemak-DHk Matrix
 
   ;; Common shortcuts for Extend layer
   cpy  C-c   ;; Copy
