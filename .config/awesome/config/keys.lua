@@ -150,7 +150,7 @@ return function(apps, menu, widgets)
             awful.spawn("plasma-systemmonitor")
         end, { description = "launch system monitor", group = "launcher" }),
         awful.key({ apps.modkey }, "b", function()
-            awful.spawn("google-chrome-stable --password-store=gnome")
+            awful.spawn("google-chrome-stable")
         end, { description = "launch google chrome", group = "launcher" }),
         awful.key({ apps.modkey }, "e", function()
             -- Check KDE shortcut settings if the dolphin doesn't show theme!!!
