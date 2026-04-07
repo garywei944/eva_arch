@@ -68,7 +68,7 @@
 ;; Optimized for matrix keyboard usage patterns
 (deflayer extend
   _       @lq  @lh  _    _    _    _    _    _    _    _    _    _
-  _       @lq  @lh  _    _    _    _    _    _    _    _    _    _    _
+  _       @lq  @lh  _    end  _    _    _    _    _    home _    _    _
   _       esc  @bk  @fnd @fw  ins  pgup _    home end  pgup _    slck _
   _       lalt lmet lsft lctl ralt lft  down up   rght del  caps _
   _       @cut @cpy tab  @pst @udo pgdn bspc lsft lctl menu _
