@@ -3,4 +3,3 @@ export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 
 numlockx on
-fcitx5 -d

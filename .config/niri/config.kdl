@@ -194,6 +194,12 @@ hotkey-overlay {
 }
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// spawn-at-startup "kwalletd6"
+// spawn-sh-at-startup "insync start"
+// spawn-sh-at-startup "google-chrome-stable --password-store=kwallet --no-startup-window"
+spawn-sh-at-startup "bash /home/aris/.config/autostart.sh"
+
 animations {
     workspace-switch {
         spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
@@ -286,6 +292,7 @@ window-rule {
 window-rule {
     match app-id="Cpis-panel-service"
     open-floating true
+    open-focused false
     focus-ring {
         off
     }
@@ -315,6 +322,12 @@ binds {
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Ctrl+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+    Mod+B hotkey-overlay-title="Launch Browser: Chrome" { spawn "google-chrome-stable"; }
+    Mod+E hotkey-overlay-title="File Manager: dolphin" { spawn "dolphin"; }
+    Mod+KP_Left hotkey-overlay-title="Launch QQ Music" { spawn "qqmusic"; }
+    Mod+KP_Home hotkey-overlay-title="Launch WeChat" { spawn "wechat"; }
+    Mod+KP_Insert hotkey-overlay-title="Launch Discord" { spawn "discord"; }
+
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
@@ -336,6 +349,9 @@ binds {
     XF86AudioStop        allow-when-locked=true { spawn-sh "playerctl stop"; }
     XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
     XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
+    Mod+KP_Next          allow-when-locked=true { spawn-sh "playerctl next"; }
+    Mod+KP_End           allow-when-locked=true { spawn-sh "playerctl previous"; }
+    Mod+KP_Down          allow-when-locked=true { spawn-sh "playerctl play-pause"; }
 
     // Example brightness key mappings for brightnessctl.
     // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
@@ -537,7 +553,7 @@ binds {
     Mod+Ctrl+R { reset-window-height; }
     Mod+Up { maximize-column; }
     Mod+Down { maximize-column; }
-    // Mod+F { maximize-column; }
+    Mod+F { maximize-column; }
     Mod+Ctrl+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
 
@@ -568,7 +584,7 @@ binds {
 
     // Move the focused window between the floating and the tiling layout.
     // Mod+V       { toggle-window-floating; }
-    Mod+F       { toggle-window-floating; }
+    Mod+Escape       { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
 
     // Toggle tabbed column display mode.
@@ -596,7 +612,7 @@ binds {
     //
     // The allow-inhibiting=false property can be applied to other binds as well,
     // which ensures niri always processes them, even when an inhibitor is active.
-    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    // Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
 
     // The quit action will show a confirmation dialog to avoid accidental exits.
     // Mod+Shift+E { quit; }
