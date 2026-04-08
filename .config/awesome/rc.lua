@@ -8,6 +8,8 @@ local logging = require("logging")
 logging.set_level(logging.DEBUG)
 logging.setup_error_handling()
 
+logging.info("Starting Awesome")
+
 local logger = logging.root
 
 -- Initialization
