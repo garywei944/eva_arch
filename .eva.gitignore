@@ -33,6 +33,7 @@
 !.config/etc
 !.config/kanata
 !.config/neofetch
+!.config/niri
 !.config/personal
 !.config/scripts
 !.config/terminator
