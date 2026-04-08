@@ -28,6 +28,7 @@
 # .config
 !.config
 .config/*
+!.config/alacritty
 !.config/awesome
 !.config/etc
 !.config/kanata
