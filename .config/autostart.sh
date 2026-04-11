@@ -40,6 +40,24 @@ else
 fi
 
 if [ "$SESSION" = "awesome" ]; then
+  # Import env vars into systemd user session
+  systemctl --user import-environment \
+    XDG_SESSION_DESKTOP \
+    XDG_CURRENT_DESKTOP \
+    XDG_MENU_PREFIX \
+    KDE_FULL_SESSION \
+    KDE_SESSION_VERSION \
+    QT_QPA_PLATFORM \
+    QT_QPA_PLATFORMTHEME \
+    QT_QPA_PLATFORMTHEME_QT6 \
+    QT_IM_MODULE \
+    QT_IM_MODULES \
+    ELECTRON_OZONE_PLATFORM_HINT
+
+  # Restart portals so they pick up the new environment
+  systemctl --user restart plasma-xdg-desktop-portal-kde.service
+  systemctl --user restart xdg-desktop-portal.service
+
   run waw
 
   run_once picom -- picom -b
