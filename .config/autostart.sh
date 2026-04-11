@@ -31,13 +31,25 @@ run_once() {
   run "$@"
 }
 
-# run waw
+if pgrep -u "${USER}" -x "niri" >/dev/null 2>&1; then
+  SESSION="niri"
+elif pgrep -u "${USER}" -x "awesome" >/dev/null 2>&1; then
+  SESSION="awesome"
+else
+  SESSION="unknown"
+fi
+
+if [ "$SESSION" = "awesome" ]; then
+  run waw
+
+  run_once picom -- picom -b
+  run_once albert -- albert
+fi
 
 # Daemons / services
+run_once kded6 -- kded6
 run_once kwalletd6 -- kwalletd6
-# run_once picom -- picom -b
-run_once fcitx5 -- fcitx5 -d
-# run_once albert -- albert
+run_once fcitx5 -- fcitx5 -d --replace
 run_once insync -- insync start
 # run_once betterbird -- betterbird
 

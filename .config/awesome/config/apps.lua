@@ -2,7 +2,7 @@ local M = {
     -- This is used later as the default terminal and editor to run.
     -- terminal = "x-terminal-emulator"
     -- editor = os.getenv("EDITOR") or "editor"
-    terminal = "terminator",
+    terminal = "alacritty",
     editor = "vim",
 
     -- Default modkey.

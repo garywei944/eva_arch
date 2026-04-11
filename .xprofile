@@ -1,5 +1,25 @@
-export XMODIFIERS=@im=fcitx
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
+# KDE integration
+export XDG_CURRENT_DESKTOP="awesome"
+export KDE_FULL_SESSION="true"
+export KDE_SESSION_VERSION="6"
+export XDG_CURRENT_DESKTOP="awesome"
+export XDG_MENU_PREFIX="plasma-"
+
+# Qt
+export QT_QPA_PLATFORM="xcb"
+export QT_QPA_PLATFORMTHEME="kde"
+export QT_QPA_PLATFORMTHEME_QT6="kde"
+# export QT_AUTO_SCREEN_SCALE_FACTOR="1"
+# export QT_ENABLE_HIGHDPI_SCALING="1"
+# export QT_SCALE_FACTOR="1.25"
+# export QT_SCALE_FACTOR_ROUNDING_POLICY="RoundPreferFloor"
+# export QT_SCALE_FACTOR_ROUNDING_POLICY="Round"
+
+# Input method
+export QT_IM_MODULE="fcitx"
+export QT_IM_MODULES="xcb;fcitx"
+
+# Electron
+export ELECTRON_OZONE_PLATFORM_HINT="auto"
 
 numlockx on
