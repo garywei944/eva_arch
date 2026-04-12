@@ -33,11 +33,13 @@
 !.config/etc
 !.config/hypr
 !.config/kanata
+!.config/kitty
 !.config/neofetch
 !.config/niri
 !.config/personal
 !.config/scripts
 !.config/terminator
+!config/uwsm
 !.config/zsh_custom
 
 !.config/autostart.sh
