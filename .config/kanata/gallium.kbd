@@ -1,0 +1,163 @@
+(defcfg
+  ;; Place your OS specific configurations here, see: https://github.com/jtroo/kanata
+  ;; ** For Linux **
+  ;; input  (device-file "/dev/input/by-id/usb-04d9_USB-HID_Keyboard-event-kbd")
+  ;; output (uinput-sink "Kanata Colemak-DH Matrix output")
+
+  ;; ** For Windows **
+  ;; input  (low-level-hook)
+  ;; output (send-event-sink)
+
+  ;; ** For MacOS **
+  ;; input  (iokit-name "my-keyboard-product-string")
+  ;; output (kext)
+
+  linux-dev (
+    /dev/input/by-id/usb-Corsair_CORSAIR_K100_RGB_Optical-Mechanical_Gaming_Keyboard_561B61D76113B4D1-event-kbd
+  )
+
+  process-unmapped-keys   yes
+  concurrent-tap-hold     yes
+  allow-hardware-repeat   no
+)
+
+(defsrc
+  esc
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+
+(defalias
+  ;; toggle layer aliases
+  num (layer-toggle numbers)
+  chr (layer-toggle chords)
+  arr (layer-toggle arrows)
+  msc (layer-toggle misc)
+  lay (layer-toggle layers)
+  mse (layer-toggle mouse)
+
+  ;; change the base layer between qwerty and gallium
+  gal (layer-switch gallium)
+  qwr (layer-switch qwerty)
+  gme (layer-switch gaming)
+
+  ;; tap-hold keys with letters for tap and layer change for hold
+  nnm (tap-hold-release 200 200 n @num)
+  rar (tap-hold-release 200 200 r @arr)
+  tch (tap-hold-release 200 200 t @chr)
+  smc (tap-hold-release 200 200 s @msc)
+  grl (tap-hold-release 200 200 grv @lay)
+  dms (tap-hold-release 200 200 d @mse)
+
+  ;; tap for capslk, hold for lctl
+  cap (tap-hold-release 200 200 esc lctl)
+  esc caps
+
+  ;; chords
+  csv C-S-v
+  csc C-S-c
+)
+
+(deflocalkeys-linux
+  pho 445
+)
+
+(defalias
+  ;; shifted keys
+  { S-[
+  } S-]
+  : S-;
+  ral (tap-hold-release 200 200 sldr ralt)
+)
+
+(deflayer gallium
+  @esc
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  b    l    @dms c    v    j    f    o    u    ,    [    ]    \
+  @cap @nnm @rar @tch @smc g    y    h    a    e    i    '    ret
+  lsft x    q    m    w    z    k    p    '    ;    .    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+(deflayer qwerty
+  @esc
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @cap a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+(deflayer gaming
+  esc
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+(deflayer layers
+  _
+  _    @qwr @gal @gme lrld _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
+
+(deflayer numbers
+  _
+  _    _    _    _    _    _    nlk  kp7  kp8  kp9  _    _    _    _
+  _    _    C-S-tab C-tab _    XX   _    kp4  kp5  kp6  min  _    _    _
+  _    _    C-z  C-y  M-tab XX   _    kp1  kp2  kp3  +    _    _
+  _    C-z  C-x  C-c  C-v  XX   _    kp0  kp0  .    /    _
+  _    _    _              _              _    _    _
+)
+
+(deflayer misc
+  _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    ins  @{   @}   [    ]    _    _    _
+  _    _    _    _    _    _    C-bspc bspc esc  ret  _    _    _
+  _    C-z  C-x  C-c  C-v  _    _    del  _    _    _    _
+  _    _    _              _              _    _    _
+)
+
+(deflayer chords
+  _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    C-u  _    _    _    _
+  _    _    _    _    _    _    _    _    S-;  _    C-s  _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
+
+(deflayer arrows
+  _
+  _    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  _
+  _    _    _    _    _    _    C-S-tab pgup up   pgdn C-tab _    _    _
+  _    _    _    _    _    _    home left down rght end  _    _
+  _    _    _    _    _    _    _    _    C-w  _    _    _
+  _    _    _              _              _    _    _
+)
+
+(defalias
+  mwu (mwheel-up 50 120)
+  mwd (mwheel-down 50 120)
+  mwl (mwheel-left 50 120)
+  mwr (mwheel-right 50 120)
+)
+
+(deflayer mouse
+  _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    @mwu bck  _    fwd  _    _    _    _    _    _    _    _    _
+  _    @mwd mlft _    mrgt mmid _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
