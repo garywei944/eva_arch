@@ -5,21 +5,13 @@
 
   process-unmapped-keys   yes
   concurrent-tap-hold     yes
-  ;; allow-hardware-repeat   no
+  allow-hardware-repeat   false
 )
 
 (defsrc
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
-  lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt menu rctl
-)
-
-(deflayer qwerty
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  @cap a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt menu rctl
 )
@@ -32,20 +24,44 @@
   lctl lmet lalt           spc            ralt menu rctl
 )
 
+(deflayer qwerty
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @cap a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt menu rctl
+)
+
+(deflayer gaming
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt menu rctl
+)
+
+(defvar
+  ;; tap-repress-timeout
+  tt 200
+  ;; hold-timeout
+  ht 230
+)
+
 (defalias
   ;; tap: backtick (grave), hold: toggle layer-switching layer while held
-  grl (tap-hold 200 200 grv (layer-toggle layers))
+  grl (tap-hold $tt $ht grv (layer-toggle layers))
 
   ;; layer-switch changes the base layer.
   gal (layer-switch gallium)
   qwr (layer-switch qwerty)
+  gme (layer-switch gaming)
 
   ;; tap for capslk, hold for lctl
-  cap (tap-hold 200 200 esc lctl)
+  cap (tap-hold $tt $ht esc lctl)
 )
 
 (deflayer layers
-  _    @qwr @gal lrld _    _    _    _    _    _    _    _    _    _
+  _    @qwr @gal @gme lrld _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
