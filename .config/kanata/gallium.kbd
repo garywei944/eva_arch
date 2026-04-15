@@ -1,4 +1,6 @@
 (defcfg
+  ;; Don't crash if keyboard isn't connect on startup
+  linux-continue-if-no-devs-found yes
   linux-dev (
     /dev/input/by-id/usb-Corsair_CORSAIR_K100_RGB_Optical-Mechanical_Gaming_Keyboard_561B61D76113B4D1-event-kbd
   )
@@ -19,17 +21,17 @@
 (deflayer gallium
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
-  @cap n    r    t    s    g    y    h    a    e    i    /    ret
-  lsft x    q    m    w    z    k    p    '    ;    .    rsft
-  lctl lmet lalt           spc            ralt menu rctl
+  @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   /    ret
+  lsft x    q    m    w    z    k    p    '    ;    .    @oss
+  lctl lmet lalt           @sym           ralt menu rctl
 )
 
 (deflayer qwerty
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  @cap a    s    d    f    g    h    j    k    l    ;    '    ret
-  lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt menu rctl
+  @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    @oss
+  lctl lmet lalt           @sym           ralt menu rctl
 )
 
 (deflayer gaming
@@ -58,6 +60,34 @@
 
   ;; tap for capslk, hold for lctl
   cap (tap-hold $tt $ht esc lctl)
+
+  ;; home row mods
+  n (tap-hold $tt $ht n lmet)
+  r (tap-hold $tt $ht r lalt)
+  t (tap-hold $tt $ht t lctl)
+  s (tap-hold $tt $ht s lsft)
+  h (tap-hold $tt $ht h rsft)
+  a (tap-hold $tt $ht a rctl)
+  e (tap-hold $tt $ht e lalt)
+  i (tap-hold $tt $ht i lmet)
+
+  aqt (tap-hold $tt $ht a lmet)
+  sqt (tap-hold $tt $ht s lalt)
+  dqt (tap-hold $tt $ht d lctl)
+  fqt (tap-hold $tt $ht f lsft)
+  jqt (tap-hold $tt $ht j rsft)
+  kqt (tap-hold $tt $ht k rctl)
+  lqt (tap-hold $tt $ht l lalt)
+  ;qt (tap-hold $tt $ht ; lmet)
+
+  ;; Move useful keys closer and add layers
+  oss (one-shot-press 2000 lsft)
+  sym (tap-hold $tt $ht spc  (layer-while-held symbols))
+;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
+;;   nav (tap-hold $tt $ht bspc (layer-while-held nav))
+;;   fun (tap-hold $tt $ht '    (layer-while-held function))
+;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
+  cwr (caps-word-toggle 10000)
 )
 
 (deflayer layers
@@ -65,5 +95,57 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
+(defvar
+  ;; --- existing ones from your snippet, all kept ---
+  rps S-0     ;; ) Right paren
+  exc S-1     ;; ! Bang
+  dlr S-4     ;; $ Dollar
+  per S-5     ;; % Percent
+  crt S-6     ;; ^ Caret
+  amp S-7     ;; & Ampersand
+  ask S-8     ;; * Asterisk
+  lps S-9     ;; ( Left paren
+  pls S-=     ;; + Plus
+  lbc S-[     ;; { Left brace
+  rbc S-]     ;; } Right brace
+  uds S--     ;; _ Underscore
+  qtm S-/     ;; ? Question mark
+  tld S-grv   ;; ~ Tilde   (NOTE: changed from S-\ — on US ANSI, ~ is shift+grave)
+  vrb S-\     ;; | Pipe    (NOTE: changed from S-nubs — on US ANSI, | is shift+\)
+  num S-3     ;; # Hash    (NOTE: changed from bksl — on US ANSI, # is shift+3)
+  dqm S-'     ;; " Double quote (NOTE: changed from S-2 — on US ANSI, " is shift+')
+  ats S-2     ;; @ At-sign (NOTE: changed from S-' — on US ANSI, @ is shift+2)
+  lst S-,     ;; < Less than
+  grt S-.     ;; > Greater than
+  cln S-;     ;; : Colon
+  mns -       ;; - Minus (just the key itself)
+)
+
+;; Symbol layer activated by holding Space.
+;; Layout philosophy:
+;;   - Home row: brackets organized as left-open / right-close pairs,
+;;     with `=` on right index home (most common code symbol),
+;;     `:` on left pinky home (Python's most-typed symbol after `=`),
+;;     `_` on left index inner stretch (snake_case central position).
+;;   - Top row: shifted-number symbols in their familiar positions,
+;;     plus `?` and `|` at the right end.
+;;   - Bottom row: less-frequent but useful symbols (~, \, @, `, <, >, ').
+;;
+;; Roll patterns enabled:
+;;   ()  = physical s+l  (cross-hand alternation, fastest possible)
+;;   {}  = physical d+k  (same)
+;;   []  = physical f+j  (same)
+;;   <>  = physical n+m  (same-hand roll, inward)
+;;   ==  = physical h+h  (same key)
+;;   ::  = physical a+a  (same key)
+;;   :=  = physical a+h  (Python walrus operator, comfortable)
+;;   ->  = physical o+m  (-, then > with sym held; awkward, accept)
+(deflayer symbols
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
+  _    $cln $lps $lbc [    $uds =    ]    $rbc $rps _    _    _
+  _    $tld \    $ats grv  _    $lst $grt '    _    _    _
   _    _    _              _              _    _    _
 )
