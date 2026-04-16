@@ -7,7 +7,7 @@
 
   process-unmapped-keys   yes
   concurrent-tap-hold     yes
-  allow-hardware-repeat   false
+  allow-hardware-repeat   true
 )
 
 (defsrc
@@ -20,21 +20,21 @@
 )
 
 (deflayer gallium
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
-  @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @fun ret
+  @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  lctl lmet @nav           @sym           @num menu rctl
+  @ctl lmet @nav           @sym           @num menu rctl
 )
 
 (deflayer qwerty
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  lctl lmet @nav           @sym           @num menu rctl
+  @ctl lmet @nav           @sym           @num menu rctl
 )
 
 (deflayer gaming
@@ -64,6 +64,7 @@
 
   ;; tap for capslk, hold for lctl
   cap (tap-hold $tt $ht esc lctl)
+  esc caps
 
   ;; home row mods
   n (tap-hold $tt $ht n lmet)
@@ -83,16 +84,17 @@
   kqt (tap-hold $tt $ht k rctl)
   lqt (tap-hold $tt $ht l lalt)
   ;qt (tap-hold $tt $ht ; lmet)
-  'qt (tap-hold $tt $ht ' (layer-while-held function))
+  'qt (tap-hold $tt $ht ' (layer-while-held chords))
 
   ;; Move useful keys closer and add layers
   oss (one-shot-press 2000 lsft)
   sym (tap-hold $tt $ht spc  (layer-while-held symbols))
-  num (tap-hold $tt $ht ret  (layer-while-held nav))
+  num (tap-hold $tt $ht ret  (layer-while-held numbers))
   nav (tap-hold $tt $ht bspc (layer-while-held nav))
-  fun (tap-hold $tt $ht /    (layer-while-held function))
-  vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
+  chr (tap-hold $tt $ht /    (layer-while-held chords))
+;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
   cwr (caps-word-toggle 10000)
+  ctl (layer-while-held controls)
 )
 
 (deflayer template
@@ -106,8 +108,8 @@
 
 (deflayer layers
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    @qwr @gal @gme lrld _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    @qwr @gal @gme _    _    _    _    _    _    _    _    _    _    _
+  _    lrld _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _              _              _    _    _
@@ -168,50 +170,48 @@
 )
 
 (defalias
-  osm (one-shot-press 2000 lmet)
-  osa (one-shot-press 2000 lalt)
-  osc (one-shot-press 2000 lctl)
-  osg (one-shot-press 2000 ralt)
+  mwu (mwheel-up 50 120)
+  mwd (mwheel-down 50 120)
+  mwl (mwheel-left 50 120)
+  mwr (mwheel-right 50 120)
+
+  ntb C-tab
+  ptb C-S-tab
 )
+
 
 (deflayer nav
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    C-S-tab C-tab _    _    _    _    _
-  _    @osm @osa @osc @oss @osg left down up   rght _    _    _
+  _    _    _    _    _    _    @mwl @mwd @mwu @mwr _    _    _    _
+  _    _    _    @ptb @ntb _    left down up   rght _    _    _
   _    _    _    _    _    _    home pgdn pgup end  _    _
+  _    _    _              A-spc          _    _    _
+)
+
+(deflayer chords
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    C-u  ins  _    _    _    _    _
+  _    _    _    C-d  _    _    _    prev next pp   _    _    _
+  _    C-z  C-x  C-c  C-v  _    _    vold volu mute _    _
   _    _    _              _              _    _    _
 )
 
-(defalias
-  pca (macro [ c)
-  nca (macro ] c)
-  prf (macro [ [)
-  nrf (macro ] ])
-  pis (macro [ i)
-  nis (macro ] i)
-  pbf (macro [ b)
-  nbf (macro ] b)
-  pdg (macro [ d)
-  ndg (macro ] d)
-  pql (macro [ q)
-  nql (macro ] q)
-)
-
-(deflayer vim-nav
+(deflayer numbers
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    @pca @nca _    _    @pbf @nbf _    _    _    _    _
-  _    _    _    @prf @nrf _    _    @pdg @ndg _    _    _    _
-  _    _    _    @pis @nis _    _    @pql @nql _    _    _
-  _    _    _              _              _    _    _
+  _    _    7    8    9    _    _    _    _    _    _    _    _    _
+  _    0    4    5    6    _    _    _    _    _    _    _    _
+  _    _    1    2    3    _    _    _    A-,  _    _    _
+  _    _    del            @cwr           _    _    _
 )
 
-(deflayer function
+(deflayer controls
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    f7   f8   f9   f12  _    prev next pp   _    _    _    _
-  _    prnt f4   f5   f6   f11  _    vold volu mute _    _    _
-  _    _    f1   f2   f3   f10  _    brdn bru  _    _    _
+  _    _    C-w  _    C-r  _    _    _    _    _    _    _    _    _
+  _    C-a  C-s  C-d  C-f  _    C-h  _    _    _    _    _    _
+  _    C-z  C-x  C-c  C-v  _    C-n  _    _    _    _    _
   _    _    _              _              _    _    _
 )
