@@ -11,7 +11,8 @@
 )
 
 (defsrc
-  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
@@ -19,23 +20,26 @@
 )
 
 (deflayer gallium
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
-  @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   /    ret
+  @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @fun ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  lctl lmet lalt           @sym           ralt menu rctl
+  lctl lmet @nav           @sym           @num menu rctl
 )
 
 (deflayer qwerty
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt '    ret
+  @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  lctl lmet lalt           @sym           ralt menu rctl
+  lctl lmet @nav           @sym           @num menu rctl
 )
 
 (deflayer gaming
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
@@ -79,24 +83,36 @@
   kqt (tap-hold $tt $ht k rctl)
   lqt (tap-hold $tt $ht l lalt)
   ;qt (tap-hold $tt $ht ; lmet)
+  'qt (tap-hold $tt $ht ' (layer-while-held function))
 
   ;; Move useful keys closer and add layers
   oss (one-shot-press 2000 lsft)
   sym (tap-hold $tt $ht spc  (layer-while-held symbols))
-;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
-;;   nav (tap-hold $tt $ht bspc (layer-while-held nav))
-;;   fun (tap-hold $tt $ht '    (layer-while-held function))
-;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
+  num (tap-hold $tt $ht ret  (layer-while-held nav))
+  nav (tap-hold $tt $ht bspc (layer-while-held nav))
+  fun (tap-hold $tt $ht /    (layer-while-held function))
+  vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
   cwr (caps-word-toggle 10000)
 )
 
-(deflayer layers
-  _    @qwr @gal @gme lrld _    _    _    _    _    _    _    _    _
+(deflayer template
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _              _              _    _    _
 )
+
+(deflayer layers
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    @qwr @gal @gme lrld _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
+
 (defvar
   ;; --- existing ones from your snippet, all kept ---
   rps S-0     ;; ) Right paren
@@ -143,9 +159,59 @@
 ;;   :=  = physical a+h  (Python walrus operator, comfortable)
 ;;   ->  = physical o+m  (-, then > with sym held; awkward, accept)
 (deflayer symbols
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
   _    $cln $lps $lbc [    $uds =    ]    $rbc $rps _    _    _
   _    $tld \    $ats grv  _    $lst $grt '    _    _    _
+  _    _    _              _              _    _    _
+)
+
+(defalias
+  osm (one-shot-press 2000 lmet)
+  osa (one-shot-press 2000 lalt)
+  osc (one-shot-press 2000 lctl)
+  osg (one-shot-press 2000 ralt)
+)
+
+(deflayer nav
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    C-S-tab C-tab _    _    _    _    _
+  _    @osm @osa @osc @oss @osg left down up   rght _    _    _
+  _    _    _    _    _    _    home pgdn pgup end  _    _
+  _    _    _              _              _    _    _
+)
+
+(defalias
+  pca (macro [ c)
+  nca (macro ] c)
+  prf (macro [ [)
+  nrf (macro ] ])
+  pis (macro [ i)
+  nis (macro ] i)
+  pbf (macro [ b)
+  nbf (macro ] b)
+  pdg (macro [ d)
+  ndg (macro ] d)
+  pql (macro [ q)
+  nql (macro ] q)
+)
+
+(deflayer vim-nav
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    @pca @nca _    _    @pbf @nbf _    _    _    _    _
+  _    _    _    @prf @nrf _    _    @pdg @ndg _    _    _    _
+  _    _    _    @pis @nis _    _    @pql @nql _    _    _
+  _    _    _              _              _    _    _
+)
+
+(deflayer function
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    f7   f8   f9   f12  _    prev next pp   _    _    _    _
+  _    prnt f4   f5   f6   f11  _    vold volu mute _    _    _
+  _    _    f1   f2   f3   f10  _    brdn bru  _    _    _
   _    _    _              _              _    _    _
 )
