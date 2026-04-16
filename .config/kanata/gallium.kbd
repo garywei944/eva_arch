@@ -25,7 +25,7 @@
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  @ctl lmet @nav           @sym           @num menu rctl
+  lctl lmet lalt           @sym           @nav menu rctl
 )
 
 (deflayer qwerty
@@ -34,8 +34,8 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  @ctl lmet @nav           @sym           @num menu rctl
-)
+  lctl lmet lalt           @sym           @nav menu rctl
+
 
 (deflayer gaming
   esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
@@ -89,12 +89,12 @@
   ;; Move useful keys closer and add layers
   oss (one-shot-press 2000 lsft)
   sym (tap-hold $tt $ht spc  (layer-while-held symbols))
-  num (tap-hold $tt $ht ret  (layer-while-held numbers))
-  nav (tap-hold $tt $ht bspc (layer-while-held nav))
+;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
+;;   nav (tap-hold $tt $ht bspc (layer-while-held nav))
+  nav (layer-while-held nav)
   chr (tap-hold $tt $ht /    (layer-while-held chords))
 ;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
   cwr (caps-word-toggle 10000)
-  ctl (layer-while-held controls)
 )
 
 (deflayer template
@@ -193,25 +193,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    C-u  ins  _    _    _    _    _
-  _    _    _    C-d  _    _    _    prev next pp   _    _    _
+  _    _    _    C-d  _    _    _    next prev pp   _    _    _
   _    C-z  C-x  C-c  C-v  _    _    vold volu mute _    _
-  _    _    _              _              _    _    _
-)
-
-(deflayer numbers
-  _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    7    8    9    _    _    _    _    _    _    _    _    _
-  _    0    4    5    6    _    _    _    _    _    _    _    _
-  _    _    1    2    3    _    _    _    A-,  _    _    _
-  _    _    del            @cwr           _    _    _
-)
-
-(deflayer controls
-  _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    C-w  _    C-r  _    _    _    _    _    _    _    _    _
-  _    C-a  C-s  C-d  C-f  _    C-h  _    _    _    _    _    _
-  _    C-z  C-x  C-c  C-v  _    C-n  _    _    _    _    _
   _    _    _              _              _    _    _
 )
