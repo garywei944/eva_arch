@@ -21,7 +21,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt menu rctl
+  lctl lmet lalt           spc            ralt rmet menu rctl
 )
 
 (deflayer gallium
@@ -30,7 +30,7 @@
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  @lcl @mod lalt           @sym           @nav menu @rcl
+  lctl lmet lalt           @sym           @nav rmet menu rctl
 )
 
 (deflayer qwerty
@@ -39,7 +39,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  @lcl @mod lalt           @sym           @nav menu @rcl
+  lctl lmet lalt           @sym           @nav rmet menu rctl
 )
 
 (deflayer gaming
@@ -48,7 +48,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt menu rctl
+  lctl lmet lalt           spc            ralt rmet menu rctl
 )
 
 (defvar
@@ -60,18 +60,12 @@
 
 (platform (linux win)
   (defalias
-    lcl lctl
-    rcl rctl
-    mod lmet
     ins ins
   )
 )
 
 (platform (macos)
   (defalias
-    lcl lmet
-    rcl rmet
-    mod lctl
     ins  fn
   )
 )
@@ -126,7 +120,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              _              _    _    _
+  _    _    _              _              _    _    _    _
 )
 
 (deflayer layers
@@ -135,7 +129,7 @@
   _    lrld _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              _              _    _    _
+  _    _    _              _              _    _    _    _
 )
 
 (defvar
@@ -189,7 +183,7 @@
   _    $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
   _    $cln $lps $lbc [    $uds =    ]    $rbc $rps _    _    _
   _    $tld \    $ats grv  _    $lst $grt '    _    _    _
-  _    _    _              _              _    _    _
+  _    _    _              _              _    _    _    _
 )
 
 (defalias
@@ -209,7 +203,7 @@
   _    _    _    _    _    _    @mwl @mwd @mwu @mwr _    _    _    _
   _    _    _    @ptb @ntb _    left down up   rght _    _    _
   _    _    _    _    _    _    home pgdn pgup end  _    _
-  _    _    _              A-spc          _    _    _
+  _    _    _              A-spc          _    _    _    _
 )
 
 (deflayer chords
@@ -218,5 +212,5 @@
   _    _    _    _    _    _    _    C-u  ins  _    _    _    _    _
   _    _    _    C-d  _    _    _    next prev pp   _    _    _
   _    C-z  C-x  C-c  C-v  _    _    vold volu mute _    _
-  _    _    _              _              _    _    _
+  _    _    _              _              _    _    _    _
 )
