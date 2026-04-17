@@ -21,21 +21,21 @@
 
 (deflayer gallium
   @esc f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  lctl lmet lalt           @sym           @nav menu rctl
+  @lcl @mod lalt           @sym           @nav menu @rcl
 )
 
 (deflayer qwerty
   @esc f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  lctl lmet lalt           @sym           @nav menu rctl
-
+  @lcl @mod lalt           @sym           @nav menu @rcl
+)
 
 (deflayer gaming
   esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
@@ -51,6 +51,23 @@
   tt 200
   ;; hold-timeout
   ht 230
+)
+
+(platform (macos)
+  (defalias
+    lcl lmet
+    rcl rmet
+    mod lctl
+    ins  fn
+  )
+)
+
+
+(defalias
+  lcl lctl
+  rcl rctl
+  mod lmet
+  ins ins
 )
 
 (defalias
