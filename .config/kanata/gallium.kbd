@@ -25,7 +25,7 @@
 )
 
 (deflayer gallium
-  @esc f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
@@ -34,7 +34,7 @@
 )
 
 (deflayer qwerty
-  @esc f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
@@ -43,7 +43,7 @@
 )
 
 (deflayer gaming
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  esc  @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
@@ -61,12 +61,36 @@
 (platform (linux win)
   (defalias
     ins ins
+    f1 f1
+    f2 f2
+    f3 f3
+    f4 f4
+    f5 f5
+    f6 f6
+    f7 f7
+    f8 f8
+    f9 f9
+    f10 f10
+    f11 f11
+    f12 f12
   )
 )
 
 (platform (macos)
   (defalias
     ins  fn
+    f1 brdown
+    f2 brup
+    f3 C-up
+    f4 M-spc
+    f5 f5
+    f6 f6
+    f7 prev
+    f8 pp
+    f9 next
+    f10 mute
+    f11 vold
+    f12 volu
   )
 )
 
