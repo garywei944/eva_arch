@@ -4,6 +4,11 @@
   linux-dev (
     /dev/input/by-id/usb-Corsair_CORSAIR_K100_RGB_Optical-Mechanical_Gaming_Keyboard_561B61D76113B4D1-event-kbd
   )
+  macos-dev-names-include (
+    "Apple Internal Keyboard / Trackpad"
+    "Corsair iCUE VirtualHIDKeyboard 1.8.10"
+    "CORSAIR K100 RGB Optical-Mechanical Gaming Keyboard"
+  )
 
   process-unmapped-keys   yes
   concurrent-tap-hold     yes
