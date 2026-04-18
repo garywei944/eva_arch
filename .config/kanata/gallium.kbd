@@ -78,7 +78,7 @@
 
 (platform (macos)
   (defalias
-    ins  fn
+    ins (tap-hold $tt $ht fn (layer-while-held function))
     f1 brdown
     f2 brup
     f3 C-up
@@ -91,6 +91,21 @@
     f10 mute
     f11 vold
     f12 volu
+  )
+)
+
+(platform (macos)
+  (defoverrides
+    (lalt spc)  (lmet spc)
+    (lalt grv)  (lmet grv)
+    (lalt tab)  (lmet tab)
+    (home)      (lmet left)
+    (end)       (lmet rght)
+    (lsft home) (lmet lsft left)
+    (lsft end)  (lmet lsft rght)
+    (lctl home) (lctl lmet left)
+    (lctl end)  (lctl lmet rght)
+    (prnt)      (lctl lsft a)
   )
 )
 
@@ -236,5 +251,14 @@
   _    _    _    _    _    _    _    C-u  ins  _    _    _    _    _
   _    _    _    C-d  _    _    _    next prev pp   _    _    _
   _    C-z  C-x  C-c  C-v  _    _    vold volu mute _    _
+  _    _    _              _              _    _    _    _
+)
+
+(deflayer function
+  _    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _              _              _    _    _    _
 )
