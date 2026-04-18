@@ -16,7 +16,7 @@
 )
 
 (defsrc
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  prnt
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  sys
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
@@ -25,7 +25,7 @@
 )
 
 (deflayer gallium
-  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 prnt
+  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 sys
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
@@ -34,7 +34,7 @@
 )
 
 (deflayer qwerty
-  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 prnt
+  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 sys
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
@@ -43,7 +43,7 @@
 )
 
 (deflayer gaming
-  esc  @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 prnt
+  esc  @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 sys
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
@@ -105,7 +105,7 @@
     (lsft end)  (lmet lsft rght)
     (lctl home) (lctl lmet left)
     (lctl end)  (lctl lmet rght)
-    (prnt)      (lctl lsft a)
+    (sys)       (lctl lsft a)
   )
 )
 
