@@ -16,7 +16,7 @@
 )
 
 (defsrc
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  prnt
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
@@ -25,7 +25,7 @@
 )
 
 (deflayer gallium
-  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
+  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 prnt
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
@@ -34,7 +34,7 @@
 )
 
 (deflayer qwerty
-  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
+  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 prnt
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
@@ -43,7 +43,7 @@
 )
 
 (deflayer gaming
-  esc  @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
+  esc  @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12 prnt
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
@@ -154,7 +154,7 @@
 )
 
 (deflayer template
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
@@ -163,7 +163,7 @@
 )
 
 (deflayer layers
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    @qwr @gal @gme _    _    _    _    _    _    _    _    _    _    _
   _    lrld _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
@@ -217,7 +217,7 @@
 ;;   :=  = physical a+h  (Python walrus operator, comfortable)
 ;;   ->  = physical o+m  (-, then > with sym held; awkward, accept)
 (deflayer symbols
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
   _    $cln $lps $lbc [    $uds =    ]    $rbc $rps _    _    _
@@ -237,7 +237,7 @@
 
 
 (deflayer nav
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    @mwl @mwd @mwu @mwr _    _    _    _
   _    _    _    @ptb @ntb _    left down up   rght _    _    _
@@ -246,7 +246,7 @@
 )
 
 (deflayer chords
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    C-u  ins  _    _    _    _    _
   _    _    _    C-d  _    _    _    next prev pp   _    _    _
@@ -255,7 +255,7 @@
 )
 
 (deflayer function
-  _    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  _    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
