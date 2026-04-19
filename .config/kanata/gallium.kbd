@@ -30,7 +30,7 @@
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  lctl lmet lalt           @sym           @nav rmet menu rctl
+  @hyp lmet lalt           @sym           @nav rmet menu rctl
 )
 
 (deflayer qwerty
@@ -39,7 +39,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  lctl lmet lalt           @sym           @nav rmet menu rctl
+  @hyp lmet lalt           @sym           @nav rmet menu rctl
 )
 
 (deflayer gaming
@@ -101,10 +101,6 @@
     (lalt tab)  (lmet tab)
     (home)      (lmet left)
     (end)       (lmet rght)
-    (lsft home) (lmet lsft left)
-    (lsft end)  (lmet lsft rght)
-    (lctl home) (lctl lmet left)
-    (lctl end)  (lctl lmet rght)
   )
 )
 
@@ -120,6 +116,7 @@
   ;; tap for capslk, hold for lctl
   cap (tap-hold $tt $ht esc lctl)
   esc caps
+  hyp (tap-hold $tt $ht (one-shot 2000 lctl) (multi rmet ralt rsft rctl))
 
   ;; home row mods
   n (tap-hold $tt $ht n lmet)
@@ -163,7 +160,7 @@
 
 (deflayer layers
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    @qwr @gal @gme _    _    _    _    _    _    _    _    _    _    _
+  _    @gal @qwr @gme _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
@@ -194,6 +191,7 @@
   grt S-.     ;; > Greater than
   cln S-;     ;; : Colon
   mns -       ;; - Minus (just the key itself)
+  slh /       ;; / Slash (just the key itself
 )
 
 ;; Symbol layer activated by holding Space.
@@ -219,7 +217,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    M-1  M-2  M-3  M-4  M-5  M-6  M-7  M-8  M-9  _    _    _    _    _
   @ntb $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
-  _    $cln $lps $lbc [    $uds =    ]    $rbc $rps _    _    _
+  _    $cln $lps $lbc [    $uds =    ]    $rbc $rps $slh _    _
   _    $tld \    $ats grv  _    $lst $grt '    _    _    _
   _    _    _              _              _    _    _    _
 )
