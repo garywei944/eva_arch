@@ -2,6 +2,9 @@
 
 Custom Arch Linux configurations and dotfiles
 
+![Hyprland](.config/hypr/cachy_hypr.png)
+Hyprland ([`~/.config/hypr/`](.config/hypr))
+
 ![KDE Plasma](arch_neofetch_v3.png)
 KDE Plasma
 
