@@ -191,6 +191,9 @@
   grt S-.     ;; > Greater than
   cln S-;     ;; : Colon
   mns -       ;; - Minus (just the key itself)
+
+  ntb C-tab
+  ptb C-S-tab
 )
 
 ;; Symbol layer activated by holding Space.
@@ -215,7 +218,7 @@
 (deflayer symbols
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    M-1  M-2  M-3  M-4  M-5  M-6  M-7  M-8  M-9  _    _    _    _    _
-  @ntb $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
+  $ntb $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm $vrb _
   _    $cln $lps $lbc [    $uds =    ]    $rbc $rps _    _    _
   _    $tld \    $ats grv  _    $lst $grt '    _    _    _
   _    _    _              _              _    _    _    _
@@ -226,9 +229,6 @@
   mwd (mwheel-down 50 120)
   mwl (mwheel-left 50 120)
   mwr (mwheel-right 50 120)
-
-  ntb C-tab
-  ptb C-S-tab
 )
 
 
@@ -236,7 +236,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    @mwl @mwd @mwu @mwr _    _    _    _
-  _    _    _    @ptb @ntb _    left down up   rght _    _    _
+  _    _    _    $ptb $ntb _    left down up   rght _    _    _
   _    _    _    _    _    _    home pgdn pgup end  _    _
   _    _    _              A-spc          _    _    _    _
 )
@@ -244,9 +244,9 @@
 (deflayer chords
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    7    8    9    _    _    _    ins  _    _    _    _    _
-  _    _    4    5    6    _    _    next prev pp   _    _    _
-  _    _    1    2    3    _    _    vold volu mute _    _
+  _    _    7    8    9    $mns _    _    ins  _    _    _    _    _
+  _    _    4    5    6    $pls _    next prev pp   _    _    _
+  _    _    1    2    3    .    _    vold volu mute _    _
   _    _    del            0              _    _    _    _
 )
 

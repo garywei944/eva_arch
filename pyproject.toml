@@ -41,7 +41,7 @@ target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "UP"]
-ignore = []
+ignore = ["F722"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["eden", "evakit"]
