@@ -12,7 +12,7 @@
 
   process-unmapped-keys   yes
   concurrent-tap-hold     yes
-  allow-hardware-repeat   true
+  allow-hardware-repeat   false
 )
 
 (defsrc
@@ -58,7 +58,7 @@
   ht 230
 )
 
-(platform (linux win)
+(platform (linux win winiov2 wintercept)
   (defalias
     ins ins
     f1 f1
