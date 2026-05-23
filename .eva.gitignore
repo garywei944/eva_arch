@@ -37,9 +37,10 @@
 !.config/neofetch
 !.config/niri
 !.config/personal
+!.config/satty
 !.config/scripts
 !.config/terminator
-!config/uwsm
+!.config/uwsm
 !.config/zsh_custom
 
 !.config/autostart.sh
