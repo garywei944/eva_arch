@@ -43,11 +43,20 @@
 )
 
 (deflayer gaming
-  esc  @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc ins
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet menu rctl
+)
+
+(deflayer gaming-gallium
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
+  tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
+  caps n    r    t    s    g    y    h    a    e    i    /    ret
+  lsft x    q    m    w    z    k    p    '    ;    .    rsft
   lctl lmet lalt           spc            ralt rmet menu rctl
 )
 
@@ -107,11 +116,13 @@
 (defalias
   ;; tap: backtick (grave), hold: toggle layer-switching layer while held
   grl (tap-hold $tt $ht grv (layer-toggle layers))
+  inl (tap-hold $tt $ht ins (layer-toggle layers))
 
   ;; layer-switch changes the base layer.
   gal (layer-switch gallium)
   qwr (layer-switch qwerty)
   gme (layer-switch gaming)
+  gmg (layer-switch gaming-gallium)
 
   ;; tap for capslk, hold for lctl
   cap (tap-hold $tt $ht esc lctl)
@@ -160,7 +171,7 @@
 
 (deflayer layers
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    @gal @qwr @gme _    _    _    _    _    _    _    _    _    _    _
+  _    @gal @qwr @gme @gmg _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
