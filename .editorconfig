@@ -9,6 +9,9 @@ indent_size = 4
 trim_trailing_whitespace = true
 insert_final_newline = true
 
+[*.{c,cpp,cu,cuh,h,hpp,cc,cxx}]
+indent_size = 2
+
 [*.{html,css,js,json,sh,yml,yaml}]
 indent_size = 2
 
