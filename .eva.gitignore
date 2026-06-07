@@ -19,6 +19,8 @@
 !.zlogin
 !.zsh.bashrc
 !arch_neofetch_v3.png
+!CLAUDE.md
+!AGENTS.md
 !LICENSE
 !pyproject.toml
 !README.md
@@ -50,6 +52,12 @@
 # extentions
 *.uuid
 .idea
+!/.claude/
+/.claude/*
+!.claude/CLAUDE.md
+!/.codex/
+/.codex/*
+!.codex/AGENTS.md
 !.vscode
 .vscode/*
 !.vscode/settings.json
