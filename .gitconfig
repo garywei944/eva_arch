@@ -33,6 +33,3 @@
 	navigate = true
 [gpg]
 	program = gpg
-[safe]
-	directory = /srv/jekyll
-	directory = /srv/jekyll
