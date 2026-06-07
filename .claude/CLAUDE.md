@@ -1,5 +1,10 @@
 # CLAUDE.md
 
+Shared persona / Voice DNA (ground truth in private `~/.hermes`, synced across EVA replicas; only this path reference is public, not the content):
+@~/.hermes/SOUL.md
+
+---
+
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.

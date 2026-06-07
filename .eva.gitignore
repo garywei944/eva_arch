@@ -58,6 +58,7 @@
 !/.codex/
 /.codex/*
 !.codex/AGENTS.md
+!.codex/AGENTS.override.md
 !.vscode
 .vscode/*
 !.vscode/settings.json

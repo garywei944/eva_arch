@@ -1,0 +1,1 @@
+../.hermes/SOUL.md
