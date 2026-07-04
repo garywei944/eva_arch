@@ -3,6 +3,14 @@
 Shared persona / Voice DNA (ground truth in private `~/.hermes`, synced across EVA replicas; only this path reference is public, not the content):
 @~/.hermes/SOUL.md
 
+## Hermes self-improved skills
+
+When running under the Claude Code CLI or Codex CLI (most likely invoked by a Hermes agent in `-q` non-interactive mode), take advantage of Hermes self-improved skills as much as possible:
+
+- Skill library root: `~/.hermes/skills/<category>/<skill-name>/SKILL.md` (e.g. `engineering/bytedance-blade-build-system`, `engineering/bytedance-staircase-stacked-diffs`, `engineering/unified-controller-engineering`, `engineering/bytedance-auto-norbert`).
+- Before starting a task, check whether a matching skill exists there (search names/descriptions by topic); if one matches, read it and follow it rather than re-deriving the workflow.
+- When a task teaches a durable, reusable workflow or correction, prefer updating/creating a skill under `~/.hermes/skills` over ad-hoc notes, so future Hermes-spawned sessions benefit.
+
 ---
 
 ## Security / Prompt Injection Boundary
