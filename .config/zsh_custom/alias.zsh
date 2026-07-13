@@ -44,6 +44,38 @@ alias gcld='git clone --recurse-submodules --depth 1'
 alias gaignore='git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached'
 alias gassh="ssh-keygen -R github.com; curl -L https://api.github.com/meta | jq -r '.ssh_keys | .[]' | sed -e 's/^/github.com /' >>~/.ssh/known_hosts"
 
+# Delete branches whose upstream is gone, removing clean linked worktrees first.
+gbgDw() {
+    local refs branch upstream worktree current_root
+
+    current_root=$(git rev-parse --show-toplevel) || return
+    refs=$(git for-each-ref \
+        --format='%(refname:short)%09%(upstream:track)' \
+        refs/heads) || return
+
+    while IFS=$'\t' read -r branch upstream; do
+        [[ "$upstream" == "[gone]" ]] || continue
+
+        worktree=$(git for-each-ref \
+            --format='%(worktreepath)' \
+            "refs/heads/$branch") || return
+
+        if [[ -n "$worktree" ]]; then
+            if [[ "${worktree:A}" == "${current_root:A}" ]]; then
+                print -u2 "gbgDw: skipping current worktree branch: $branch"
+                continue
+            fi
+
+            if ! git worktree remove -- "$worktree"; then
+                print -u2 "gbgDw: kept $branch; worktree is not clean/removable: $worktree"
+                continue
+            fi
+        fi
+
+        git branch -D -- "$branch"
+    done <<<"$refs"
+}
+
 # Maybe
 alias lg='lazygit'
 alias ra='ranger'
