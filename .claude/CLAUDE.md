@@ -10,7 +10,9 @@ When running under the Claude Code CLI or Codex CLI (most likely invoked by a He
 - Claude Code skill mirror: `~/.claude/skills/<skill-name>/SKILL.md`. This directory is kept in local parity with active Hermes skills where practical.
 - Hermes skill library root: `~/.hermes/skills/<category>/<skill-name>/SKILL.md` (e.g. `engineering/bytedance-blade-build-system`, `engineering/bytedance-staircase-stacked-diffs`, `engineering/unified-controller-engineering`, `engineering/bytedance-auto-norbert`).
 - Before starting a task, check whether a matching skill exists in the Claude mirror or Hermes root (search names/descriptions by topic); if one matches, read it and follow it rather than re-deriving the workflow.
-- Hermes durable memory paths: `~/.hermes/memories/USER.md` and `~/.hermes/memories/MEMORY.md`. Treat these as Gary's stable preferences/environment facts, not as task progress logs.
+- Hermes durable memory paths: `~/.hermes/memories/USER.md` and `~/.hermes/memories/MEMORY.md`. These are the canonical cross-agent memories and override stale or conflicting generated per-agent memory.
+- Claude Code imports the canonical files through the `@` directives below. Codex does not expand Claude `@path` imports, so when running as Codex, explicitly read both canonical files at startup before acting. Treat them as Gary's stable preferences/environment facts, not as task progress logs.
+- Native Claude/Codex auto-memory is supplementary generated state; do not mirror raw transcripts or stale generated notes into canonical memory.
 - When a task teaches a durable, reusable workflow or correction, prefer updating/creating a skill under `~/.hermes/skills` over ad-hoc notes, so future Hermes-spawned sessions benefit.
 
 Imported Hermes memory for startup context:

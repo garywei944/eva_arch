@@ -8,3 +8,8 @@ globals = {
   "root",
   "mouse",
 }
+
+-- DMS-generated Hyprland Lua runs with the `hl` API injected by Hyprland.
+files[".config/hypr/dms/*.lua"] = {
+  globals = { "hl" },
+}
