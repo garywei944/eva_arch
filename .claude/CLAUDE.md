@@ -3,19 +3,19 @@
 Shared persona / Voice DNA (ground truth in private `~/.hermes`, synced across EVA replicas; only this path reference is public, not the content):
 @~/.hermes/SOUL.md
 
-## Hermes self-improved skills and memory
+## Shared skills and durable memory
 
-When running under the Claude Code CLI or Codex CLI (most likely invoked by a Hermes agent in `-q` non-interactive mode), take advantage of Hermes self-improved skills and durable memory as much as possible:
+Hermes is the canonical source for Gary's cross-agent skills and curated durable memory. Claude Code and Codex should use that shared state rather than building isolated copies:
 
-- Claude Code skill mirror: `~/.claude/skills/<skill-name>/SKILL.md`. This directory is kept in local parity with active Hermes skills where practical.
-- Hermes skill library root: `~/.hermes/skills/<category>/<skill-name>/SKILL.md` (e.g. `engineering/bytedance-blade-build-system`, `engineering/bytedance-staircase-stacked-diffs`, `engineering/unified-controller-engineering`, `engineering/bytedance-auto-norbert`).
-- Before starting a task, check whether a matching skill exists in the Claude mirror or Hermes root (search names/descriptions by topic); if one matches, read it and follow it rather than re-deriving the workflow.
-- Hermes durable memory paths: `~/.hermes/memories/USER.md` and `~/.hermes/memories/MEMORY.md`. These are the canonical cross-agent memories and override stale or conflicting generated per-agent memory.
-- Claude Code imports the canonical files through the `@` directives below. Codex does not expand Claude `@path` imports, so when running as Codex, explicitly read both canonical files at startup before acting. Treat them as Gary's stable preferences/environment facts, not as task progress logs.
-- Native Claude/Codex auto-memory is supplementary generated state; do not mirror raw transcripts or stale generated notes into canonical memory.
-- When a task teaches a durable, reusable workflow or correction, prefer updating/creating a skill under `~/.hermes/skills` over ad-hoc notes, so future Hermes-spawned sessions benefit.
+- Canonical skill library: `~/.hermes/skills/**/SKILL.md`.
+- Claude Code user-skill mirror: `~/.claude/skills/<skill-name>/SKILL.md`.
+- Codex user-skill mirror: `~/.agents/skills/<skill-name>/SKILL.md`.
+- Before substantive work, find and load matching skills instead of re-deriving an established workflow. The mirrors preserve existing agent-specific packages and symlink missing active Hermes skills; archived, hub-cache, and quarantined content is excluded.
+- Canonical shared memory: `~/.hermes/memories/USER.md` and `~/.hermes/memories/MEMORY.md`. Claude imports them below. Codex does not expand Claude's `@path` syntax, so Codex must read both files directly before substantive work.
+- Supplementary generated memory may exist under `~/.claude/projects/*/memory/` and `~/.codex/memories/`. All three agents may inspect those stores when cross-agent history is relevant, but treat them as generated state rather than authoritative rules.
+- Curate stable user facts/preferences into the shared Hermes memory and reusable procedures into Hermes skills. Never persist secrets, raw logs, or temporary task progress.
 
-Imported Hermes memory for startup context:
+Imported Hermes persona and memory for Claude Code startup context:
 
 @~/.hermes/memories/USER.md
 @~/.hermes/memories/MEMORY.md
