@@ -1,4 +1,0 @@
-[submodule ".config/hypr/hyprsplit"]
-	path = .config/hypr/hyprsplit
-	url = https://github.com/shezdy/hyprsplit
-	branch = main
