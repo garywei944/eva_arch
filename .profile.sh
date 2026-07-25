@@ -1,235 +1,384 @@
 #!/bin/sh
 
-# This script is sourced by all POSIX-compliant shells upon startup
+# Shared environment setup for POSIX-compatible shell startup files.
+# Keep this file safe to source repeatedly and avoid interactive output.
 
-command_exists() {
-  command -v "${1}" >/dev/null 2>&1
+_eva_command_exists() {
+  command -v "$1" >/dev/null 2>&1
 }
 
-# Function: Deduplicate a separator-delimited list while preserving order.
-dedupe_list() {
-  # Usage: new_list=$(dedupe_list "${list}" [":"])
-  awk -v v="${1-}" -v sep="${2-:}" 'BEGIN {
-    n = split(v, a, sep); out = "";
-    for (i = 1; i <= n; i++) {
-      if (a[i] != "" && !seen[a[i]]++) {
-        out = out (out ? sep : "") a[i];
+# Deduplicate a colon-delimited path while preserving the first occurrence.
+_eva_dedupe_path() {
+  awk -v path="${1-}" 'BEGIN {
+    count = split(path, entries, ":")
+    output = ""
+    for (i = 1; i <= count; i++) {
+      if (entries[i] != "" && !seen[entries[i]]++) {
+        output = output (output == "" ? "" : ":") entries[i]
       }
     }
-    print out;
+    print output
   }'
 }
 
-prepend_path() {
-  # Usage: new_list=$(prepend_path "/new/path" "${list}")
-  printf '%s' "${1}${2:+:${2}}"
+_eva_prepend_path() {
+  [ -n "${1-}" ] || {
+    printf '%s' "${2-}"
+    return
+  }
+  printf '%s%s' "$1" "${2:+:$2}"
 }
 
-append_path() {
-  # Usage: new_list=$(append_path "/new/path" "${list}")
-  printf '%s' "${2}${2:+:}${1}"
+_eva_append_path() {
+  [ -n "${1-}" ] || {
+    printf '%s' "${2-}"
+    return
+  }
+  printf '%s%s' "${2-}" "${2:+:}$1"
+}
+
+_eva_ssh_agent_is_usable() {
+  [ -n "${SSH_AUTH_SOCK-}" ] && [ -S "${SSH_AUTH_SOCK}" ] || return 1
+
+  # ssh-add returns 1 when the agent is reachable but has no identities.
+  _eva_command_exists ssh-add || return 0
+  ssh-add -l >/dev/null 2>&1
+  case $? in
+    0 | 1) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 ################################################################################
-# Set up environment
+# Base paths
 ################################################################################
 
-for p in "${HOME}/.local/bin" \
-  "${HOME}/bin" \
+# Iterate from lowest to highest priority because each entry is prepended.
+for _eva_dir in \
+  /opt/cisco/anyconnect/bin \
   /usr/local/go/bin \
   "${HOME}/.local/opt/go/bin" \
   "${HOME}/.cargo/bin" \
-  /opt/cisco/anyconnect/bin; do
-  [ -d "${p}" ] && PATH=$(prepend_path "${p}" "${PATH}")
+  "${HOME}/bin" \
+  "${HOME}/.local/bin"; do
+  [ -d "${_eva_dir}" ] && PATH=$(_eva_prepend_path "${_eva_dir}" "${PATH-}")
 done
 
-# Set up LD_LIBRARY_PATH
-for p in /usr/lib/x86_64-linux-gnu \
+for _eva_dir in \
+  /usr/lib/x86_64-linux-gnu \
   /usr/local/lib64 \
   "${HOME}/.local/lib"; do
-  [ -d "${p}" ] && LD_LIBRARY_PATH=$(prepend_path "${p}" "${LD_LIBRARY_PATH}")
+  [ -d "${_eva_dir}" ] &&
+    LD_LIBRARY_PATH=$(_eva_prepend_path "${_eva_dir}" "${LD_LIBRARY_PATH-}")
 done
 
-# CUDA
-for CUDA_HOME in /usr/local/cuda /opt/cuda; do
-  if [ -d "${CUDA_HOME}" ]; then
-    export CUDA_HOME
-    CPATH=$(prepend_path "${CUDA_HOME}/include" "${CPATH}")
+################################################################################
+# Toolchains
+################################################################################
 
-    for SUBDIR in bin nsight_compute nsight_systems/bin; do
-      [ -d "${CUDA_HOME}/${SUBDIR}" ] && PATH=$(prepend_path "${CUDA_HOME}/${SUBDIR}" "${PATH}")
-    done
-    for SUBDIR in lib64 extras/CUPTI/lib64; do
-      [ -d "${CUDA_HOME}/${SUBDIR}" ] &&
-        LD_LIBRARY_PATH=$(append_path "${CUDA_HOME}/${SUBDIR}" "${LD_LIBRARY_PATH}")
-    done
-    break
-  fi
-done
+# CUDA: respect a valid explicit CUDA_HOME, then try common locations.
+_eva_cuda_home=
+if [ -n "${CUDA_HOME-}" ] && [ -d "${CUDA_HOME}" ]; then
+  _eva_cuda_home=${CUDA_HOME}
+else
+  for _eva_candidate in /usr/local/cuda /opt/cuda; do
+    if [ -d "${_eva_candidate}" ]; then
+      _eva_cuda_home=${_eva_candidate}
+      break
+    fi
+  done
+fi
 
-# Fix brew, copied from oh-my-zsh brew plugin
-if ! command_exists brew; then
-  for p in /opt/homebrew/bin/brew \
+if [ -n "${_eva_cuda_home}" ]; then
+  CUDA_HOME=${_eva_cuda_home}
+  export CUDA_HOME
+
+  [ -d "${CUDA_HOME}/include" ] &&
+    CPATH=$(_eva_prepend_path "${CUDA_HOME}/include" "${CPATH-}")
+
+  for _eva_subdir in bin nsight_compute nsight_systems/bin; do
+    [ -d "${CUDA_HOME}/${_eva_subdir}" ] &&
+      PATH=$(_eva_prepend_path "${CUDA_HOME}/${_eva_subdir}" "${PATH-}")
+  done
+
+  for _eva_subdir in lib64 extras/CUPTI/lib64; do
+    [ -d "${CUDA_HOME}/${_eva_subdir}" ] &&
+      LD_LIBRARY_PATH=$(_eva_append_path "${CUDA_HOME}/${_eva_subdir}" "${LD_LIBRARY_PATH-}")
+  done
+fi
+
+# Homebrew. shellenv is evaluated only from a discovered executable and only
+# when it returns successfully.
+if ! _eva_command_exists brew; then
+  _eva_brew=
+  for _eva_candidate in \
+    /opt/homebrew/bin/brew \
     /usr/local/bin/brew \
     /home/linuxbrew/.linuxbrew/bin/brew \
     "${HOME}/.linuxbrew/bin/brew"; do
-    if [ -x "${p}" ]; then
-      BREW_LOCATION="${p}"
+    if [ -x "${_eva_candidate}" ]; then
+      _eva_brew=${_eva_candidate}
       break
     fi
   done
 
-  if [ -n "${BREW_LOCATION}" ]; then
-    # Only add Homebrew installation to PATH, MANPATH, and INFOPATH if brew is
-    # not already on the path, to prevent duplicate entries. This aligns with
-    # the behavior of the brew installer.sh post-install steps.
-    eval "$("${BREW_LOCATION}" shellenv)"
-    unset BREW_LOCATION
+  if [ -n "${_eva_brew}" ]; then
+    _eva_brew_shellenv=$("${_eva_brew}" shellenv 2>/dev/null) || _eva_brew_shellenv=
+    [ -n "${_eva_brew_shellenv}" ] && eval "${_eva_brew_shellenv}"
   fi
 fi
 
-if command_exists brew; then
-  HOMEBREW_PREFIX="$(brew --prefix)"
+_eva_homebrew_prefix=
+if [ -n "${HOMEBREW_PREFIX-}" ] && [ -d "${HOMEBREW_PREFIX}" ]; then
+  _eva_homebrew_prefix=${HOMEBREW_PREFIX}
+elif _eva_command_exists brew; then
+  _eva_homebrew_prefix=$(brew --prefix 2>/dev/null) || _eva_homebrew_prefix=
+  [ -d "${_eva_homebrew_prefix}" ] || _eva_homebrew_prefix=
+fi
+
+if [ -n "${_eva_homebrew_prefix}" ]; then
+  HOMEBREW_PREFIX=${_eva_homebrew_prefix}
   export HOMEBREW_PREFIX
-
-  PATH=$(prepend_path "${HOMEBREW_PREFIX}/bin" "${PATH}")
+  [ -d "${HOMEBREW_PREFIX}/sbin" ] &&
+    PATH=$(_eva_prepend_path "${HOMEBREW_PREFIX}/sbin" "${PATH-}")
+  [ -d "${HOMEBREW_PREFIX}/bin" ] &&
+    PATH=$(_eva_prepend_path "${HOMEBREW_PREFIX}/bin" "${PATH-}")
 fi
 
-# SUDO
-# https://superuser.com/a/1281228
-# https://github.com/koalaman/shellcheck/wiki/SC2181
-if __sudo="$(sudo -nv 2>&1)"; then
-  # has sudo access w/o password
-  :
-elif echo "$__sudo" | grep -q '^sudo:'; then
-  # has sudo access need password
-  :
-else
-  # no sudo access
-  export NOSUDO=1
+# Mark hosts where sudo is unavailable or the user is definitively denied.
+# Password-required responses still mean sudo is usable interactively.
+if [ -z "${NOSUDO+x}" ]; then
+  if ! _eva_command_exists sudo; then
+    NOSUDO=1
+    export NOSUDO
+  elif _eva_sudo_output=$(LC_ALL=C sudo -n -v 2>&1); then
+    :
+  else
+    case ${_eva_sudo_output} in
+      *"not in the sudoers"* | *"not allowed to execute"* | *"not allowed to run sudo"* | *"may not run sudo"*)
+        NOSUDO=1
+        export NOSUDO
+        ;;
+    esac
+  fi
 fi
-unset __sudo
 
-# JAVA
+# Java: preserve an explicit JAVA_HOME, otherwise use common platform defaults.
 if [ -z "${JAVA_HOME+x}" ]; then
-  for JAVA_HOME in /usr/lib/jvm/default \
+  _eva_java_home=
+  for _eva_candidate in \
+    /usr/lib/jvm/default \
     /usr/lib/jvm/default-java \
     /Library/Java/JavaVirtualMachines/openjdk.jdk/Contents/Home; do
-    if [ -d "${JAVA_HOME}" ]; then
-      export JAVA_HOME
+    if [ -d "${_eva_candidate}" ]; then
+      _eva_java_home=${_eva_candidate}
       break
     fi
   done
+
+  if [ -z "${_eva_java_home}" ] && [ -x /usr/libexec/java_home ]; then
+    _eva_java_home=$(/usr/libexec/java_home 2>/dev/null) || _eva_java_home=
+  fi
+
+  if [ -n "${_eva_java_home}" ]; then
+    JAVA_HOME=${_eva_java_home}
+    export JAVA_HOME
+  fi
 fi
 
-# Conda, anaconda, or mambaforge
+# Conda, Anaconda, Miniforge, or Mambaforge.
+# Work around the Miniconda OpenSSL 3 legacy-provider loading issue.
+: "${CRYPTOGRAPHY_OPENSSL_NO_LEGACY:=1}"
+export CRYPTOGRAPHY_OPENSSL_NO_LEGACY
 
-# Fix miniconda OpenSSL 3.0 legacy provider failed to load issue
-export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
+if _eva_command_exists micromamba; then
+  : "${MAMBA_ROOT_PREFIX:=${HOME}/.conda}"
+  export MAMBA_ROOT_PREFIX
+fi
 
-# if micromamba installed, add ${HOME}/.conda as base
-command_exists micromamba && export MAMBA_ROOT_PREFIX="${HOME}/.conda"
+if [ -z "${CONDA_PATH+x}" ]; then
+  _eva_conda_path=
+  for _eva_conda in anaconda3 miniconda3 mambaforge miniforge3 miniforge; do
+    for _eva_candidate in \
+      "${HOME}/${_eva_conda}" \
+      "/opt/${_eva_conda}" \
+      "/usr/local/Caskroom/${_eva_conda}/base"; do
+      if [ -d "${_eva_candidate}" ]; then
+        _eva_conda_path=${_eva_candidate}
+        break 2
+      fi
+    done
 
-for CONDA in anaconda3 miniconda3 mambaforge miniforge3 miniforge; do
-  for p in "${HOME}/${CONDA}" \
-    "/opt/${CONDA}" \
-    /usr/local/Caskroom/${CONDA}/base \
-    "${HOMEBREW_PREFIX}/Caskroom/${CONDA}/base" \
-    "${HOMEBREW_PREFIX}/${CONDA}"; do
-    if [ -d "${p}" ]; then
-      export CONDA_PATH="${p}"
-      break 2
+    if [ -n "${_eva_homebrew_prefix}" ]; then
+      for _eva_candidate in \
+        "${_eva_homebrew_prefix}/Caskroom/${_eva_conda}/base" \
+        "${_eva_homebrew_prefix}/${_eva_conda}"; do
+        if [ -d "${_eva_candidate}" ]; then
+          _eva_conda_path=${_eva_candidate}
+          break 2
+        fi
+      done
     fi
   done
-done
-unset CONDA
 
-# pyenv
-# for p in "${HOME}/.pyenv" \
-#   "/usr/local/pyenv"; do
-#   if [ -d "${p}" ]; then
-#     export PYENV_ROOT="${p}"
-#     PATH=$(prepend_path "${PYENV_ROOT}/bin" "${PATH}")
-#     break
-#   fi
-# done
-
-# fzf and fd
-export FZF_DEFAULT_COMMAND=fd
-
-# SDKMAN
-[ -d "${HOME}/.sdkman" ] && export SDKMAN_DIR="${HOME}/.sdkman"
-
-# Ruby
-# check if ruby is install by brew
-if [ -n "${HOMEBREW_PREFIX}" ] || [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
-  if [ -d "${HOMEBREW_PREFIX}/opt/ruby" ]; then
-    PATH=$(prepend_path "${HOMEBREW_PREFIX}/opt/ruby/bin" "${PATH}")
-    export LDFLAGS="-L${HOMEBREW_PREFIX}/opt/ruby/lib"
-    export CPPFLAGS="-I${HOMEBREW_PREFIX}/opt/ruby/include"
-    export PKG_CONFIG_PATH="${HOMEBREW_PREFIX}/opt/ruby/lib/pkgconfig"
+  if [ -n "${_eva_conda_path}" ]; then
+    CONDA_PATH=${_eva_conda_path}
+    export CONDA_PATH
   fi
 fi
-if command_exists gem; then
-  if ! GEM_HOME="$(gem env user_gemhome 2>/dev/null)" || [ -z "${GEM_HOME}" ]; then
-    [ -d "${HOME}/.gem" ] && export GEM_HOME="${HOME}/.gem"
-  else
-    export GEM_HOME
+
+# fzf and fd: keep an explicit command and avoid configuring a missing binary.
+if [ -z "${FZF_DEFAULT_COMMAND-}" ]; then
+  if _eva_command_exists fd; then
+    FZF_DEFAULT_COMMAND=fd
+  elif _eva_command_exists fdfind; then
+    FZF_DEFAULT_COMMAND=fdfind
   fi
-  [ -n "${GEM_HOME}" ] && PATH=$(prepend_path "${GEM_HOME}/bin" "${PATH}")
+  [ -n "${FZF_DEFAULT_COMMAND-}" ] && export FZF_DEFAULT_COMMAND
 fi
 
-# wine
-command_exists wine && export WINEDEBUG=fixme-font
+# SDKMAN.
+if [ -z "${SDKMAN_DIR+x}" ] && [ -d "${HOME}/.sdkman" ]; then
+  SDKMAN_DIR=${HOME}/.sdkman
+  export SDKMAN_DIR
+fi
 
-# npm global packages
-[ -d "${HOME}/.npm-global/bin" ] && PATH=$(prepend_path "${HOME}/.npm-global/bin" "${PATH}")
+# Homebrew Ruby.
+_eva_ruby_prefix=
+if [ -n "${_eva_homebrew_prefix}" ] && [ -d "${_eva_homebrew_prefix}/opt/ruby" ]; then
+  _eva_ruby_prefix=${_eva_homebrew_prefix}/opt/ruby
+  PATH=$(_eva_prepend_path "${_eva_ruby_prefix}/bin" "${PATH-}")
 
-# Set up ssh-agent, macOS is handled by keychain
-if [ "$(uname)" != "Darwin" ] && [ ! -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
-  if [ -n "${SSH_AUTH_SOCK}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then
-    :
-  elif command_exists ssh-agent; then
-    # get number of ssh-agent running
-    SSH_AGENT_COUNT=$(pgrep -u "${USER}" ssh-agent | wc -l)
-    # if no ssh-agent running, start one
-    if [ "${SSH_AGENT_COUNT}" -eq 0 ]; then
-      eval "$(ssh-agent -s)" >/dev/null
-    # else if only one ssh-agent running, use it
-    elif [ "${SSH_AGENT_COUNT}" -eq 1 ]; then
-      SSH_AUTH_SOCK=$(find /tmp/ssh-*/ -user "${USER}" -type s -name 'agent*' 2>/dev/null)
-      SSH_AGENT_PID=$(pgrep -u "${USER}" ssh-agent)
-      export SSH_AUTH_SOCK SSH_AGENT_PID
-    # if more than one ssh-agent running, kill all and start a new one
-    else
-      pkill -u "${USER}" ssh-agent
-      eval "$(ssh-agent -s)" >/dev/null
+  case " ${LDFLAGS-} " in
+    *" -L${_eva_ruby_prefix}/lib "*) ;;
+    *) LDFLAGS="-L${_eva_ruby_prefix}/lib${LDFLAGS:+ ${LDFLAGS}}" ;;
+  esac
+  case " ${CPPFLAGS-} " in
+    *" -I${_eva_ruby_prefix}/include "*) ;;
+    *) CPPFLAGS="-I${_eva_ruby_prefix}/include${CPPFLAGS:+ ${CPPFLAGS}}" ;;
+  esac
+  PKG_CONFIG_PATH=$(_eva_prepend_path "${_eva_ruby_prefix}/lib/pkgconfig" "${PKG_CONFIG_PATH-}")
+  export LDFLAGS CPPFLAGS PKG_CONFIG_PATH
+fi
+
+if _eva_command_exists gem; then
+  if [ -z "${GEM_HOME-}" ]; then
+    _eva_gem_home=$(gem env user_gemhome 2>/dev/null) || _eva_gem_home=
+    if [ -n "${_eva_gem_home}" ]; then
+      GEM_HOME=${_eva_gem_home}
+    elif [ -d "${HOME}/.gem" ]; then
+      GEM_HOME=${HOME}/.gem
     fi
-    unset SSH_AGENT_COUNT
+  fi
+
+  if [ -n "${GEM_HOME-}" ]; then
+    export GEM_HOME
+    PATH=$(_eva_prepend_path "${GEM_HOME}/bin" "${PATH-}")
   fi
 fi
 
-PATH=$(dedupe_list "${PATH}")
-LD_LIBRARY_PATH=$(dedupe_list "${LD_LIBRARY_PATH}")
-CPATH=$(dedupe_list "${CPATH}")
+# Wine.
+if _eva_command_exists wine; then
+  : "${WINEDEBUG:=fixme-font}"
+  export WINEDEBUG
+fi
+
+# npm global packages.
+[ -d "${HOME}/.npm-global/bin" ] &&
+  PATH=$(_eva_prepend_path "${HOME}/.npm-global/bin" "${PATH-}")
+
+################################################################################
+# SSH agent
+################################################################################
+
+_eva_uname=$(uname -s 2>/dev/null) || _eva_uname=unknown
+case $- in
+  *i*)
+    if [ "${_eva_uname}" != Darwin ] && [ ! -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+      if ! _eva_ssh_agent_is_usable && _eva_command_exists ssh-agent; then
+        _eva_agent_dir=${XDG_RUNTIME_DIR:-${HOME}/.cache}/eva
+        _eva_agent_env=${_eva_agent_dir}/ssh-agent.env
+
+        # Reuse only an environment file whose socket still answers ssh-add.
+        if [ -r "${_eva_agent_env}" ]; then
+          # This file is generated exclusively from `ssh-agent -s` below.
+          # shellcheck disable=SC1090
+          . "${_eva_agent_env}" >/dev/null 2>&1
+        fi
+
+        if ! _eva_ssh_agent_is_usable && mkdir -p "${_eva_agent_dir}" 2>/dev/null; then
+          chmod 700 "${_eva_agent_dir}" 2>/dev/null || :
+          _eva_agent_tmp=${_eva_agent_env}.$$
+          if (umask 077 && ssh-agent -s >"${_eva_agent_tmp}"); then
+            # shellcheck disable=SC1090
+            . "${_eva_agent_tmp}" >/dev/null 2>&1
+            if _eva_ssh_agent_is_usable; then
+              mv -f "${_eva_agent_tmp}" "${_eva_agent_env}"
+            else
+              rm -f "${_eva_agent_tmp}"
+            fi
+          else
+            rm -f "${_eva_agent_tmp}"
+          fi
+        fi
+      fi
+    fi
+    ;;
+esac
+
+################################################################################
+# Finalize exported environment
+################################################################################
+
+PATH=$(_eva_dedupe_path "${PATH-}")
+LD_LIBRARY_PATH=$(_eva_dedupe_path "${LD_LIBRARY_PATH-}")
+CPATH=$(_eva_dedupe_path "${CPATH-}")
 export PATH LD_LIBRARY_PATH CPATH
 
-# Always assume vim is installed
-EDITOR="$(command -v vim)"
-# if we have code, not in an SSH term, and the X11 display number is under 10
-if command_exists code &&
-  [ "${SSH_TTY}${DISPLAY}" = "${DISPLAY#*:[1-9][0-9]}" ]; then
-  VISUAL="$(command -v code) --wait"
-  SUDO_EDITOR="${VISUAL}"
-else
-  VISUAL="${EDITOR}"
-  SUDO_EDITOR="${EDITOR}"
+if [ -n "${PKG_CONFIG_PATH-}" ]; then
+  PKG_CONFIG_PATH=$(_eva_dedupe_path "${PKG_CONFIG_PATH}")
+  export PKG_CONFIG_PATH
 fi
+
+# Preserve explicit editor choices. Prefer VS Code only for local graphical
+# sessions; remote shells should keep a terminal editor.
+if [ -z "${EDITOR-}" ]; then
+  for _eva_editor in vim vi; do
+    if _eva_command_exists "${_eva_editor}"; then
+      EDITOR=$(command -v "${_eva_editor}")
+      break
+    fi
+  done
+  : "${EDITOR:=vi}"
+fi
+
+if [ -z "${VISUAL-}" ]; then
+  if _eva_command_exists code &&
+    [ -z "${SSH_TTY-}${SSH_CONNECTION-}" ] &&
+    { [ "${_eva_uname}" = Darwin ] || [ -n "${DISPLAY-}${WAYLAND_DISPLAY-}" ]; }; then
+    VISUAL="$(command -v code) --wait"
+  else
+    VISUAL=${EDITOR}
+  fi
+fi
+
+: "${SUDO_EDITOR:=${VISUAL}}"
 export EDITOR VISUAL SUDO_EDITOR
 
-export LANG=en_US.UTF-8
+: "${LANG:=en_US.UTF-8}"
+export LANG
 
-unset -f command_exists dedupe_list prepend_path append_path
+case ${EVA_HISTORY-} in
+  *"~/.profile.sh"*) ;;
+  *)
+    EVA_HISTORY="${EVA_HISTORY:+${EVA_HISTORY} -> }~/.profile.sh"
+    export EVA_HISTORY
+    ;;
+esac
 
-# variable to track history
-export EVA_HISTORY="${EVA_HISTORY:+${EVA_HISTORY} -> }~/.profile.sh"
+unset _eva_agent_dir _eva_agent_env _eva_agent_tmp _eva_brew _eva_brew_shellenv
+unset _eva_candidate _eva_conda _eva_conda_path _eva_cuda_home _eva_dir _eva_editor
+unset _eva_gem_home _eva_homebrew_prefix _eva_java_home _eva_ruby_prefix _eva_subdir
+unset _eva_sudo_output _eva_uname
+unset -f _eva_append_path _eva_command_exists _eva_dedupe_path
+unset -f _eva_prepend_path _eva_ssh_agent_is_usable
