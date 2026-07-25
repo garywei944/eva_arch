@@ -15,6 +15,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout Hermes state
+        uses: actions/checkout@v6
+        with:
+          repository: garywei944/eva_hermes_states
+          path: .hermes
+          token: ${{ secrets.EVA_HERMES_STATES_TOKEN }}
+          persist-credentials: false
+
       - name: Install system deps
         run: |
           sudo apt-get update
