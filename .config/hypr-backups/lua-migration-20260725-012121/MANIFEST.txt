@@ -1,0 +1,5 @@
+created_at=2026-07-25T01:21:21-07:00
+source=/home/aris/.config/hypr
+hyprland_version=0.56.0
+hyprland_commit=36b2e0cfe0c6094dbc47bd42a437431315bb3087
+provider=hyprlang
