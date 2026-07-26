@@ -121,6 +121,7 @@ repos:
     rev: v2.5.2
     hooks:
       - id: stylua
+        exclude: ^\.config/hypr/dms/layout\.lua$
 
   - repo: https://github.com/Calinou/pre-commit-luacheck
     rev: v1.0.0
