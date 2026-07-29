@@ -136,12 +136,14 @@ plugins+=(
   cp rsync qrcode torrent transfer encode64 urltools
   extract universalarchive
   # zsh
-  aliases history themes zsh-autosuggestions zsh-syntax-highlighting
+  aliases history themes zsh-autosuggestions
   emoji emotty safe-paste timer themes web-search colorize
   # formatting
   isodate
   # custom plugins
   conda cmake
+  # Must remain last: wraps ZLE widgets created by earlier plugins.
+  zsh-syntax-highlighting
 )
 
 . "$ZSH/oh-my-zsh.sh"
