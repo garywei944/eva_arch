@@ -142,7 +142,7 @@ plugins+=(
   isodate
   # custom plugins
   conda cmake
-  # Must remain last: wraps ZLE widgets created by earlier plugins.
+  # Keep last so its ZLE hook/wrappers observe prior plugin changes.
   zsh-syntax-highlighting
 )
 
