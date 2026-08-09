@@ -15,6 +15,7 @@
 !.profile.sh
 !.rc.zsh
 !.tmux.conf
+!.tmux.conf.local
 !.vimrc
 !.xprofile
 !.zlogin
@@ -46,6 +47,9 @@
 !.config/satty
 !.config/scripts
 !.config/terminator
+!.config/tmux
+.config/tmux/*
+!.config/tmux/oh-my-tmux.conf
 !.config/uwsm
 !.config/zsh_custom
 
