@@ -412,6 +412,11 @@ bind -n S-Left previous-window #!important
 bind -n S-Right next-window #!important
 
 set -g mouse on #!important
+# Ignore ordinary background output, but forward real application bells (for example task completion).
+set -g monitor-activity off #!important
+set -g monitor-bell on #!important
+set -g bell-action any #!important
+set -g visual-bell off #!important
 set -ga terminal-features "*:hyperlinks" #!important
 bind h split-window -h #!important
 bind v split-window -v #!important
