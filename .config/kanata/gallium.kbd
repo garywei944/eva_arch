@@ -30,7 +30,7 @@
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  @hyp lmet lalt           @sym           @nav rmet menu rctl
+  @hyp lmet lalt           @sym           @nav rmet ralt rctl
 )
 
 (deflayer qwerty
@@ -39,7 +39,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  @hyp lmet lalt           @sym           @nav rmet menu rctl
+  @hyp lmet lalt           @sym           @nav rmet ralt rctl
 )
 
 (deflayer gaming
@@ -175,7 +175,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              lrld           _    _    _    _
+  _    _    _              lrld           ralt _    _    _
 )
 
 (defvar
