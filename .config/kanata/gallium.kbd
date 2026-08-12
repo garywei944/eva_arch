@@ -25,7 +25,7 @@
 )
 
 (deflayer gallium
-  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
+  caps @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
@@ -34,7 +34,7 @@
 )
 
 (deflayer qwerty
-  @esc @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
+  caps @f1  @f2  @f3  @f4  @f5  @f6  @f7  @f8  @f9  @f10 @f11 @f12
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
@@ -43,19 +43,19 @@
 )
 
 (deflayer gaming
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  caps f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  @cap a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet menu rctl
 )
 
 (deflayer gaming-gallium
-  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
+  caps f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
-  caps n    r    t    s    g    y    h    a    e    i    /    ret
+  @cap n    r    t    s    g    y    h    a    e    i    /    ret
   lsft x    q    m    w    z    k    p    '    ;    .    rsft
   lctl lmet lalt           spc            ralt rmet menu rctl
 )
@@ -126,7 +126,6 @@
 
   ;; tap for capslk, hold for lctl
   cap (tap-hold $tt $ht esc lctl)
-  esc caps
   hyp (tap-hold $tt $ht (one-shot 2000 lctl) (multi rmet ralt rsft rctl))
 
   ;; home row mods
