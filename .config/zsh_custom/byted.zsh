@@ -47,5 +47,6 @@ alias srs="st restack && st submit"
 alias scont="st continue"
 alias sabort="st abort"
 
-# ssh-agent for bytedance key
-alias sshkeybyted="eval \"$(ssh-agent -s)\" && ssh-add ~/.ssh/bytedance"
+# Start a dedicated agent for the ByteDance key only when the alias is invoked.
+# Single quotes are intentional: double quotes execute ssh-agent while loading zsh.
+alias sshkeybyted='eval "$(ssh-agent -s)" && ssh-add ~/.ssh/bytedance'
