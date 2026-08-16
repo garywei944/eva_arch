@@ -1,0 +1,80 @@
+.shell powershell
+.pause ctrl + alt + shift + p
+
+# Safe full input-stack restart: whkd first, then Kanata via the elevated helper task.
+ctrl + alt + shift + r : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/kanata/restart-whkd-kanata.ps1"
+ctrl + alt + shift + o : komorebic replace-configuration "$Env:KOMOREBI_CONFIG_HOME/komorebi.json"
+ctrl + alt + shift + i : komorebic toggle-pause
+
+# Keep Windows-native Win+N, Win+P and Win+W unbound.
+# Alt+Enter and Alt+Shift+Enter stay unbound here for Hermes TUI multiline input.
+# Windows Terminal must also pass those chords through instead of handling fullscreen.
+
+# Win+T launches Arch WSL; Win+B launches Chrome on the monitor under the pointer.
+win + t                 : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/komorebi/launch-on-cursor-monitor.ps1" -Application Arch
+win + b                 : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/komorebi/launch-on-cursor-monitor.ps1" -Application Chrome
+win + shift + t         : komorebic toggle-float
+win + f                 : komorebic toggle-monocle
+win + shift + f         : komorebic toggle-monocle
+# Monocle enlarges within komorebi's work area, so the bar remains visible.
+win + up                : komorebic toggle-monocle
+win + down              : komorebic toggle-monocle
+
+# Focus windows from the physical H/J/K/L positions on the Gallium layer.
+# Kanata emits Y/H/A/E from those positions; whkd sees the emitted keys.
+win + y                 : komorebic focus left
+win + h                 : komorebic focus down
+win + a                 : komorebic focus up
+win + e                 : komorebic focus right
+
+# Move windows within the current workspace.
+win + shift + y         : komorebic move left
+win + shift + h         : komorebic move down
+win + shift + a         : komorebic move up
+win + shift + e         : komorebic move right
+win + shift + left      : komorebic move left
+win + shift + down      : komorebic move down
+win + shift + up        : komorebic move up
+win + shift + right     : komorebic move right
+win + left              : komorebic move left
+win + right             : komorebic move right
+
+# Focus or send across the horizontal three-monitor arrangement.
+win + ctrl + y          : komorebic cycle-monitor previous
+win + ctrl + e          : komorebic cycle-monitor next
+win + ctrl + shift + y  : komorebic cycle-send-to-monitor previous
+win + ctrl + shift + e  : komorebic cycle-send-to-monitor next
+
+# Cycle local workspaces. PRIOR/NEXT are the Windows PageUp/PageDown virtual keys.
+win + prior             : komorebic cycle-workspace previous
+win + next              : komorebic cycle-workspace next
+win + shift + prior     : komorebic cycle-send-to-workspace previous
+win + shift + next      : komorebic cycle-send-to-workspace next
+
+# Focus local workspace 1-9 on whichever monitor is active.
+win + 1                 : komorebic focus-workspace 0
+win + 2                 : komorebic focus-workspace 1
+win + 3                 : komorebic focus-workspace 2
+win + 4                 : komorebic focus-workspace 3
+win + 5                 : komorebic focus-workspace 4
+win + 6                 : komorebic focus-workspace 5
+win + 7                 : komorebic focus-workspace 6
+win + 8                 : komorebic focus-workspace 7
+win + 9                 : komorebic focus-workspace 8
+
+# Send to local workspace 1-9 without following the window.
+win + shift + 1         : komorebic send-to-workspace 0
+win + shift + 2         : komorebic send-to-workspace 1
+win + shift + 3         : komorebic send-to-workspace 2
+win + shift + 4         : komorebic send-to-workspace 3
+win + shift + 5         : komorebic send-to-workspace 4
+win + shift + 6         : komorebic send-to-workspace 5
+win + shift + 7         : komorebic send-to-workspace 6
+win + shift + 8         : komorebic send-to-workspace 7
+win + shift + 9         : komorebic send-to-workspace 8
+
+# Resize the focused tile.
+win + oem_plus          : komorebic resize-axis horizontal increase
+win + oem_minus         : komorebic resize-axis horizontal decrease
+win + shift + oem_plus  : komorebic resize-axis vertical increase
+win + shift + oem_minus : komorebic resize-axis vertical decrease

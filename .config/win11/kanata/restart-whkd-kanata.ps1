@@ -4,6 +4,7 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $whkdExe = "C:\Program Files\whkd\bin\whkd.exe"
+$whkdConfig = "E:\Projects\eva_arch\.config\win11\whkd\whkdrc"
 $helperTask = "kanata-restart-after-whkd"
 
 $existing = @(Get-Process -Name "whkd" -ErrorAction SilentlyContinue)
@@ -21,7 +22,7 @@ while (Get-Process -Id $oldWhkdId -ErrorAction SilentlyContinue) {
     Start-Sleep -Milliseconds 100
 }
 
-$newWhkd = Start-Process -FilePath $whkdExe -WindowStyle Hidden -PassThru
+$newWhkd = Start-Process -FilePath $whkdExe -ArgumentList @("--config", $whkdConfig) -WindowStyle Hidden -PassThru
 $stableUntil = (Get-Date).AddSeconds(1)
 while ((Get-Date) -lt $stableUntil) {
     Start-Sleep -Milliseconds 100

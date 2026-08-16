@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.41/schema.json",
+  "app_specific_configuration_path": "$Env:KOMOREBI_CONFIG_HOME/applications.json",
+  "window_hiding_behaviour": "Cloak",
+  "cross_monitor_move_behaviour": "Insert",
+  "default_workspace_padding": 4,
+  "default_container_padding": 4,
+  "border": true,
+  "border_width": 2,
+  "border_offset": -1,
+  "theme": {
+    "palette": "Catppuccin",
+    "name": "Macchiato",
+    "single_border": "Blue",
+    "stack_border": "Green",
+    "monocle_border": "Mauve",
+    "floating_border": "Peach",
+    "unfocused_border": "Surface0",
+    "bar_accent": "Blue"
+  },
+  "display_index_preferences": {
+    "0": "SKG2723-5&2244559e&0&UID4353",
+    "1": "SKG2723-5&2244559e&0&UID4355",
+    "2": "SKG2723-5&2244559e&0&UID4357"
+  },
+  "bar_configurations": [
+    "$Env:KOMOREBI_CONFIG_HOME/komorebi.bar.json",
+    "$Env:KOMOREBI_CONFIG_HOME/komorebi.bar.monitor1.json",
+    "$Env:KOMOREBI_CONFIG_HOME/komorebi.bar.monitor2.json"
+  ],
+  "monitors": [
+    {
+      "workspaces": [
+        { "name": "1-1 | Code", "layout": "BSP" },
+        { "name": "1-2 | Web", "layout": "BSP" },
+        { "name": "1-3 | Folder", "layout": "BSP" },
+        { "name": "1-4 | Doc", "layout": "BSP" },
+        { "name": "1-5 | App", "layout": "BSP" },
+        { "name": "1-6 | Code", "layout": "BSP" },
+        { "name": "1-7 | Web", "layout": "BSP" },
+        { "name": "1-8 | Terminal", "layout": "BSP" },
+        { "name": "1-9 | Reserve", "layout": "BSP" }
+      ]
+    },
+    {
+      "workspaces": [
+        { "name": "2-1 | Code", "layout": "BSP" },
+        { "name": "2-2 | Web", "layout": "BSP" },
+        { "name": "2-3 | Folder", "layout": "BSP" },
+        { "name": "2-4 | Doc", "layout": "BSP" },
+        { "name": "2-5 | App", "layout": "BSP" },
+        { "name": "2-6 | Code", "layout": "BSP" },
+        { "name": "2-7 | Web", "layout": "BSP" },
+        { "name": "2-8 | Terminal", "layout": "BSP" },
+        { "name": "2-9 | Reserve", "layout": "BSP" }
+      ]
+    },
+    {
+      "workspaces": [
+        { "name": "3-1 | Web", "layout": "BSP" },
+        { "name": "3-2 | Chat", "layout": "BSP" },
+        { "name": "3-3 | Git", "layout": "BSP" },
+        { "name": "3-4 | Doc", "layout": "BSP" },
+        { "name": "3-5 | App", "layout": "BSP" },
+        { "name": "3-6 | Code", "layout": "BSP" },
+        { "name": "3-7 | Music", "layout": "BSP" },
+        { "name": "3-8 | Terminal", "layout": "BSP" },
+        { "name": "3-9 | Reserve", "layout": "BSP" }
+      ]
+    }
+  ]
+}

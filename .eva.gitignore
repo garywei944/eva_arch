@@ -50,6 +50,7 @@
 !.config/tmux
 .config/tmux/*
 !.config/tmux/oh-my-tmux.conf
+!.config/win11
 !.config/uwsm
 !.config/zsh_custom
 
