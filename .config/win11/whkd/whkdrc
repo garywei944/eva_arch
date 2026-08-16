@@ -5,6 +5,8 @@
 ctrl + alt + shift + r : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/kanata/restart-whkd-kanata.ps1"
 ctrl + alt + shift + o : komorebic replace-configuration "$Env:KOMOREBI_CONFIG_HOME/komorebi.json"
 ctrl + alt + shift + i : komorebic toggle-pause
+# Toggle wallpaper mode: hide/show all bars and minimize/restore open windows.
+ctrl + alt + shift + d : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$Env:KOMOREBI_CONFIG_HOME/toggle-wallpaper-mode.ps1"
 
 # Keep Windows-native Win+N, Win+P and Win+W unbound.
 # Alt+Enter and Alt+Shift+Enter stay unbound here for Hermes TUI multiline input.

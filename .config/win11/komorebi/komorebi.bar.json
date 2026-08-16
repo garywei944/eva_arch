@@ -73,6 +73,18 @@
       }
     },
     {
+      "Battery": {
+        "enable": true
+      }
+    },
+    {
+      "Systray": {
+        "enable": true
+      }
+    }
+  ],
+  "center_widgets": [
+    {
       "Date": {
         "enable": true,
         "format": "DayDateMonthYear"
@@ -82,11 +94,6 @@
       "Time": {
         "enable": true,
         "format": "TwentyFourHour"
-      }
-    },
-    {
-      "Battery": {
-        "enable": true
       }
     }
   ]
