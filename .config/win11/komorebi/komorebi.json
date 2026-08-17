@@ -31,41 +31,122 @@
   "monitors": [
     {
       "workspaces": [
-        { "name": "1-1 | Code", "layout": "BSP" },
-        { "name": "1-2 | Web", "layout": "BSP" },
-        { "name": "1-3 | Folder", "layout": "BSP" },
-        { "name": "1-4 | Doc", "layout": "BSP" },
-        { "name": "1-5 | App", "layout": "BSP" },
-        { "name": "1-6 | Code", "layout": "BSP" },
-        { "name": "1-7 | Web", "layout": "BSP" },
-        { "name": "1-8 | Terminal", "layout": "BSP" },
-        { "name": "1-9 | Reserve", "layout": "BSP" }
+        {
+          "name": "1-1 | Code",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-2 | Web",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-3 | Folder",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-4 | Doc",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-5 | App",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-6 | Code",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-7 | Web",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-8 | Terminal",
+          "layout": "BSP"
+        },
+        {
+          "name": "1-9 | Reserve",
+          "layout": "BSP"
+        }
       ]
     },
     {
       "workspaces": [
-        { "name": "2-1 | Code", "layout": "BSP" },
-        { "name": "2-2 | Web", "layout": "BSP" },
-        { "name": "2-3 | Folder", "layout": "BSP" },
-        { "name": "2-4 | Doc", "layout": "BSP" },
-        { "name": "2-5 | App", "layout": "BSP" },
-        { "name": "2-6 | Code", "layout": "BSP" },
-        { "name": "2-7 | Web", "layout": "BSP" },
-        { "name": "2-8 | Terminal", "layout": "BSP" },
-        { "name": "2-9 | Reserve", "layout": "BSP" }
+        {
+          "name": "2-1 | Code",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-2 | Web",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-3 | Folder",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-4 | Doc",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-5 | App",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-6 | Code",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-7 | Web",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-8 | Terminal",
+          "layout": "BSP"
+        },
+        {
+          "name": "2-9 | Reserve",
+          "layout": "BSP"
+        }
       ]
     },
     {
       "workspaces": [
-        { "name": "3-1 | Web", "layout": "BSP" },
-        { "name": "3-2 | Chat", "layout": "BSP" },
-        { "name": "3-3 | Git", "layout": "BSP" },
-        { "name": "3-4 | Doc", "layout": "BSP" },
-        { "name": "3-5 | App", "layout": "BSP" },
-        { "name": "3-6 | Code", "layout": "BSP" },
-        { "name": "3-7 | Music", "layout": "BSP" },
-        { "name": "3-8 | Terminal", "layout": "BSP" },
-        { "name": "3-9 | Reserve", "layout": "BSP" }
+        {
+          "name": "3-1 | Web",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-2 | Chat",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-3 | Git",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-4 | Doc",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-5 | App",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-6 | Code",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-7 | Music",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-8 | Terminal",
+          "layout": "BSP"
+        },
+        {
+          "name": "3-9 | Reserve",
+          "layout": "BSP"
+        }
       ]
     }
   ]
