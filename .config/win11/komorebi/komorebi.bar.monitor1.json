@@ -32,7 +32,8 @@
       "Komorebi": {
         "workspaces": {
           "enable": true,
-          "hide_empty_workspaces": false
+          "hide_empty_workspaces": false,
+          "display": "AllIconsAndText"
         },
         "layout": {
           "enable": true
