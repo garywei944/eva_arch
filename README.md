@@ -1,9 +1,12 @@
 # eva_arch
 
-Custom Arch Linux configurations and dotfiles
+Custom CachyOS, Arch Linux, and Win11 configurations and dotfiles
 
 ![Hyprland](.config/hypr/cachy_hypr.png)
 Hyprland ([`~/.config/hypr/`](.config/hypr))
+
+![Windows 11 Komorebi](.config/win11/komorebi/win11_komorebi.png)
+Windows 11 Komorebi ([`~/.config/win11/komorebi/`](.config/win11/komorebi))
 
 ![KDE Plasma](arch_neofetch_v3.png)
 KDE Plasma
