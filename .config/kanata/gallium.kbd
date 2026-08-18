@@ -126,15 +126,15 @@
 
   ;; tap for capslk, hold for lctl
   cap (tap-hold $tt $ht esc lctl)
-  hyp (tap-hold $tt $ht (one-shot 2000 lctl) (multi rmet ralt rsft rctl))
+  hyp (tap-hold $tt $ht (one-shot 2000 lctl) (multi lmet lalt lsft lctl))
 
   ;; home row mods
   n (tap-hold $tt $ht n lmet)
   r (tap-hold $tt $ht r lalt)
   t (tap-hold $tt $ht t lctl)
   s (tap-hold $tt $ht s lsft)
-  h (tap-hold $tt $ht h rsft)
-  a (tap-hold $tt $ht a rctl)
+  h (tap-hold $tt $ht h lsft)
+  a (tap-hold $tt $ht a lctl)
   e (tap-hold $tt $ht e lalt)
   i (tap-hold $tt $ht i lmet)
 
@@ -142,8 +142,8 @@
   sqt (tap-hold $tt $ht s lalt)
   dqt (tap-hold $tt $ht d lctl)
   fqt (tap-hold $tt $ht f lsft)
-  jqt (tap-hold $tt $ht j rsft)
-  kqt (tap-hold $tt $ht k rctl)
+  jqt (tap-hold $tt $ht j lsft)
+  kqt (tap-hold $tt $ht k lctl)
   lqt (tap-hold $tt $ht l lalt)
   ;qt (tap-hold $tt $ht ; lmet)
   'qt (tap-hold $tt $ht ' (layer-while-held chords))
