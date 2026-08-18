@@ -2,3 +2,4 @@ plugins/*
 !plugins/conda
 !plugins/cmake
 !plugins/lsd
+!plugins/pixi

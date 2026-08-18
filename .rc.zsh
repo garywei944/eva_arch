@@ -141,7 +141,7 @@ plugins+=(
   # formatting
   isodate
   # custom plugins
-  conda cmake
+  conda cmake pixi
   # Keep last so its ZLE hook/wrappers observe prior plugin changes.
   zsh-syntax-highlighting
 )
