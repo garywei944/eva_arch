@@ -46,7 +46,7 @@
   caps f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
-  @cap a    s    d    f    g    h    j    k    l    ;    '    ret
+  esc  a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet menu rctl
 )
@@ -55,7 +55,7 @@
   caps f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc @inl
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
-  @cap n    r    t    s    g    y    h    a    e    i    /    ret
+  esc  n    r    t    s    g    y    h    a    e    i    /    ret
   lsft x    q    m    w    z    k    p    '    ;    .    rsft
   lctl lmet lalt           spc            ralt rmet menu rctl
 )
