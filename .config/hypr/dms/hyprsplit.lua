@@ -33,5 +33,5 @@ replace({ "SUPER + SHIFT + Page_Up", "SUPER + SHIFT + P" }, hs.dsp.window.move({
 for i = 1, 9 do
     local workspace = tostring(i)
     replace({ "SUPER + " .. workspace }, hs.dsp.focus({ workspace = workspace }))
-    replace({ "SUPER + SHIFT + " .. workspace }, hs.dsp.window.move({ workspace = workspace, follow = false }))
+    replace({ "SUPER + SHIFT + " .. workspace }, hs.dsp.window.move({ workspace = workspace, follow = true }))
 end
