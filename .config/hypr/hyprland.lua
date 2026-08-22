@@ -77,6 +77,12 @@ hl.window_rule({
     match = { class = "^(firefox)$", title = "^(Picture-in-Picture)$" },
     float = true,
 })
+hl.window_rule({
+    match = { class = "^steam_app_[0-9]+$" },
+    float = true,
+    center = true,
+    content = "game",
+})
 hl.window_rule({ match = { class = "^(zoom)$" }, float = true })
 hl.layer_rule({ match = { namespace = "^(quickshell)$" }, no_anim = true })
 hl.layer_rule({ match = { namespace = "^dms:.*" }, no_anim = true })
