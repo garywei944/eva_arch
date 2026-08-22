@@ -80,7 +80,7 @@
     },
     {
       "Systray": {
-        "enable": true
+        "enable": false
       }
     }
   ],
