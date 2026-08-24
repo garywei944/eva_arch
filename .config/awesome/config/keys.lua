@@ -168,11 +168,11 @@ return function(apps, menu, widgets)
 
         -- Screenshots
         awful.key({ apps.modkey }, "Print", function()
-            awful.spawn("scrot 'ArcoLinuxD-%Y-%m-%d-%s_screenshot_$wx$h.jpg' -e 'mv $f $$(xdg-user-dir PICTURES)'")
-        end, { description = "scrot screenshot", group = "screenshots" }),
+            awful.spawn("mark-shot --capture --all-outputs --fullscreen")
+        end, { description = "mark-shot fullscreen screenshot", group = "screenshots" }),
         awful.key({}, "Print", function()
-            awful.spawn("flameshot gui")
-        end, { description = "flameshot screenshot", group = "screenshots" })
+            awful.spawn("mark-shot --capture")
+        end, { description = "mark-shot screenshot", group = "screenshots" })
     )
 
     local clientkeys = gears.table.join(

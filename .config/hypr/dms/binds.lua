@@ -154,13 +154,17 @@ hl.bind("SUPER + SHIFT + minus", resize_by_monitor_fraction(0, -0.10), { repeati
 hl.bind("SUPER + SHIFT + equal", resize_by_monitor_fraction(0, 0.10), { repeating = true })
 
 -- Screenshots and display controls.
-hl.bind("Print", hl.dsp.exec_cmd("grimblast --notify --freeze save area /tmp/ss.png && satty --filename /tmp/ss.png"))
-hl.bind(
-    "SHIFT + Print",
-    hl.dsp.exec_cmd("grimblast --notify --freeze save screen /tmp/ss.png && satty --filename /tmp/ss.png")
-)
-hl.bind("CTRL + Print", hl.dsp.exec_cmd("dms screenshot full"))
-hl.bind("ALT + Print", hl.dsp.exec_cmd("dms screenshot window"))
+hl.bind("Print", hl.dsp.exec_cmd("mark-shot --capture"))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd("mark-shot --capture --all-outputs --fullscreen"))
+hl.bind("CTRL + Print", function()
+    local monitor = hl.get_active_monitor()
+    local command = "mark-shot --capture --fullscreen"
+    if monitor ~= nil and monitor.name ~= nil then
+        command = command .. " --display " .. string.format("%q", monitor.name)
+    end
+    hl.exec_cmd(command)
+end)
+hl.bind("ALT + Print", hl.dsp.exec_cmd("mark-shot --capture"))
 hl.bind("SUPER + P", hl.dsp.exec_cmd("dms ipc outputs cycleProfile"))
 hl.bind("SUPER + SHIFT + P", hl.dsp.dpms({ action = "toggle" }))
 
