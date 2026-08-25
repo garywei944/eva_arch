@@ -5,22 +5,35 @@ from __future__ import annotations
 
 import json
 import os
+import runpy
 import subprocess
 import sys
 import time
 from collections import Counter
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 CONTROL = Path.home() / ".local/bin/wallpaper-engine-control"
 PLUGIN = Path.home() / ".config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControl.qml"
 ACTIVE_CONFIG = Path.home() / ".config/Linux Wallpaper Engine/active-wallpapers.json"
-STEAM_CONFIG = Path.home() / ".local/share/Steam/steamapps/common/wallpaper_engine/config.json"
+CONTROL_MODULE = runpy.run_path(str(CONTROL))
 POWER_STATE = (
     Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-control/power.json"
 )
 UX_ASAR = "/usr/lib/linux-wallpaper-engine-ux/app.asar"
 RENDERER_NAME = "linux-wallpaperengine"
+
+
+def ux_selected_steam_config_path() -> Path:
+    for library in CONTROL_MODULE["steam_library_paths"]():
+        candidate = library / "steamapps/common/wallpaper_engine/config.json"
+        if candidate.exists():
+            return candidate.resolve()
+    raise RuntimeError("Wallpaper Engine UX has no existing config.json candidate")
+
+
+STEAM_CONFIG = ux_selected_steam_config_path()
 
 
 def invoke(action: str) -> tuple[int, dict[str, Any], str]:
@@ -115,22 +128,44 @@ def durable_active_state() -> dict[str, Any]:
     return {key: data.get(key) for key in ("activeWallpapers", "activePlaylists", "activePlaylist")}
 
 
-def active_playlist_items(active_state: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    active_playlists = active_state.get("activePlaylists")
-    if not isinstance(active_playlists, dict):
-        return {}
-    names = {
-        str(entry.get("name")) for entry in active_playlists.values() if isinstance(entry, dict) and entry.get("name")
-    }
+def effective_active_playlist_entries(active_state: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    stored = active_state.get("activePlaylists")
+    entries = (
+        {str(screen): entry for screen, entry in stored.items() if isinstance(stored, dict) and isinstance(entry, dict)}
+        if isinstance(stored, dict)
+        else {}
+    )
+    legacy = active_state.get("activePlaylist")
+    if isinstance(legacy, dict):
+        screen = legacy.get("screen")
+        if isinstance(screen, str) and screen and screen not in entries:
+            entries[screen] = legacy
+    return entries
+
+
+def playlist_catalog() -> dict[str, dict[str, Any]]:
     config = json.loads(STEAM_CONFIG.read_text())
     playlists = config.get("steamuser", {}).get("general", {}).get("playlists", [])
     return {
-        str(playlist["name"]): {
+        str(playlist["name"]): json.loads(json.dumps(playlist))
+        for playlist in playlists
+        if isinstance(playlist, dict) and isinstance(playlist.get("name"), str)
+    }
+
+
+def active_playlist_items(active_state: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    names = {
+        str(entry.get("name"))
+        for entry in effective_active_playlist_entries(active_state).values()
+        if isinstance(entry.get("name"), str) and entry.get("name")
+    }
+    return {
+        name: {
             "order": playlist.get("settings", {}).get("order"),
             "items": list(playlist.get("items", [])),
         }
-        for playlist in playlists
-        if isinstance(playlist, dict) and playlist.get("name") in names
+        for name, playlist in playlist_catalog().items()
+        if name in names
     }
 
 
@@ -176,8 +211,167 @@ def active_state_matches_shuffled_restart(
     return True
 
 
-def main() -> int:
+def controller_fixture_errors() -> list[str]:
     errors: list[str] = []
+
+    def fixture_path(root: Path) -> Path:
+        return root / "steamapps/common/wallpaper_engine/config.json"
+
+    def write_fixture(root: Path, config: dict[str, Any], mode: int = 0o600) -> Path:
+        path = fixture_path(root)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(config))
+        os.chmod(path, mode)
+        return path
+
+    minimal = {"steamuser": {"general": {"playlists": []}}}
+    with TemporaryDirectory(prefix="wallpaper-playlist-path-") as directory:
+        first = Path(directory) / "first"
+        second = Path(directory) / "second"
+        first_path = write_fixture(first, minimal, 0o400)
+        write_fixture(second, minimal, 0o600)
+        globals_ = CONTROL_MODULE["find_steam_config_path"].__globals__
+        original_roots = globals_["STEAM_ROOT_PATHS"]
+        globals_["STEAM_ROOT_PATHS"] = (first, second)
+        try:
+            try:
+                selected = CONTROL_MODULE["find_steam_config_path"]()
+            except CONTROL_MODULE["ControlError"]:
+                selected = None
+            if selected is not None:
+                errors.append(
+                    "controller must fail on the UX-selected first existing config instead of choosing a later writable one: "
+                    f"selected={selected}, expected refusal for {first_path.resolve()}"
+                )
+        finally:
+            globals_["STEAM_ROOT_PATHS"] = original_roots
+
+    shadowed_state = {
+        "activePlaylists": {"DP-1": {"name": "current", "screen": "DP-1"}},
+        "activePlaylist": {"name": "stale", "screen": "DP-1"},
+    }
+    if CONTROL_MODULE["active_playlist_names"](shadowed_state) != ["current"]:
+        errors.append("a legacy playlist shadowed by activePlaylists is incorrectly treated as active")
+
+    with TemporaryDirectory(prefix="wallpaper-playlist-scope-") as directory:
+        root = Path(directory) / "Steam"
+        original = {
+            "unrelated": {"keep": True},
+            "steamuser": {
+                "general": {
+                    "playlists": [
+                        {"name": "active-random", "items": ["a", "b", "c"], "settings": {"order": "random"}},
+                        {
+                            "name": "active-sequential",
+                            "items": ["x", "y"],
+                            "settings": {"order": "sequential"},
+                        },
+                        {"name": "inactive-random", "items": ["u", "v"], "settings": {"order": "random"}},
+                    ]
+                }
+            },
+        }
+        path = write_fixture(root, original)
+        globals_ = CONTROL_MODULE["shuffle_active_random_playlists"].__globals__
+        original_roots = globals_["STEAM_ROOT_PATHS"]
+        globals_["STEAM_ROOT_PATHS"] = (root,)
+        active = {
+            "activePlaylists": {
+                "DP-1": {"name": "active-random", "screen": "DP-1"},
+                "DP-2": {"name": "active-sequential", "screen": "DP-2"},
+            },
+            "activePlaylist": {"name": "inactive-random", "screen": "DP-1"},
+        }
+        try:
+            shuffled = CONTROL_MODULE["shuffle_active_random_playlists"](active)
+        finally:
+            globals_["STEAM_ROOT_PATHS"] = original_roots
+        after = json.loads(path.read_text())
+        before_by_name = {playlist["name"]: playlist for playlist in original["steamuser"]["general"]["playlists"]}
+        after_by_name = {playlist["name"]: playlist for playlist in after["steamuser"]["general"]["playlists"]}
+        if shuffled != ["active-random"]:
+            errors.append(f"shuffle scope included an inactive or non-random playlist: {shuffled}")
+        if after_by_name["active-sequential"] != before_by_name["active-sequential"]:
+            errors.append("active sequential playlist order changed")
+        if after_by_name["inactive-random"] != before_by_name["inactive-random"]:
+            errors.append("inactive random playlist changed")
+        if Counter(after_by_name["active-random"]["items"]) != Counter(before_by_name["active-random"]["items"]):
+            errors.append("active random playlist membership changed")
+
+    with TemporaryDirectory(prefix="wallpaper-playlist-race-") as directory:
+        root = Path(directory) / "Steam"
+        original = {"steamuser": {"general": {"playlists": [{"name": "r", "items": ["a", "b"]}]}}}
+        concurrent = {"steamuser": {"general": {"playlists": [{"name": "concurrent", "items": ["z"]}]}}}
+        path = write_fixture(root, original)
+        backup = path.with_name("config.json.eva-wallpaper-control.backup")
+        backup.write_bytes(b"trusted-backup")
+        module = runpy.run_path(str(CONTROL))
+        exchange = module.get("_exchange_paths")
+        if not callable(exchange):
+            errors.append("playlist config commit lacks an atomic exchange primitive for race detection")
+        else:
+            parsed, *write_arguments = module["read_steam_config"](path)
+            parsed["steamuser"]["general"]["playlists"][0]["items"] = ["b", "a"]
+            globals_ = module["write_steam_config"].__globals__
+            raced = False
+
+            def racing_exchange(source: Path, target: Path) -> None:
+                nonlocal raced
+                if not raced and target == path:
+                    path.write_text(json.dumps(concurrent))
+                    raced = True
+                exchange(source, target)
+
+            globals_["_exchange_paths"] = racing_exchange
+            try:
+                try:
+                    module["write_steam_config"](path, parsed, *write_arguments)
+                except module["ControlError"]:
+                    pass
+                else:
+                    errors.append("concurrent config replacement was silently overwritten")
+            finally:
+                globals_["_exchange_paths"] = exchange
+            if json.loads(path.read_text()) != concurrent:
+                errors.append("concurrent config replacement was not restored after a rejected commit")
+            if backup.read_bytes() != b"trusted-backup":
+                errors.append("a rejected concurrent commit replaced the last valid backup")
+
+    with TemporaryDirectory(prefix="wallpaper-playlist-failure-") as directory:
+        root = Path(directory) / "Steam"
+        original = {"steamuser": {"general": {"playlists": [{"name": "r", "items": ["a", "b"]}]}}}
+        path = write_fixture(root, original)
+        module = runpy.run_path(str(CONTROL))
+        parsed, *write_arguments = module["read_steam_config"](path)
+        parsed["steamuser"]["general"]["playlists"][0]["items"] = ["b", "a"]
+        module_os = module["write_steam_config"].__globals__["os"]
+        original_chmod = module_os.chmod
+
+        def fail_post_commit_chmod(target: str | os.PathLike[str], mode: int) -> None:
+            if Path(target) == path:
+                raise OSError("injected chmod failure")
+            original_chmod(target, mode)
+
+        module_os.chmod = fail_post_commit_chmod
+        failed = False
+        try:
+            try:
+                module["write_steam_config"](path, parsed, *write_arguments)
+            except module["ControlError"]:
+                failed = True
+        finally:
+            module_os.chmod = original_chmod
+        if failed and json.loads(path.read_text()) != original:
+            errors.append("playlist config changed even though the write reported failure")
+
+    return errors
+
+
+def main() -> int:
+    errors = controller_fixture_errors()
+    if errors:
+        print("\n".join(f"FAIL: {error}" for error in errors))
+        return 1
     source = PLUGIN.read_text()
     for required in (
         'command: [root.controlPath, "power-toggle", "--json"]',

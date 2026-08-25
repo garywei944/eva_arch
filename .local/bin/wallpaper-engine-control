@@ -11,6 +11,7 @@ render loop while the process stays responsive to DBus and Wayland events.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import fcntl
 import json
 import os
@@ -18,6 +19,7 @@ import re
 import secrets
 import shutil
 import signal
+import stat
 import subprocess
 import sys
 import time
@@ -43,6 +45,8 @@ STEAM_ROOT_PATHS = (
 )
 STEAM_CONFIG_RELATIVE_PATH = Path("steamapps/common/wallpaper_engine/config.json")
 STEAM_LIBRARY_PATH_PATTERN = re.compile(r'"path"\s+"([^"]+)"')
+AT_FDCWD = -100
+RENAME_EXCHANGE = 2
 HELPER_PROGRAM = "zenity"
 HELPER_CLASS = "zenity"
 HELPER_TITLE_PREFIX = "EVA Wallpaper Pause Helper"
@@ -242,25 +246,41 @@ def find_steam_config_path() -> Path:
     for library in steam_library_paths():
         candidate = library / STEAM_CONFIG_RELATIVE_PATH
         try:
+            exists = candidate.exists()
+        except OSError:
+            continue
+        if not exists:
+            continue
+        try:
             resolved = candidate.resolve(strict=True)
             status = resolved.stat()
-        except FileNotFoundError, PermissionError, OSError:
-            continue
-        if resolved.is_file() and status.st_uid == os.getuid() and os.access(resolved, os.W_OK):
-            return resolved
-    raise ControlError("could not find an owner-writable Wallpaper Engine config.json")
+        except (FileNotFoundError, PermissionError, OSError) as error:
+            raise ControlError(
+                f"cannot inspect the Wallpaper Engine UX-selected config {candidate}: {error}"
+            ) from error
+        if not resolved.is_file():
+            raise ControlError(f"Wallpaper Engine UX-selected config is not a file: {resolved}")
+        if status.st_uid != os.getuid():
+            raise ControlError(f"Wallpaper Engine UX-selected config is owned by another user: {resolved}")
+        if not os.access(resolved, os.R_OK | os.W_OK):
+            raise ControlError(f"Wallpaper Engine UX-selected config is not owner-readable and writable: {resolved}")
+        return resolved
+    raise ControlError("could not find the Wallpaper Engine UX-selected config.json")
 
 
 def active_playlist_names(active_config: dict[str, Any]) -> list[str]:
     names: set[str] = set()
     entries = active_config.get("activePlaylists")
-    if isinstance(entries, dict):
-        for entry in entries.values():
-            if isinstance(entry, dict) and isinstance(entry.get("name"), str) and entry["name"]:
-                names.add(entry["name"])
+    active_entries = entries if isinstance(entries, dict) else {}
+    for entry in active_entries.values():
+        if isinstance(entry, dict) and isinstance(entry.get("name"), str) and entry["name"]:
+            names.add(entry["name"])
     legacy = active_config.get("activePlaylist")
-    if isinstance(legacy, dict) and isinstance(legacy.get("name"), str) and legacy["name"]:
-        names.add(legacy["name"])
+    if isinstance(legacy, dict):
+        screen = legacy.get("screen")
+        name = legacy.get("name")
+        if isinstance(screen, str) and screen not in active_entries and isinstance(name, str) and name:
+            names.add(name)
     return sorted(names)
 
 
@@ -286,75 +306,171 @@ def shuffled_playlist_items(
     return shuffled
 
 
-def read_steam_config(path: Path) -> tuple[dict[str, Any], tuple[int, int, int], int]:
+def _file_identity(status: os.stat_result) -> tuple[int, int, int, int]:
+    return (status.st_dev, status.st_ino, status.st_size, status.st_mtime_ns)
+
+
+def _read_file_snapshot(path: Path) -> tuple[bytes, tuple[int, int, int, int], int, int]:
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
     try:
-        status_before = path.stat()
-        raw = path.read_text()
-        status_after = path.stat()
+        descriptor = os.open(path, flags)
+        with os.fdopen(descriptor, "rb") as handle:
+            status_before = os.fstat(handle.fileno())
+            if not stat.S_ISREG(status_before.st_mode):
+                raise ControlError(f"Wallpaper Engine config is not a regular file: {path}")
+            raw = handle.read()
+            status_after = os.fstat(handle.fileno())
+        path_status = os.stat(path, follow_symlinks=False)
+    except ControlError:
+        raise
     except (FileNotFoundError, PermissionError, OSError) as error:
         raise ControlError(f"cannot read Wallpaper Engine playlist config: {error}") from error
-    identity_before = (status_before.st_ino, status_before.st_size, status_before.st_mtime_ns)
-    identity_after = (status_after.st_ino, status_after.st_size, status_after.st_mtime_ns)
-    if identity_before != identity_after:
+    identity = _file_identity(status_before)
+    if identity != _file_identity(status_after) or identity != _file_identity(path_status):
         raise ControlError("Wallpaper Engine playlist config changed while it was being read")
-    if status_after.st_uid != os.getuid():
+    return raw, identity, stat.S_IMODE(status_after.st_mode), status_after.st_uid
+
+
+def read_steam_config(path: Path) -> tuple[dict[str, Any], bytes, tuple[int, int, int, int], int]:
+    raw, identity, mode, owner = _read_file_snapshot(path)
+    if owner != os.getuid():
         raise ControlError("refusing to modify a Wallpaper Engine playlist config owned by another user")
     try:
-        config = json.loads(raw)
-    except json.JSONDecodeError as error:
+        config = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise ControlError("Wallpaper Engine config.json is invalid") from error
     if not isinstance(config, dict):
         raise ControlError("Wallpaper Engine config.json must contain an object")
-    return config, identity_after, status_after.st_mode & 0o777
+    return config, raw, identity, mode
+
+
+def _write_sibling_temp(path: Path, label: str, payload: bytes, mode: int) -> Path:
+    temporary = path.with_name(f".{path.name}.{label}-{os.getpid()}-{uuid.uuid4().hex}")
+    try:
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(descriptor, "wb") as handle:
+            os.fchmod(handle.fileno(), mode)
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except OSError as error:
+        temporary.unlink(missing_ok=True)
+        raise ControlError(f"cannot prepare shuffled Wallpaper Engine config: {error}") from error
+    return temporary
+
+
+def _exchange_paths(source: Path, target: Path) -> None:
+    libc = ctypes.CDLL(None, use_errno=True)
+    renameat2 = getattr(libc, "renameat2", None)
+    if renameat2 is None:
+        raise ControlError("renameat2(RENAME_EXCHANGE) is unavailable; refusing a non-atomic config update")
+    renameat2.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+    renameat2.restype = ctypes.c_int
+    result = renameat2(
+        AT_FDCWD,
+        os.fsencode(source),
+        AT_FDCWD,
+        os.fsencode(target),
+        RENAME_EXCHANGE,
+    )
+    if result != 0:
+        error_number = ctypes.get_errno()
+        raise ControlError(f"cannot atomically exchange Wallpaper Engine config: {os.strerror(error_number)}")
+
+
+def _restore_exchanged_path(
+    source: Path,
+    target: Path,
+    committed_raw: bytes,
+    committed_identity: tuple[int, int, int, int],
+    restore_raw: bytes,
+) -> None:
+    current_raw, current_identity, _, _ = _read_file_snapshot(target)
+    if current_identity != committed_identity or current_raw != committed_raw:
+        raise ControlError(f"config changed after exchange; recovery copy retained at {source}")
+    _exchange_paths(source, target)
+    restored_raw, _, _, _ = _read_file_snapshot(target)
+    if restored_raw != restore_raw:
+        raise ControlError(f"config rollback verification failed; recovery copy retained at {source}")
+
+
+def _safe_private_unlink(path: Path) -> None:
+    try:
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            os.fchmod(descriptor, 0o600)
+        finally:
+            os.close(descriptor)
+        path.unlink()
+    except FileNotFoundError, OSError:
+        pass
 
 
 def write_steam_config(
     path: Path,
     config: dict[str, Any],
-    expected_identity: tuple[int, int, int],
+    expected_raw: bytes,
+    expected_identity: tuple[int, int, int, int],
     mode: int,
 ) -> None:
-    try:
-        current = path.stat()
-    except (FileNotFoundError, PermissionError, OSError) as error:
-        raise ControlError(f"cannot validate Wallpaper Engine playlist config: {error}") from error
-    current_identity = (current.st_ino, current.st_size, current.st_mtime_ns)
-    if current_identity != expected_identity:
-        raise ControlError("Wallpaper Engine playlist config changed before the shuffle could be saved")
-
+    payload = (json.dumps(config, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     backup = path.with_name(f"{path.name}.eva-wallpaper-control.backup")
-    backup_temporary = path.with_name(f".{path.name}.eva-backup-tmp-{os.getpid()}-{uuid.uuid4().hex}")
-    temporary = path.with_name(f".{path.name}.eva-tmp-{os.getpid()}-{uuid.uuid4().hex}")
+    backup_temporary = _write_sibling_temp(path, "eva-backup-tmp", expected_raw, 0o600)
+    temporary = _write_sibling_temp(path, "eva-tmp", payload, mode)
+    temporary_identity = _file_identity(temporary.stat())
+    preserve_temporary = False
+    exchanged = False
     try:
-        with path.open("rb") as source:
-            backup_descriptor = os.open(backup_temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            with os.fdopen(backup_descriptor, "wb") as target:
-                shutil.copyfileobj(source, target)
-                target.flush()
-                os.fsync(target.fileno())
-        os.replace(backup_temporary, backup)
-        os.chmod(backup, 0o600)
-        current = path.stat()
-        if (current.st_ino, current.st_size, current.st_mtime_ns) != expected_identity:
-            raise ControlError("Wallpaper Engine playlist config changed while its backup was being created")
-        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode)
-        with os.fdopen(descriptor, "w") as handle:
-            json.dump(config, handle, indent=2, ensure_ascii=False)
-            handle.write("\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-        current = path.stat()
-        if (current.st_ino, current.st_size, current.st_mtime_ns) != expected_identity:
-            raise ControlError("Wallpaper Engine playlist config changed while the shuffle was being prepared")
-        os.replace(temporary, path)
-        os.chmod(path, mode)
-    except ControlError:
-        raise
-    except OSError as error:
-        raise ControlError(f"cannot save shuffled Wallpaper Engine playlists: {error}") from error
+        current_raw, current_identity, _, current_owner = _read_file_snapshot(path)
+        if current_owner != os.getuid() or current_identity != expected_identity or current_raw != expected_raw:
+            raise ControlError("Wallpaper Engine playlist config changed before the shuffle could be saved")
+
+        _exchange_paths(temporary, path)
+        exchanged = True
+        captured_raw, captured_identity, _, _ = _read_file_snapshot(temporary)
+        committed_raw, committed_identity, _, _ = _read_file_snapshot(path)
+        if captured_identity != expected_identity or captured_raw != expected_raw:
+            try:
+                _restore_exchanged_path(
+                    temporary,
+                    path,
+                    committed_raw,
+                    committed_identity,
+                    captured_raw,
+                )
+                exchanged = False
+            except ControlError:
+                preserve_temporary = True
+                raise
+            raise ControlError("Wallpaper Engine playlist config changed at the atomic commit boundary")
+        if committed_identity != temporary_identity or committed_raw != payload:
+            preserve_temporary = True
+            raise ControlError(f"config changed after exchange; recovery copy retained at {temporary}")
+
+        try:
+            os.replace(backup_temporary, backup)
+        except OSError as error:
+            try:
+                _restore_exchanged_path(
+                    temporary,
+                    path,
+                    payload,
+                    temporary_identity,
+                    expected_raw,
+                )
+                exchanged = False
+            except ControlError:
+                preserve_temporary = True
+                raise
+            raise ControlError(f"cannot publish Wallpaper Engine config backup: {error}") from error
+
+        exchanged = False
     finally:
-        backup_temporary.unlink(missing_ok=True)
-        temporary.unlink(missing_ok=True)
+        if not preserve_temporary:
+            _safe_private_unlink(temporary)
+        _safe_private_unlink(backup_temporary)
+        if exchanged:
+            preserve_temporary = True
 
 
 def shuffle_active_random_playlists(active_config: dict[str, Any]) -> list[str]:
