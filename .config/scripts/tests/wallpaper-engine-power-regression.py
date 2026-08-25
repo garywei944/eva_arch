@@ -8,12 +8,14 @@ import os
 import subprocess
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
 CONTROL = Path.home() / ".local/bin/wallpaper-engine-control"
 PLUGIN = Path.home() / ".config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControl.qml"
 ACTIVE_CONFIG = Path.home() / ".config/Linux Wallpaper Engine/active-wallpapers.json"
+STEAM_CONFIG = Path.home() / ".local/share/Steam/steamapps/common/wallpaper_engine/config.json"
 POWER_STATE = (
     Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-control/power.json"
 )
@@ -113,6 +115,67 @@ def durable_active_state() -> dict[str, Any]:
     return {key: data.get(key) for key in ("activeWallpapers", "activePlaylists", "activePlaylist")}
 
 
+def active_playlist_items(active_state: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    active_playlists = active_state.get("activePlaylists")
+    if not isinstance(active_playlists, dict):
+        return {}
+    names = {
+        str(entry.get("name")) for entry in active_playlists.values() if isinstance(entry, dict) and entry.get("name")
+    }
+    config = json.loads(STEAM_CONFIG.read_text())
+    playlists = config.get("steamuser", {}).get("general", {}).get("playlists", [])
+    return {
+        str(playlist["name"]): {
+            "order": playlist.get("settings", {}).get("order"),
+            "items": list(playlist.get("items", [])),
+        }
+        for playlist in playlists
+        if isinstance(playlist, dict) and playlist.get("name") in names
+    }
+
+
+def active_state_matches_shuffled_restart(
+    before: dict[str, Any],
+    after: dict[str, Any],
+    shuffled_playlists: dict[str, dict[str, Any]],
+) -> bool:
+    if before.get("activePlaylists") != after.get("activePlaylists"):
+        return False
+    if before.get("activePlaylist") != after.get("activePlaylist"):
+        return False
+
+    before_wallpapers = before.get("activeWallpapers")
+    after_wallpapers = after.get("activeWallpapers")
+    active_playlists = before.get("activePlaylists")
+    if (
+        not isinstance(before_wallpapers, dict)
+        or not isinstance(after_wallpapers, dict)
+        or not isinstance(active_playlists, dict)
+    ):
+        return before_wallpapers == after_wallpapers
+    if set(before_wallpapers) != set(after_wallpapers):
+        return False
+
+    for screen, before_entry in before_wallpapers.items():
+        after_entry = after_wallpapers.get(screen)
+        playlist_entry = active_playlists.get(screen)
+        playlist_name = playlist_entry.get("name") if isinstance(playlist_entry, dict) else None
+        playlist = shuffled_playlists.get(str(playlist_name)) if playlist_name else None
+        if playlist is None or playlist.get("order") != "random" or len(playlist.get("items", [])) <= 1:
+            if after_entry != before_entry:
+                return False
+            continue
+        if not isinstance(before_entry, dict) or not isinstance(after_entry, dict):
+            return False
+        if {key: value for key, value in after_entry.items() if key != "backgroundId"} != {
+            key: value for key, value in before_entry.items() if key != "backgroundId"
+        }:
+            return False
+        if after_entry.get("backgroundId") != playlist["items"][0]:
+            return False
+    return True
+
+
 def main() -> int:
     errors: list[str] = []
     source = PLUGIN.read_text()
@@ -132,6 +195,31 @@ def main() -> int:
         return 1
 
     active_before = durable_active_state()
+    playlists_before = active_playlist_items(active_before)
+    active_playlist_entries = active_before.get("activePlaylists")
+    expected_playlist_names = (
+        {
+            str(entry.get("name"))
+            for entry in active_playlist_entries.values()
+            if isinstance(entry, dict) and entry.get("name")
+        }
+        if isinstance(active_playlist_entries, dict)
+        else set()
+    )
+    if set(playlists_before) != expected_playlist_names:
+        errors.append(
+            "precondition failed: active playlists are missing from the Steam config; "
+            f"active={sorted(expected_playlist_names)}, found={sorted(playlists_before)}"
+        )
+    random_restart_names = {
+        name
+        for name, playlist in playlists_before.items()
+        if playlist.get("order") == "random"
+        and len(playlist.get("items", [])) > 1
+        and any(item != playlist["items"][0] for item in playlist["items"][1:])
+    }
+    if not random_restart_names:
+        errors.append("precondition failed: no active randomized playlist has a distinct alternative start item")
     expected_screens: set[str] = set()
     for key in ("activeWallpapers", "activePlaylists"):
         section = active_before.get(key)
@@ -144,6 +232,7 @@ def main() -> int:
             "precondition failed: configured outputs are not all running; "
             f"configured={sorted(expected_screens)}, running={initial.get('screens', [])}"
         )
+    if errors:
         print("\n".join(f"FAIL: {error}" for error in errors))
         return 1
     gpu_before = gpu_memory_used_mib()
@@ -200,13 +289,36 @@ def main() -> int:
             stayed_running, stable_state = state_stays("running", duration=3)
             if not stayed_running:
                 errors.append(f"restored rendering did not remain stable: {stable_state}")
-            if durable_active_state() != active_before:
-                errors.append("start did not preserve the durable active-wallpaper selection")
+            active_after = durable_active_state()
+            playlists_after = active_playlist_items(active_after)
+            if set(playlists_after) != set(playlists_before):
+                errors.append(
+                    "start changed the active playlist set: "
+                    f"before={sorted(playlists_before)}, after={sorted(playlists_after)}"
+                )
+            for name, before_playlist in playlists_before.items():
+                after_playlist = playlists_after.get(name)
+                if after_playlist is None:
+                    continue
+                before_items = before_playlist.get("items", [])
+                after_items = after_playlist.get("items", [])
+                if Counter(before_items) != Counter(after_items):
+                    errors.append(f"start changed playlist membership for {name}")
+                if (
+                    before_playlist.get("order") == "random"
+                    and len(before_items) > 1
+                    and any(item != before_items[0] for item in before_items[1:])
+                    and after_items
+                    and after_items[0] == before_items[0]
+                ):
+                    errors.append(f"random playlist {name} replayed its pre-stop first item")
+            if not active_state_matches_shuffled_restart(active_before, active_after, playlists_after):
+                errors.append("start did not preserve playlist assignments and non-playlist wallpaper selections")
             try:
                 restore_plan = json.loads(POWER_STATE.read_text()).get("active_config", {})
             except FileNotFoundError, json.JSONDecodeError:
                 restore_plan = {}
-            if {key: restore_plan.get(key) for key in active_before} != active_before:
+            if {key: restore_plan.get(key) for key in active_after} != active_after:
                 errors.append("start did not retain a matching last-known restore plan for repeated power cycles")
     finally:
         _, cleanup_state, _ = invoke("status")
@@ -221,7 +333,7 @@ def main() -> int:
 
     print(
         "PASS: manual stop removes the UX and all renderers, releases GPU memory, "
-        "preserves wallpaper selections, and start restores every output"
+        "preserves playlist assignments, reshuffles random starts, and restores every output"
     )
     return 0
 

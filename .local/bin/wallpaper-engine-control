@@ -14,13 +14,15 @@ import argparse
 import fcntl
 import json
 import os
+import re
+import secrets
 import shutil
 import signal
 import subprocess
 import sys
 import time
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -32,6 +34,15 @@ UX_EXECUTABLE = "/usr/lib/electron39/electron"
 UX_LAUNCHER = "/usr/bin/gtk-launch"
 UX_DESKTOP_ID = "linux-wallpaper-engine-ux"
 ACTIVE_WALLPAPERS_PATH = Path.home() / ".config/Linux Wallpaper Engine/active-wallpapers.json"
+STEAM_ROOT_PATHS = (
+    Path.home() / ".local/share/Steam",
+    Path.home() / ".steam/steam",
+    Path.home() / ".var/app/com.valvesoftware.Steam/.local/share/Steam",
+    Path.home() / ".var/app/com.valvesoftware.Steam/.data/Steam",
+    Path.home() / ".var/app/com.valvesoftware.Steam/.steam/steam",
+)
+STEAM_CONFIG_RELATIVE_PATH = Path("steamapps/common/wallpaper_engine/config.json")
+STEAM_LIBRARY_PATH_PATTERN = re.compile(r'"path"\s+"([^"]+)"')
 HELPER_PROGRAM = "zenity"
 HELPER_CLASS = "zenity"
 HELPER_TITLE_PREFIX = "EVA Wallpaper Pause Helper"
@@ -204,6 +215,195 @@ def write_active_wallpaper_config(config: dict[str, Any]) -> None:
         os.chmod(ACTIVE_WALLPAPERS_PATH, mode)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def steam_library_paths() -> list[Path]:
+    libraries: list[Path] = []
+    seen: set[str] = set()
+
+    def add(path: Path) -> None:
+        key = os.fspath(path)
+        if path.is_absolute() and key not in seen:
+            seen.add(key)
+            libraries.append(path)
+
+    for root in STEAM_ROOT_PATHS:
+        add(root)
+        try:
+            library_folders = (root / "steamapps/libraryfolders.vdf").read_text()
+        except FileNotFoundError, PermissionError, OSError:
+            continue
+        for match in STEAM_LIBRARY_PATH_PATTERN.finditer(library_folders):
+            add(Path(match.group(1).replace("\\\\", "\\")))
+    return libraries
+
+
+def find_steam_config_path() -> Path:
+    for library in steam_library_paths():
+        candidate = library / STEAM_CONFIG_RELATIVE_PATH
+        try:
+            resolved = candidate.resolve(strict=True)
+            status = resolved.stat()
+        except FileNotFoundError, PermissionError, OSError:
+            continue
+        if resolved.is_file() and status.st_uid == os.getuid() and os.access(resolved, os.W_OK):
+            return resolved
+    raise ControlError("could not find an owner-writable Wallpaper Engine config.json")
+
+
+def active_playlist_names(active_config: dict[str, Any]) -> list[str]:
+    names: set[str] = set()
+    entries = active_config.get("activePlaylists")
+    if isinstance(entries, dict):
+        for entry in entries.values():
+            if isinstance(entry, dict) and isinstance(entry.get("name"), str) and entry["name"]:
+                names.add(entry["name"])
+    legacy = active_config.get("activePlaylist")
+    if isinstance(legacy, dict) and isinstance(legacy.get("name"), str) and legacy["name"]:
+        names.add(legacy["name"])
+    return sorted(names)
+
+
+def shuffled_playlist_items(
+    items: list[str],
+    randbelow: Callable[[int], int] = secrets.randbelow,
+) -> list[str]:
+    shuffled = list(items)
+    for current_index in range(len(shuffled) - 1, 0, -1):
+        selected_index = randbelow(current_index + 1)
+        if not 0 <= selected_index <= current_index:
+            raise ControlError("playlist random source returned an invalid index")
+        shuffled[current_index], shuffled[selected_index] = shuffled[selected_index], shuffled[current_index]
+
+    # A mathematically valid shuffle can leave the first item unchanged. Deep
+    # restart must visibly avoid replaying that item, so choose uniformly among
+    # the remaining distinct candidates in that case.
+    if len(shuffled) > 1 and shuffled[0] == items[0]:
+        alternatives = [index for index, item in enumerate(shuffled[1:], start=1) if item != items[0]]
+        if alternatives:
+            selected_index = alternatives[randbelow(len(alternatives))]
+            shuffled[0], shuffled[selected_index] = shuffled[selected_index], shuffled[0]
+    return shuffled
+
+
+def read_steam_config(path: Path) -> tuple[dict[str, Any], tuple[int, int, int], int]:
+    try:
+        status_before = path.stat()
+        raw = path.read_text()
+        status_after = path.stat()
+    except (FileNotFoundError, PermissionError, OSError) as error:
+        raise ControlError(f"cannot read Wallpaper Engine playlist config: {error}") from error
+    identity_before = (status_before.st_ino, status_before.st_size, status_before.st_mtime_ns)
+    identity_after = (status_after.st_ino, status_after.st_size, status_after.st_mtime_ns)
+    if identity_before != identity_after:
+        raise ControlError("Wallpaper Engine playlist config changed while it was being read")
+    if status_after.st_uid != os.getuid():
+        raise ControlError("refusing to modify a Wallpaper Engine playlist config owned by another user")
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise ControlError("Wallpaper Engine config.json is invalid") from error
+    if not isinstance(config, dict):
+        raise ControlError("Wallpaper Engine config.json must contain an object")
+    return config, identity_after, status_after.st_mode & 0o777
+
+
+def write_steam_config(
+    path: Path,
+    config: dict[str, Any],
+    expected_identity: tuple[int, int, int],
+    mode: int,
+) -> None:
+    try:
+        current = path.stat()
+    except (FileNotFoundError, PermissionError, OSError) as error:
+        raise ControlError(f"cannot validate Wallpaper Engine playlist config: {error}") from error
+    current_identity = (current.st_ino, current.st_size, current.st_mtime_ns)
+    if current_identity != expected_identity:
+        raise ControlError("Wallpaper Engine playlist config changed before the shuffle could be saved")
+
+    backup = path.with_name(f"{path.name}.eva-wallpaper-control.backup")
+    backup_temporary = path.with_name(f".{path.name}.eva-backup-tmp-{os.getpid()}-{uuid.uuid4().hex}")
+    temporary = path.with_name(f".{path.name}.eva-tmp-{os.getpid()}-{uuid.uuid4().hex}")
+    try:
+        with path.open("rb") as source:
+            backup_descriptor = os.open(backup_temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(backup_descriptor, "wb") as target:
+                shutil.copyfileobj(source, target)
+                target.flush()
+                os.fsync(target.fileno())
+        os.replace(backup_temporary, backup)
+        os.chmod(backup, 0o600)
+        current = path.stat()
+        if (current.st_ino, current.st_size, current.st_mtime_ns) != expected_identity:
+            raise ControlError("Wallpaper Engine playlist config changed while its backup was being created")
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode)
+        with os.fdopen(descriptor, "w") as handle:
+            json.dump(config, handle, indent=2, ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        current = path.stat()
+        if (current.st_ino, current.st_size, current.st_mtime_ns) != expected_identity:
+            raise ControlError("Wallpaper Engine playlist config changed while the shuffle was being prepared")
+        os.replace(temporary, path)
+        os.chmod(path, mode)
+    except ControlError:
+        raise
+    except OSError as error:
+        raise ControlError(f"cannot save shuffled Wallpaper Engine playlists: {error}") from error
+    finally:
+        backup_temporary.unlink(missing_ok=True)
+        temporary.unlink(missing_ok=True)
+
+
+def shuffle_active_random_playlists(active_config: dict[str, Any]) -> list[str]:
+    names = active_playlist_names(active_config)
+    if not names:
+        return []
+
+    path = find_steam_config_path()
+    config, identity, mode = read_steam_config(path)
+    steam_user = config.get("steamuser")
+    general = steam_user.get("general") if isinstance(steam_user, dict) else None
+    playlists = general.get("playlists") if isinstance(general, dict) else None
+    if not isinstance(playlists, list):
+        raise ControlError("Wallpaper Engine config.json has no playlist list")
+
+    matching: dict[str, dict[str, Any]] = {}
+    duplicates: set[str] = set()
+    for playlist in playlists:
+        if not isinstance(playlist, dict) or not isinstance(playlist.get("name"), str):
+            continue
+        name = playlist["name"]
+        if name not in names:
+            continue
+        if name in matching:
+            duplicates.add(name)
+        matching[name] = playlist
+    if duplicates:
+        raise ControlError(f"active playlist names are duplicated: {', '.join(sorted(duplicates))}")
+    missing = sorted(set(names) - set(matching))
+    if missing:
+        raise ControlError(f"active playlists are missing from config.json: {', '.join(missing)}")
+
+    shuffled_names: list[str] = []
+    for name in names:
+        playlist = matching[name]
+        settings = playlist.get("settings")
+        if not isinstance(settings, dict) or settings.get("order") != "random":
+            continue
+        items = playlist.get("items")
+        if not isinstance(items, list) or not all(isinstance(item, str) for item in items):
+            raise ControlError(f"random playlist {name} has an invalid item list")
+        if len(items) <= 1 or not any(item != items[0] for item in items[1:]):
+            continue
+        playlist["items"] = shuffled_playlist_items(items)
+        shuffled_names.append(name)
+
+    if shuffled_names:
+        write_steam_config(path, config, identity, mode)
+    return shuffled_names
 
 
 def gpu_memory_used_mib() -> int | None:
@@ -854,9 +1054,11 @@ def start_all() -> dict[str, Any]:
     if len(roots) > 1:
         raise ControlError("multiple Wallpaper Engine UX roots exist; refusing duplicate start")
 
+    shuffled_playlists: list[str] = []
     if not roots:
         if not Path(UX_LAUNCHER).is_file():
             raise ControlError(f"Wallpaper Engine launcher is missing: {UX_LAUNCHER}")
+        shuffled_playlists = shuffle_active_random_playlists(read_active_wallpaper_config())
         try:
             launcher = subprocess.Popen(
                 [UX_LAUNCHER, UX_DESKTOP_ID],
@@ -907,7 +1109,9 @@ def start_all() -> dict[str, Any]:
                 if stable_since is None:
                     stable_since = now
                 elif now - stable_since >= 2:
-                    return snapshot()
+                    result = snapshot()
+                    result["shuffled_playlists"] = shuffled_playlists
+                    return result
         else:
             stable_since = None
         time.sleep(0.2)
