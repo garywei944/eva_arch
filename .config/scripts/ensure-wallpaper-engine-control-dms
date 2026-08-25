@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Idempotently enable and place the DMS Wallpaper Engine control."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+PLUGIN_ID = "wallpaperEngineControl"
+BAR_ID = "default"
+PLACEMENT_ANCHOR = "codexBar"
+
+
+def widget_id(value: Any) -> str | None:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        identifier = value.get("id")
+        return str(identifier) if identifier is not None else None
+    return None
+
+
+def read_json(path: Path, default: dict[str, Any] | None = None) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text())
+    except FileNotFoundError:
+        if default is not None:
+            return default
+        raise
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    return value
+
+
+def write_json_atomic(path: Path, value: dict[str, Any]) -> None:
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    mode = path.stat().st_mode & 0o777 if path.exists() else 0o600
+    temporary = path.with_suffix(f".tmp.{os.getpid()}")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, mode)
+    try:
+        with os.fdopen(descriptor, "w") as handle:
+            json.dump(value, handle, indent=2, ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        os.chmod(path, mode)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def ensure_activation(config_dir: Path) -> list[str]:
+    settings_path = config_dir / "settings.json"
+    plugin_settings_path = config_dir / "plugin_settings.json"
+    settings = read_json(settings_path)
+    plugin_settings = read_json(plugin_settings_path, {})
+    changed: list[str] = []
+
+    plugin_entry = plugin_settings.get(PLUGIN_ID)
+    if not isinstance(plugin_entry, dict) or plugin_entry.get("enabled") is not True:
+        plugin_settings[PLUGIN_ID] = {
+            **(plugin_entry if isinstance(plugin_entry, dict) else {}),
+            "enabled": True,
+        }
+        write_json_atomic(plugin_settings_path, plugin_settings)
+        changed.append(str(plugin_settings_path))
+
+    bars = settings.get("barConfigs")
+    if not isinstance(bars, list):
+        raise ValueError(f"{settings_path} has no barConfigs list")
+    bar = next((item for item in bars if isinstance(item, dict) and item.get("id") == BAR_ID), None)
+    if bar is None:
+        raise ValueError(f"{settings_path} has no {BAR_ID!r} bar")
+    right_widgets = bar.get("rightWidgets")
+    if not isinstance(right_widgets, list):
+        raise ValueError(f"{settings_path} default bar has no rightWidgets list")
+
+    existing = [item for item in right_widgets if widget_id(item) != PLUGIN_ID]
+    anchor_index = next(
+        (index for index, item in enumerate(existing) if widget_id(item) == PLACEMENT_ANCHOR),
+        len(existing) - 1,
+    )
+    existing.insert(max(0, anchor_index + 1), {"id": PLUGIN_ID, "enabled": True})
+    if existing != right_widgets:
+        bar["rightWidgets"] = existing
+        write_json_atomic(settings_path, settings)
+        changed.append(str(settings_path))
+
+    return changed
+
+
+def wait_for_dms(config_dir: Path, timeout: float = 30) -> None:
+    deadline = time.monotonic() + timeout
+    settings_path = config_dir / "settings.json"
+    while time.monotonic() < deadline:
+        if settings_path.is_file():
+            result = subprocess.run(
+                ["dms", "ipc", "call", "plugins", "list"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=2,
+            )
+            if result.returncode == 0:
+                return
+        time.sleep(0.25)
+    raise TimeoutError("DMS did not become ready before activation timeout")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config-dir",
+        type=Path,
+        default=Path.home() / ".config/DankMaterialShell",
+    )
+    parser.add_argument("--wait", action="store_true")
+    parser.add_argument("--restart-if-changed", action="store_true")
+    args = parser.parse_args()
+
+    try:
+        if args.wait:
+            wait_for_dms(args.config_dir)
+        changed = ensure_activation(args.config_dir)
+        if changed and args.restart_if_changed:
+            result = subprocess.run(
+                ["dms", "restart"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=20,
+            )
+            if result.returncode != 0:
+                detail = result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}"
+                raise RuntimeError(f"DMS restart failed: {detail}")
+    except (OSError, ValueError, RuntimeError, TimeoutError, subprocess.TimeoutExpired) as error:
+        print(json.dumps({"ok": False, "error": str(error)}, separators=(",", ":")))
+        return 1
+
+    print(json.dumps({"ok": True, "changed": changed}, separators=(",", ":")))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
