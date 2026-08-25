@@ -1,0 +1,1016 @@
+#!/usr/bin/env python3
+"""Pause Linux Wallpaper Engine through its native fullscreen path.
+
+The renderer has no public pause IPC. Freezing it with SIGSTOP is unsafe because
+DBus/MPRIS events accumulate and can crash scene scripting on resume. Instead,
+this controller owns one hidden fullscreen Zenity window on a private special
+workspace. linux-wallpaperengine's built-in fullscreen detector then pauses the
+render loop while the process stays responsive to DBus and Wayland events.
+"""
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import time
+import uuid
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
+
+PROCESS_NAME = "linux-wallpaperengine"
+RENDERER_EXECUTABLE = "/opt/linux-wallpaperengine/linux-wallpaperengine"
+UX_ASAR = "/usr/lib/linux-wallpaper-engine-ux/app.asar"
+UX_EXECUTABLE = "/usr/lib/electron39/electron"
+UX_LAUNCHER = "/usr/bin/gtk-launch"
+UX_DESKTOP_ID = "linux-wallpaper-engine-ux"
+ACTIVE_WALLPAPERS_PATH = Path.home() / ".config/Linux Wallpaper Engine/active-wallpapers.json"
+HELPER_PROGRAM = "zenity"
+HELPER_CLASS = "zenity"
+HELPER_TITLE_PREFIX = "EVA Wallpaper Pause Helper"
+HELPER_TEXT = "Wallpaper rendering is paused"
+HELPER_WORKSPACE = "special:eva-wallpaper-pause"
+RUNTIME_ROOT = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-control"
+STATE_PATH = RUNTIME_ROOT / "helper.json"
+POWER_STATE_PATH = RUNTIME_ROOT / "power.json"
+LOCK_PATH = RUNTIME_ROOT / "control.lock"
+
+
+class ControlError(RuntimeError):
+    """A safe, user-facing control failure."""
+
+
+def proc_argv(pid: int) -> list[str]:
+    raw = Path(f"/proc/{pid}/cmdline").read_bytes()
+    return [os.fsdecode(value) for value in raw.split(b"\0") if value]
+
+
+def proc_stat_fields(pid: int) -> list[str]:
+    # Fields start at procfs stat field 3 because fields 1-2 precede the final ')'.
+    return Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].strip().split()
+
+
+def proc_state(pid: int) -> str:
+    return proc_stat_fields(pid)[0]
+
+
+def proc_start_time(pid: int) -> int:
+    # procfs stat field 22 is index 19 after fields 1-2 are removed.
+    return int(proc_stat_fields(pid)[19])
+
+
+def renderer_records() -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for proc in Path("/proc").iterdir():
+        if not proc.name.isdigit():
+            continue
+        try:
+            pid = int(proc.name)
+            argv = proc_argv(pid)
+            executable = os.readlink(f"/proc/{pid}/exe")
+            owner_uid = proc.stat().st_uid
+            if (
+                not argv
+                or Path(argv[0]).name != PROCESS_NAME
+                or executable != RENDERER_EXECUTABLE
+                or owner_uid != os.getuid()
+            ):
+                continue
+            stat_fields = proc_stat_fields(pid)
+            state = stat_fields[0]
+            ppid = int(stat_fields[1])
+            start_time = int(stat_fields[19])
+        except FileNotFoundError, PermissionError, ProcessLookupError, IndexError, ValueError:
+            continue
+
+        screens: list[str] = []
+        spans: list[str] = []
+        for index, argument in enumerate(argv[:-1]):
+            if argument == "--screen-root":
+                screens.append(argv[index + 1])
+            elif argument == "--screen-span":
+                spans.extend(screen for screen in argv[index + 1].split(",") if screen)
+
+        records.append(
+            {
+                "pid": pid,
+                "ppid": ppid,
+                "start_time": start_time,
+                "state": state,
+                "screens": screens,
+                "spans": spans,
+                "argv": argv,
+                "executable": executable,
+            }
+        )
+    return sorted(records, key=lambda record: int(record["pid"]))
+
+
+def ux_root_records() -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for proc in Path("/proc").iterdir():
+        if not proc.name.isdigit():
+            continue
+        try:
+            pid = int(proc.name)
+            argv = proc_argv(pid)
+            executable = os.readlink(f"/proc/{pid}/exe")
+            owner_uid = proc.stat().st_uid
+            if argv != [UX_EXECUTABLE, UX_ASAR] or executable != UX_EXECUTABLE or owner_uid != os.getuid():
+                continue
+            stat_fields = proc_stat_fields(pid)
+        except FileNotFoundError, PermissionError, ProcessLookupError, IndexError, ValueError:
+            continue
+        records.append(
+            {
+                "pid": pid,
+                "ppid": int(stat_fields[1]),
+                "start_time": int(stat_fields[19]),
+                "state": stat_fields[0],
+                "argv": argv,
+                "executable": executable,
+            }
+        )
+    return sorted(records, key=lambda record: int(record["pid"]))
+
+
+def proc_cgroup_path(pid: int) -> str:
+    for line in Path(f"/proc/{pid}/cgroup").read_text().splitlines():
+        fields = line.split(":", 2)
+        if len(fields) == 3 and fields[0] == "0":
+            return fields[2]
+    raise ControlError(f"cannot resolve cgroup v2 path for PID {pid}")
+
+
+def cgroup_processes(cgroup_path: str) -> list[int]:
+    root = Path("/sys/fs/cgroup").resolve()
+    path = (root / cgroup_path.lstrip("/")).resolve()
+    if path != root and root not in path.parents:
+        raise ControlError(f"refusing invalid cgroup path: {cgroup_path}")
+    try:
+        return sorted(int(line) for line in (path / "cgroup.procs").read_text().splitlines() if line)
+    except FileNotFoundError:
+        return []
+
+
+def read_active_wallpaper_config() -> dict[str, Any]:
+    try:
+        value = json.loads(ACTIVE_WALLPAPERS_PATH.read_text())
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError as error:
+        raise ControlError("active-wallpapers.json is invalid") from error
+    if not isinstance(value, dict):
+        raise ControlError("active-wallpapers.json must contain an object")
+    return value
+
+
+def active_screens(config: dict[str, Any]) -> list[str]:
+    screens: set[str] = set()
+    for key in ("activeWallpapers", "activePlaylists"):
+        section = config.get(key, {})
+        if isinstance(section, dict):
+            screens.update(str(screen) for screen in section if screen)
+    return sorted(screens)
+
+
+def active_screens_from_config() -> list[str]:
+    return active_screens(read_active_wallpaper_config())
+
+
+def active_selection(config: dict[str, Any]) -> dict[str, Any]:
+    return {key: config.get(key) for key in ("activeWallpapers", "activePlaylists", "activePlaylist")}
+
+
+def write_active_wallpaper_config(config: dict[str, Any]) -> None:
+    ACTIVE_WALLPAPERS_PATH.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    mode = ACTIVE_WALLPAPERS_PATH.stat().st_mode & 0o777 if ACTIVE_WALLPAPERS_PATH.exists() else 0o600
+    temporary = ACTIVE_WALLPAPERS_PATH.with_suffix(f".tmp.{os.getpid()}")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, mode)
+    try:
+        with os.fdopen(descriptor, "w") as handle:
+            json.dump(config, handle, indent="\t", ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, ACTIVE_WALLPAPERS_PATH)
+        os.chmod(ACTIVE_WALLPAPERS_PATH, mode)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def gpu_memory_used_mib() -> int | None:
+    try:
+        result = subprocess.run(
+            [
+                "nvidia-smi",
+                "--query-gpu=memory.used",
+                "--format=csv,noheader,nounits",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+    except OSError, subprocess.TimeoutExpired:
+        return None
+    if result.returncode != 0:
+        return None
+    try:
+        return int(result.stdout.splitlines()[0].strip())
+    except IndexError, ValueError:
+        return None
+
+
+def hyprland_clients() -> list[dict[str, Any]]:
+    try:
+        result = subprocess.run(
+            ["hyprctl", "clients", "-j"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ControlError(f"cannot query Hyprland clients: {error}") from error
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}"
+        raise ControlError(f"cannot query Hyprland clients: {detail}")
+    try:
+        value = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        raise ControlError("Hyprland returned invalid client JSON") from error
+    if not isinstance(value, list):
+        raise ControlError("Hyprland returned an unexpected client payload")
+    return value
+
+
+def helper_client(pid: int, title: str) -> dict[str, Any] | None:
+    for client in hyprland_clients():
+        if client.get("pid") == pid and client.get("class") == HELPER_CLASS and client.get("title") == title:
+            return client
+    return None
+
+
+def helper_client_is_native_pause(client: dict[str, Any]) -> bool:
+    workspace = client.get("workspace")
+    return (
+        isinstance(workspace, dict)
+        and workspace.get("name") == HELPER_WORKSPACE
+        and int(client.get("fullscreen", 0)) != 0
+    )
+
+
+def helper_command(title: str) -> list[str]:
+    executable = shutil.which(HELPER_PROGRAM)
+    if executable is None:
+        raise ControlError("zenity is required for the hidden native-pause helper")
+    return [
+        executable,
+        "--info",
+        f"--title={title}",
+        f"--text={HELPER_TEXT}",
+        "--no-wrap",
+    ]
+
+
+def helper_process_matches(state: dict[str, Any]) -> bool:
+    try:
+        pid = int(state["pid"])
+        start_time = int(state["start_time"])
+        title = str(state["title"])
+        argv = proc_argv(pid)
+        actual_start_time = proc_start_time(pid)
+    except KeyError, TypeError, ValueError, OSError, IndexError:
+        return False
+
+    return (
+        actual_start_time == start_time
+        and title.startswith(f"{HELPER_TITLE_PREFIX} ")
+        and bool(argv)
+        and Path(argv[0]).name == HELPER_PROGRAM
+        and "--info" in argv
+        and f"--title={title}" in argv
+        and f"--text={HELPER_TEXT}" in argv
+        and "--no-wrap" in argv
+    )
+
+
+def ensure_runtime_root() -> None:
+    RUNTIME_ROOT.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(RUNTIME_ROOT, 0o700)
+
+
+def read_recorded_helper() -> dict[str, Any] | None:
+    try:
+        raw = STATE_PATH.read_text()
+    except FileNotFoundError:
+        return None
+    try:
+        state = json.loads(raw)
+    except json.JSONDecodeError:
+        STATE_PATH.unlink(missing_ok=True)
+        return None
+    if not isinstance(state, dict) or not helper_process_matches(state):
+        STATE_PATH.unlink(missing_ok=True)
+        return None
+    return state
+
+
+def write_json_state(path: Path, state: dict[str, Any]) -> None:
+    ensure_runtime_root()
+    temporary = path.with_suffix(f".tmp.{os.getpid()}")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    try:
+        with os.fdopen(descriptor, "w") as handle:
+            json.dump(state, handle, separators=(",", ":"))
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def write_recorded_helper(state: dict[str, Any]) -> None:
+    write_json_state(STATE_PATH, state)
+
+
+def read_power_state() -> dict[str, Any] | None:
+    try:
+        value = json.loads(POWER_STATE_PATH.read_text())
+    except FileNotFoundError:
+        return None
+    except json.JSONDecodeError:
+        POWER_STATE_PATH.unlink(missing_ok=True)
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def write_power_state(expected_screens: list[str], active_config: dict[str, Any]) -> None:
+    state = {
+        "expected_screens": sorted(set(expected_screens)),
+        "active_config": active_config,
+        "launcher": [UX_LAUNCHER, UX_DESKTOP_ID],
+    }
+    if read_power_state() != state:
+        write_json_state(POWER_STATE_PATH, state)
+
+
+def active_selection_is_empty(config: dict[str, Any]) -> bool:
+    return not any(active_selection(config).values())
+
+
+def remember_restore_plan(records: list[dict[str, Any]], roots: list[dict[str, Any]]) -> None:
+    if not roots:
+        return
+    active_config = read_active_wallpaper_config()
+    if records and active_selection_is_empty(active_config):
+        # Preserve the last known plan during transient or buggy empty writes
+        # while an exact renderer is demonstrably still active.
+        return
+    expected_screens = active_screens(active_config) or screens_from_records(records)
+    write_power_state(expected_screens, active_config)
+
+
+def discover_owned_helpers() -> list[dict[str, Any]]:
+    """Recover only helpers with this controller's exact process/window signature."""
+    recovered: list[dict[str, Any]] = []
+    for client in hyprland_clients():
+        title = str(client.get("title", ""))
+        if client.get("class") != HELPER_CLASS or not title.startswith(f"{HELPER_TITLE_PREFIX} "):
+            continue
+        try:
+            state = {
+                "pid": int(client["pid"]),
+                "start_time": proc_start_time(int(client["pid"])),
+                "title": title,
+            }
+        except KeyError, TypeError, ValueError, OSError, IndexError:
+            continue
+        if helper_process_matches(state):
+            recovered.append(state)
+    return recovered
+
+
+def owned_helper() -> dict[str, Any] | None:
+    state = read_recorded_helper()
+    if state is not None:
+        return state
+
+    recovered = discover_owned_helpers()
+    if len(recovered) > 1:
+        raise ControlError("multiple owned pause helpers exist; refusing ambiguous control")
+    if recovered:
+        write_recorded_helper(recovered[0])
+        return recovered[0]
+    return None
+
+
+def screens_from_records(records: list[dict[str, Any]]) -> list[str]:
+    return sorted({screen for record in records for screen in [*record["screens"], *record["spans"]]})
+
+
+def incompatible_native_pause_pids(records: list[dict[str, Any]]) -> list[int]:
+    return [
+        int(record["pid"])
+        for record in records
+        if "--no-fullscreen-pause" in record["argv"] or "--fullscreen-pause-only-active" in record["argv"]
+    ]
+
+
+def snapshot(error: str | None = None) -> dict[str, Any]:
+    records = renderer_records()
+    roots = ux_root_records()
+    screens = screens_from_records(records)
+    remember_restore_plan(records, roots)
+    helper = owned_helper()
+    helper_ok = False
+    helper_problem: str | None = None
+
+    if helper is not None:
+        client = helper_client(int(helper["pid"]), str(helper["title"]))
+        if client is None:
+            helper_problem = "pause helper is running without a Hyprland window"
+        elif not helper_client_is_native_pause(client):
+            helper_problem = "pause helper is not fullscreen on its private special workspace"
+        else:
+            incompatible = incompatible_native_pause_pids(records)
+            if incompatible:
+                pids = ", ".join(str(pid) for pid in incompatible)
+                helper_problem = f"native fullscreen pausing is disabled for renderer PID(s): {pids}"
+            else:
+                helper_ok = True
+
+    if helper_problem is not None:
+        overall = "error"
+        running = len(records)
+        paused = 0
+    elif helper_ok:
+        overall = "paused"
+        running = 0
+        paused = len(records)
+    elif records:
+        overall = "running"
+        running = len(records)
+        paused = 0
+    elif roots:
+        overall = "idle"
+        running = 0
+        paused = 0
+    else:
+        overall = "stopped"
+        running = 0
+        paused = 0
+
+    result: dict[str, Any] = {
+        "state": overall,
+        "count": len(records),
+        "screen_count": len(screens) if screens else (1 if records else 0),
+        "screens": screens,
+        "running": running,
+        "paused": paused,
+        "pids": [record["pid"] for record in records],
+        "ux_running": bool(roots),
+        "ux_pids": [record["pid"] for record in roots],
+        "power_stopped": not roots and not records and read_power_state() is not None,
+        "control_mode": "native-pause+full-stop",
+        "helper_pid": int(helper["pid"]) if helper is not None else None,
+    }
+    if error or helper_problem:
+        result["error"] = error or helper_problem
+    return result
+
+
+def require_native_pause_compatible(records: list[dict[str, Any]]) -> None:
+    if not records:
+        raise ControlError("no linux-wallpaperengine renderers are running")
+    incompatible = incompatible_native_pause_pids(records)
+    if incompatible:
+        pids = ", ".join(str(pid) for pid in incompatible)
+        raise ControlError(
+            "native pause requires fullscreen pausing without --fullscreen-pause-only-active; "
+            f"incompatible renderer PID(s): {pids}"
+        )
+
+
+def terminate_owned_helper(state: dict[str, Any]) -> None:
+    if not helper_process_matches(state):
+        STATE_PATH.unlink(missing_ok=True)
+        return
+
+    pid = int(state["pid"])
+    title = str(state["title"])
+    try:
+        pidfd = os.pidfd_open(pid)
+    except ProcessLookupError:
+        STATE_PATH.unlink(missing_ok=True)
+        return
+
+    try:
+        # Revalidate after opening the pidfd. Signals through this descriptor can
+        # never hit a later process that reuses the numeric PID.
+        if not helper_process_matches(state):
+            STATE_PATH.unlink(missing_ok=True)
+            return
+        try:
+            signal.pidfd_send_signal(pidfd, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+
+        deadline = time.monotonic() + 3
+        while helper_process_matches(state) and time.monotonic() < deadline:
+            time.sleep(0.05)
+        if helper_process_matches(state):
+            try:
+                signal.pidfd_send_signal(pidfd, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            deadline = time.monotonic() + 1
+            while helper_process_matches(state) and time.monotonic() < deadline:
+                time.sleep(0.05)
+        if helper_process_matches(state):
+            raise ControlError(f"pause helper PID {pid} did not exit")
+    finally:
+        os.close(pidfd)
+
+    STATE_PATH.unlink(missing_ok=True)
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline:
+        if helper_client(pid, title) is None:
+            return
+        time.sleep(0.05)
+    raise ControlError("pause helper window remained after its owned process exited")
+
+
+def terminate_spawned_child(process: subprocess.Popen[Any]) -> None:
+    try:
+        pidfd = os.pidfd_open(process.pid)
+    except ProcessLookupError:
+        process.wait(timeout=1)
+        return
+    try:
+        try:
+            signal.pidfd_send_signal(pidfd, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            try:
+                signal.pidfd_send_signal(pidfd, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait(timeout=1)
+    finally:
+        os.close(pidfd)
+
+
+def pause() -> dict[str, Any]:
+    records = renderer_records()
+    require_native_pause_compatible(records)
+
+    existing = owned_helper()
+    if existing is not None:
+        client = helper_client(int(existing["pid"]), str(existing["title"]))
+        if client is not None and helper_client_is_native_pause(client):
+            return snapshot()
+        terminate_owned_helper(existing)
+
+    title = f"{HELPER_TITLE_PREFIX} {uuid.uuid4().hex[:12]}"
+    process = subprocess.Popen(
+        helper_command(title),
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+        close_fds=True,
+    )
+    try:
+        state = {
+            "pid": process.pid,
+            "start_time": proc_start_time(process.pid),
+            "title": title,
+        }
+        write_recorded_helper(state)
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if not helper_process_matches(state):
+                raise ControlError("native-pause helper exited before it became ready")
+            client = helper_client(process.pid, title)
+            if client is not None and helper_client_is_native_pause(client):
+                return snapshot()
+            time.sleep(0.05)
+        raise ControlError(
+            "native-pause helper did not become fullscreen on special:eva-wallpaper-pause; "
+            "check the Hyprland window rule"
+        )
+    except Exception:
+        if "state" in locals() and helper_process_matches(state):
+            terminate_owned_helper(state)
+        else:
+            terminate_spawned_child(process)
+        STATE_PATH.unlink(missing_ok=True)
+        raise
+
+
+def resume() -> dict[str, Any]:
+    helper = owned_helper()
+    if helper is not None:
+        terminate_owned_helper(helper)
+    return snapshot()
+
+
+def toggle() -> dict[str, Any]:
+    helper = owned_helper()
+    if helper is not None:
+        terminate_owned_helper(helper)
+        return snapshot()
+    return pause()
+
+
+def process_identity_live(record: dict[str, Any]) -> bool:
+    try:
+        return (
+            proc_start_time(int(record["pid"])) == int(record["start_time"]) and proc_state(int(record["pid"])) != "Z"
+        )
+    except KeyError, TypeError, ValueError, OSError, IndexError:
+        return False
+
+
+def ux_identity_live(record: dict[str, Any]) -> bool:
+    if not process_identity_live(record):
+        return False
+    try:
+        pid = int(record["pid"])
+        return (
+            proc_argv(pid) == [UX_EXECUTABLE, UX_ASAR]
+            and os.readlink(f"/proc/{pid}/exe") == UX_EXECUTABLE
+            and Path(f"/proc/{pid}").stat().st_uid == os.getuid()
+        )
+    except OSError, ValueError:
+        return False
+
+
+def renderer_identity_live(record: dict[str, Any]) -> bool:
+    if not process_identity_live(record):
+        return False
+    try:
+        pid = int(record["pid"])
+        argv = proc_argv(pid)
+        return (
+            bool(argv)
+            and Path(argv[0]).name == PROCESS_NAME
+            and os.readlink(f"/proc/{pid}/exe") == RENDERER_EXECUTABLE
+            and Path(f"/proc/{pid}").stat().st_uid == os.getuid()
+        )
+    except OSError, ValueError:
+        return False
+
+
+def terminate_exact_process(record: dict[str, Any]) -> None:
+    if not renderer_identity_live(record):
+        return
+    pid = int(record["pid"])
+    try:
+        pidfd = os.pidfd_open(pid)
+    except ProcessLookupError:
+        return
+    try:
+        if not renderer_identity_live(record):
+            return
+        try:
+            signal.pidfd_send_signal(pidfd, signal.SIGTERM)
+        except ProcessLookupError:
+            return
+        deadline = time.monotonic() + 3
+        while renderer_identity_live(record) and time.monotonic() < deadline:
+            time.sleep(0.05)
+        if renderer_identity_live(record):
+            try:
+                signal.pidfd_send_signal(pidfd, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            deadline = time.monotonic() + 1
+            while renderer_identity_live(record) and time.monotonic() < deadline:
+                time.sleep(0.05)
+        if renderer_identity_live(record):
+            raise ControlError(f"owned renderer PID {pid} did not exit")
+    finally:
+        os.close(pidfd)
+
+
+def validated_ux_scope(root: dict[str, Any]) -> tuple[str, str]:
+    if not ux_identity_live(root):
+        raise ControlError("Wallpaper Engine UX identity changed before its scope could be stopped")
+    pid = int(root["pid"])
+    cgroup_path = proc_cgroup_path(pid)
+    unit = Path(cgroup_path).name
+    if (
+        not unit.endswith(f"-{pid}.scope")
+        or "/app.slice/" not in cgroup_path
+        or pid not in cgroup_processes(cgroup_path)
+    ):
+        raise ControlError(f"refusing unexpected Wallpaper Engine cgroup: {cgroup_path}")
+
+    result = subprocess.run(
+        ["systemctl", "--user", "show", unit, "-p", "ControlGroup", "--value", "--no-pager"],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    if result.returncode != 0 or result.stdout.strip() != cgroup_path:
+        raise ControlError(f"could not validate Wallpaper Engine systemd scope {unit}")
+    if not ux_identity_live(root) or proc_cgroup_path(pid) != cgroup_path:
+        raise ControlError("Wallpaper Engine UX identity or cgroup changed during validation")
+    return unit, cgroup_path
+
+
+def stop_ux_scope(root: dict[str, Any]) -> None:
+    unit, cgroup_path = validated_ux_scope(root)
+    result = subprocess.run(
+        ["systemctl", "--user", "kill", "--kill-whom=all", "--signal=KILL", unit],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}"
+        raise ControlError(f"could not kill validated Wallpaper Engine scope {unit}: {detail}")
+
+    deadline = time.monotonic() + 3
+    remaining = cgroup_processes(cgroup_path)
+    while remaining and time.monotonic() < deadline:
+        time.sleep(0.05)
+        remaining = cgroup_processes(cgroup_path)
+    if remaining or ux_identity_live(root):
+        raise ControlError(f"Wallpaper Engine scope {unit} did not empty; remaining PIDs={remaining}")
+
+
+def stop_all() -> dict[str, Any]:
+    helper = owned_helper()
+    if helper is not None:
+        terminate_owned_helper(helper)
+
+    roots = ux_root_records()
+    records = renderer_records()
+    active_config = read_active_wallpaper_config()
+    renderer_screens = screens_from_records(records)
+    if records and active_selection_is_empty(active_config):
+        saved_state = read_power_state()
+        saved_config = saved_state.get("active_config") if isinstance(saved_state, dict) else None
+        saved_screens = active_screens(saved_config) if isinstance(saved_config, dict) else []
+        if (
+            not isinstance(saved_config, dict)
+            or active_selection_is_empty(saved_config)
+            or not renderer_screens
+            or set(saved_screens) != set(renderer_screens)
+        ):
+            raise ControlError(
+                "active-wallpapers.json is empty while renderers are running and no matching "
+                "last-known restore plan exists; refusing a destructive stop"
+            )
+        active_config = saved_config
+    expected_screens = active_screens(active_config) or renderer_screens
+    write_power_state(expected_screens, active_config)
+    gpu_before = gpu_memory_used_mib()
+
+    for root in roots:
+        stop_ux_scope(root)
+
+    # Any renderer outside or surviving the validated UX scope is still stopped
+    # only by its exact PID/start-time identity; no name-based killing is used.
+    for record in records:
+        terminate_exact_process(record)
+
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline:
+        if not ux_root_records() and not renderer_records():
+            break
+        time.sleep(0.05)
+    remaining_roots = ux_root_records()
+    remaining_renderers = renderer_records()
+    if remaining_roots or remaining_renderers:
+        raise ControlError(
+            "Wallpaper Engine stop left owned processes: "
+            f"ux={[record['pid'] for record in remaining_roots]}, "
+            f"renderers={[record['pid'] for record in remaining_renderers]}"
+        )
+
+    if active_selection(read_active_wallpaper_config()) != active_selection(active_config):
+        write_active_wallpaper_config(active_config)
+
+    result = snapshot()
+    gpu_after = gpu_memory_used_mib()
+    if gpu_before is not None:
+        result["gpu_memory_before_mib"] = gpu_before
+    if gpu_after is not None:
+        result["gpu_memory_after_mib"] = gpu_after
+    if gpu_before is not None and gpu_after is not None:
+        result["gpu_memory_released_mib"] = max(0, gpu_before - gpu_after)
+    return result
+
+
+def expected_restore_screens() -> list[str]:
+    configured = active_screens_from_config()
+    if configured:
+        return configured
+    state = read_power_state()
+    if state is not None and isinstance(state.get("expected_screens"), list):
+        return sorted(str(screen) for screen in state["expected_screens"] if screen)
+    return []
+
+
+def restore_active_selection_from_power_state() -> None:
+    state = read_power_state()
+    if state is None or not isinstance(state.get("active_config"), dict):
+        return
+    saved = state["active_config"]
+    current = read_active_wallpaper_config()
+    if active_selection_is_empty(current) and not active_selection_is_empty(saved):
+        write_active_wallpaper_config(saved)
+
+
+def start_all() -> dict[str, Any]:
+    helper = owned_helper()
+    if helper is not None:
+        terminate_owned_helper(helper)
+
+    restore_active_selection_from_power_state()
+    expected_screens = expected_restore_screens()
+    roots = ux_root_records()
+    records = renderer_records()
+    if not roots and records:
+        raise ControlError("orphan Wallpaper Engine renderers are running; stop them before start")
+    if len(roots) > 1:
+        raise ControlError("multiple Wallpaper Engine UX roots exist; refusing duplicate start")
+
+    if not roots:
+        if not Path(UX_LAUNCHER).is_file():
+            raise ControlError(f"Wallpaper Engine launcher is missing: {UX_LAUNCHER}")
+        try:
+            launcher = subprocess.Popen(
+                [UX_LAUNCHER, UX_DESKTOP_ID],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+                close_fds=True,
+            )
+        except OSError as error:
+            raise ControlError(f"Wallpaper Engine launch failed: {error}") from error
+        time.sleep(0.2)
+        if launcher.poll() not in (None, 0):
+            raise ControlError(f"Wallpaper Engine launcher exited with {launcher.returncode}")
+
+    root_deadline = time.monotonic() + 12
+    while not ux_root_records() and time.monotonic() < root_deadline:
+        time.sleep(0.1)
+    started_roots = ux_root_records()
+    if not started_roots:
+        raise ControlError("Wallpaper Engine UX did not start")
+    if len(started_roots) != 1:
+        raise ControlError("Wallpaper Engine start produced duplicate UX roots; right-click stop before retrying")
+
+    restore_deadline = time.monotonic() + 30
+    restored: set[str] = set()
+    stable_since: float | None = None
+    saved_state = read_power_state()
+    saved_config = saved_state.get("active_config") if isinstance(saved_state, dict) else None
+    while time.monotonic() < restore_deadline:
+        current_roots = ux_root_records()
+        if len(current_roots) != 1:
+            raise ControlError(
+                "Wallpaper Engine UX root count changed during restore; right-click stop before retrying"
+            )
+        restored = set(screens_from_records(renderer_records()))
+        if not expected_screens or set(expected_screens).issubset(restored):
+            current_config = read_active_wallpaper_config()
+            if (
+                isinstance(saved_config, dict)
+                and not active_selection_is_empty(saved_config)
+                and active_selection_is_empty(current_config)
+            ):
+                write_active_wallpaper_config(saved_config)
+                stable_since = None
+            else:
+                now = time.monotonic()
+                if stable_since is None:
+                    stable_since = now
+                elif now - stable_since >= 2:
+                    return snapshot()
+        else:
+            stable_since = None
+        time.sleep(0.2)
+
+    raise ControlError(
+        "Wallpaper Engine UX started but did not restore every output: "
+        f"expected={expected_screens}, restored={sorted(restored)}"
+    )
+
+
+def power_toggle() -> dict[str, Any]:
+    if ux_root_records() or renderer_records():
+        return stop_all()
+    return start_all()
+
+
+@contextmanager
+def control_lock() -> Iterator[None]:
+    ensure_runtime_root()
+    descriptor = os.open(LOCK_PATH, os.O_RDWR | os.O_CREAT, 0o600)
+    with os.fdopen(descriptor, "r+") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        yield
+
+
+def emit(data: dict[str, Any], as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(data, separators=(",", ":")))
+        return
+    screen_text = ", ".join(data["screens"]) or "unnamed output"
+    print(
+        f"{data['state']}: {data['screen_count']} dynamic output(s) on {screen_text}; "
+        f"{data['count']} renderer process(es)"
+    )
+    if data.get("error"):
+        print(f"error: {data['error']}", file=sys.stderr)
+
+
+def emergency_error_payload(error: Exception) -> dict[str, Any]:
+    try:
+        message = str(error)
+    except Exception:
+        message = type(error).__name__
+    return {
+        "state": "error",
+        "count": 0,
+        "screen_count": 0,
+        "screens": [],
+        "running": 0,
+        "paused": 0,
+        "pids": [],
+        "ux_running": False,
+        "ux_pids": [],
+        "power_stopped": False,
+        "control_mode": "native-pause+full-stop",
+        "helper_pid": None,
+        "error": message,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Pause/resume Linux Wallpaper Engine through its native fullscreen detector, "
+            "or stop/start the full UX process scope to release GPU memory."
+        )
+    )
+    parser.add_argument(
+        "action",
+        nargs="?",
+        default="status",
+        choices=("status", "pause", "resume", "toggle", "stop", "start", "power-toggle"),
+    )
+    parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    args = parser.parse_args()
+
+    try:
+        with control_lock():
+            if args.action == "pause":
+                result = pause()
+            elif args.action == "resume":
+                result = resume()
+            elif args.action == "toggle":
+                result = toggle()
+            elif args.action == "stop":
+                result = stop_all()
+            elif args.action == "start":
+                result = start_all()
+            elif args.action == "power-toggle":
+                result = power_toggle()
+            else:
+                result = snapshot()
+    except Exception as error:
+        try:
+            result = snapshot(str(error))
+        except Exception:
+            result = emergency_error_payload(error)
+        emit(result, args.json)
+        return 3
+
+    emit(result, args.json)
+    return 2 if result["state"] == "error" else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

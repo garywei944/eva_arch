@@ -4,6 +4,13 @@
 !bin
 !wiki
 
+# Wallpaper Engine controller (exact runtime entry point only).
+!.local
+.local/*
+!.local/bin
+.local/bin/*
+!.local/bin/wallpaper-engine-control
+
 # files
 !.condarc
 !.editorconfig
@@ -34,6 +41,14 @@
 .config/*
 !.config/alacritty
 !.config/awesome
+!.config/DankMaterialShell
+.config/DankMaterialShell/*
+!.config/DankMaterialShell/plugins
+.config/DankMaterialShell/plugins/*
+!.config/DankMaterialShell/plugins/wallpaperEngineControl
+.config/DankMaterialShell/plugins/wallpaperEngineControl/*
+!.config/DankMaterialShell/plugins/wallpaperEngineControl/plugin.json
+!.config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControl.qml
 !.config/etc
 !.config/hypr
 !.config/hypr-backups
@@ -46,6 +61,8 @@
 !.config/personal
 !.config/satty
 !.config/scripts
+.config/scripts/**/__pycache__/
+.config/scripts/**/*.py[cod]
 !.config/terminator
 !.config/tmux
 .config/tmux/*

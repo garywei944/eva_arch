@@ -13,3 +13,24 @@ hl.window_rule({
     match = { class = "^(qqmusic)$" },
     workspace = "25",
 })
+
+-- Route Sublime Merge to the right monitor's Git workspace on creation.
+hl.window_rule({
+    name = "route-sublime-merge",
+    match = { class = "^(smerge|sublime_merge)$" },
+    workspace = "21",
+})
+
+-- A hidden fullscreen toplevel lets linux-wallpaperengine use its native pause
+-- path without SIGSTOPing renderers (which can crash after queued DBus events).
+hl.window_rule({
+    name = "native-wallpaper-pause-helper",
+    match = {
+        class = "^zenity$",
+        title = "^EVA Wallpaper Pause Helper [0-9a-f]+$",
+    },
+    workspace = "special:eva-wallpaper-pause silent",
+    fullscreen = true,
+    no_focus = true,
+    no_anim = true,
+})

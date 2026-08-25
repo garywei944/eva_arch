@@ -1,0 +1,13 @@
+{
+  "id": "wallpaperEngineControl",
+  "name": "Wallpaper Engine Control",
+  "description": "Pause/resume wallpapers or stop/start the full UX to release GPU memory",
+  "version": "1.1.0",
+  "author": "EVA for Gary",
+  "icon": "wallpaper",
+  "type": "widget",
+  "component": "./WallpaperEngineControl.qml",
+  "permissions": [
+    "process"
+  ]
+}
