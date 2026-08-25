@@ -224,7 +224,7 @@ def controller_fixture_errors() -> list[str]:
         os.chmod(path, mode)
         return path
 
-    minimal = {"steamuser": {"general": {"playlists": []}}}
+    minimal: dict[str, Any] = {"steamuser": {"general": {"playlists": []}}}
     with TemporaryDirectory(prefix="wallpaper-playlist-path-") as directory:
         first = Path(directory) / "first"
         second = Path(directory) / "second"
@@ -240,7 +240,8 @@ def controller_fixture_errors() -> list[str]:
                 selected = None
             if selected is not None:
                 errors.append(
-                    "controller must fail on the UX-selected first existing config instead of choosing a later writable one: "
+                    "controller must fail on the UX-selected first existing config "
+                    "instead of choosing a later writable one: "
                     f"selected={selected}, expected refusal for {first_path.resolve()}"
                 )
         finally:
@@ -255,7 +256,7 @@ def controller_fixture_errors() -> list[str]:
 
     with TemporaryDirectory(prefix="wallpaper-playlist-scope-") as directory:
         root = Path(directory) / "Steam"
-        original = {
+        original: dict[str, Any] = {
             "unrelated": {"keep": True},
             "steamuser": {
                 "general": {

@@ -479,7 +479,7 @@ def shuffle_active_random_playlists(active_config: dict[str, Any]) -> list[str]:
         return []
 
     path = find_steam_config_path()
-    config, identity, mode = read_steam_config(path)
+    config, raw, identity, mode = read_steam_config(path)
     steam_user = config.get("steamuser")
     general = steam_user.get("general") if isinstance(steam_user, dict) else None
     playlists = general.get("playlists") if isinstance(general, dict) else None
@@ -518,7 +518,7 @@ def shuffle_active_random_playlists(active_config: dict[str, Any]) -> list[str]:
         shuffled_names.append(name)
 
     if shuffled_names:
-        write_steam_config(path, config, identity, mode)
+        write_steam_config(path, config, raw, identity, mode)
     return shuffled_names
 
 
