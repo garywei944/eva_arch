@@ -4,12 +4,13 @@
 !bin
 !wiki
 
-# Wallpaper Engine controller (exact runtime entry point only).
+# Wallpaper Engine controller and readiness-gated login entry points.
 !.local
 .local/*
 !.local/bin
 .local/bin/*
 !.local/bin/wallpaper-engine-control
+!.local/bin/wallpaper-engine-login-start
 
 # files
 !.condarc
@@ -40,6 +41,9 @@
 !.config
 .config/*
 !.config/alacritty
+!.config/autostart
+.config/autostart/*
+!.config/autostart/wallpaper-engine-ready.desktop
 !.config/awesome
 !.config/DankMaterialShell
 .config/DankMaterialShell/*

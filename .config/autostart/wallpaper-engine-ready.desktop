@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Wallpaper Engine Ready Start
+Comment=Start Wallpaper Engine after the Wayland session is ready
+Icon=linux-wallpaper-engine-ux
+TryExec=/home/aris/.local/bin/wallpaper-engine-login-start
+Exec=/home/aris/.local/bin/wallpaper-engine-login-start
+Terminal=false
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
