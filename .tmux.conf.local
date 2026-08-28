@@ -418,6 +418,9 @@ set -g monitor-bell on #!important
 set -g bell-action any #!important
 set -g visual-bell off #!important
 set -ga terminal-features "*:hyperlinks" #!important
+# Let modern terminal applications request unambiguous modified-key sequences.
+set -s extended-keys on #!important
+set -as terminal-features ',xterm-kitty:extkeys' #!important
 bind h split-window -h #!important
 bind v split-window -v #!important
 set -g default-command "${SHELL}" #!important
