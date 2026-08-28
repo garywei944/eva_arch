@@ -11,9 +11,9 @@ repos:
       - id: check-symlinks
       - id: destroyed-symlinks
       - id: trailing-whitespace
-        exclude: .*\.spec
+        exclude: .*\.(spec|patch)
       - id: end-of-file-fixer
-        exclude: .*\.spec
+        exclude: .*\.(spec|patch)
       - id: check-yaml
         args: [--allow-multiple-documents]
         exclude: ^(.*template.*|.*templates.*)$

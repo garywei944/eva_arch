@@ -78,7 +78,12 @@ class Fixture:
             import os
             import sys
 
-            sys.exit(1 if os.environ.get("FAKE_AUDIO_DOWN") == "1" else 0)
+            service = sys.argv[-1]
+            inactive = {name for name in os.environ.get("FAKE_INACTIVE_AUDIO", "").split(",") if name}
+            if service in inactive:
+                print("inactive")
+                raise SystemExit(3)
+            print("active")
             """,
         )
 
@@ -214,6 +219,21 @@ class WallpaperEngineLoginStartTests(unittest.TestCase):
             self.assertEqual(payload["missing_screens"], ["DP-3"])
             self.assertEqual(fixture.actions(), [])
 
+    def test_check_fails_closed_until_every_audio_service_is_active(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            result = invoke_helper(
+                fixture.environment(FAKE_INACTIVE_AUDIO="pipewire-pulse.service"),
+                "--check",
+            )
+            payload = parse_payload(result)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(payload["ready"])
+            self.assertFalse(payload["audio_ready"])
+            self.assertEqual(payload["audio_services"]["pipewire-pulse.service"], "inactive")
+            self.assertEqual(fixture.actions(), [])
+
     def test_login_start_uses_one_bounded_safe_retry(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             fixture = Fixture(Path(directory))
@@ -238,6 +258,20 @@ class WallpaperEngineLoginStartTests(unittest.TestCase):
             self.assertEqual(payload["state"], "error")
             self.assertEqual(payload["step"], "readiness")
             self.assertEqual(fixture.actions(), [])
+
+    def test_invalid_numeric_overrides_fail_with_one_json_payload(self) -> None:
+        bad_values = ("not-a-number", "-1", "nan", "inf")
+        for value in bad_values:
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as directory:
+                fixture = Fixture(Path(directory))
+                result = invoke_helper(fixture.environment(WALLPAPER_ENGINE_READY_TIMEOUT=value))
+                payload = parse_payload(result)
+
+                self.assertEqual(result.returncode, 3)
+                self.assertEqual(payload["state"], "error")
+                self.assertEqual(payload["step"], "setup")
+                self.assertIn("WALLPAPER_ENGINE_READY_TIMEOUT", payload["error"])
+                self.assertEqual(fixture.actions(), [])
 
     def test_owned_autostart_replaces_the_generated_entry(self) -> None:
         desktop = DESKTOP.read_text()

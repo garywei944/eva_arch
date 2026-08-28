@@ -1,0 +1,19 @@
+diff --git a/src/WallpaperEngine/Scripting/ScriptEngine.cpp b/src/WallpaperEngine/Scripting/ScriptEngine.cpp
+index e690b92d..bf5629fb 100644
+--- a/src/WallpaperEngine/Scripting/ScriptEngine.cpp
++++ b/src/WallpaperEngine/Scripting/ScriptEngine.cpp
+@@ -183,11 +183,10 @@ ScriptEngine::ScriptEngine (Wallpapers::CScene& scene, Media::MediaSource& media
+ 	      this->notifyMediaUpdate (info);
+ 	  });
+ 
+-    this->m_unregisterAlbumArtUpdateCallback
+-	= mediaSource.addAlbumArtListener ([this] (const Media::MediaSource::MediaInfo& info) {
+-	      // TODO: SEPARATE THESE INTO THEIR OWN UPDATES SO JS ONLY RECEIVES THE MEANINGFUL UPDATES
+-	      this->notifyMediaUpdate (info);
+-	  });
++    // b016 lifetime workaround: disable ScriptEngine album-art callbacks until
++    // the listener-lifetime fix is merged with its dependent scripting changes.
++    // Metadata/playback callbacks and audio-reactive processing remain enabled.
++    this->m_unregisterAlbumArtUpdateCallback = [] {};
+ 
+     this->m_runtime = JS_NewRuntime ();

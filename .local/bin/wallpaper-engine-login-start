@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Start Linux Wallpaper Engine only after the login session is ready.
+"""Start Linux Wallpaper Engine once the login session is actually usable.
 
-The GUI's XDG autostart entry launches at the first graphical-session edge. On a
-fresh Hyprland login that can be earlier than the outputs, audio services, and
-external Steam content are all usable. This helper waits for those real seams,
-then delegates lifecycle ownership to wallpaper-engine-control. One bounded
-stop/start retry is allowed if the GUI starts without every configured renderer.
+The XDG autostart edge fires before every output is configured and before the
+external Steam library is mounted. Wait for those, then hand lifecycle
+ownership to wallpaper-engine-control. One bounded stop/start retry is allowed
+if the first start does not bring up every configured output.
+
+Environment overrides (used by the regression tests):
+  WALLPAPER_ENGINE_ACTIVE_CONFIG, WALLPAPER_ENGINE_ASSETS_DIR,
+  WALLPAPER_ENGINE_CONTROL, WALLPAPER_ENGINE_HYPRCTL,
+  WALLPAPER_ENGINE_READY_TIMEOUT, WALLPAPER_ENGINE_READY_POLL_INTERVAL,
+  WALLPAPER_ENGINE_RETRY_DELAY
 """
 
 from __future__ import annotations
@@ -13,48 +18,38 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+import math
 import os
 import subprocess
 import sys
 import time
-from collections.abc import Iterator
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 HOME = Path.home()
 ACTIVE_CONFIG = Path(
-    os.environ.get(
-        "WALLPAPER_ENGINE_ACTIVE_CONFIG",
-        HOME / ".config/Linux Wallpaper Engine/active-wallpapers.json",
-    )
+    os.environ.get("WALLPAPER_ENGINE_ACTIVE_CONFIG", HOME / ".config/Linux Wallpaper Engine/active-wallpapers.json")
 )
 ASSETS_DIR = Path(
-    os.environ.get(
-        "WALLPAPER_ENGINE_ASSETS_DIR",
-        HOME / ".local/share/Steam/steamapps/common/wallpaper_engine/assets",
-    )
+    os.environ.get("WALLPAPER_ENGINE_ASSETS_DIR", HOME / ".local/share/Steam/steamapps/common/wallpaper_engine/assets")
 )
-CONTROL = os.environ.get(
-    "WALLPAPER_ENGINE_CONTROL",
-    str(HOME / ".local/bin/wallpaper-engine-control"),
-)
-HYPRCTL = os.environ.get("WALLPAPER_ENGINE_HYPRCTL", "/usr/bin/hyprctl")
-SYSTEMCTL = os.environ.get("WALLPAPER_ENGINE_SYSTEMCTL", "/usr/bin/systemctl")
+CONTROL = os.environ.get("WALLPAPER_ENGINE_CONTROL", str(HOME / ".local/bin/wallpaper-engine-control"))
+HYPRCTL = os.environ.get("WALLPAPER_ENGINE_HYPRCTL", "hyprctl")
+SYSTEMCTL = os.environ.get("WALLPAPER_ENGINE_SYSTEMCTL", "systemctl")
+LOCK_PATH = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-login-start.lock"
+START_TIMEOUT = 75  # wallpaper-engine-control start gives up after ~55 s itself
 AUDIO_SERVICES = ("pipewire.service", "pipewire-pulse.service", "wireplumber.service")
-RUNTIME_ROOT = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-login-start"
-LOCK_PATH = RUNTIME_ROOT / "control.lock"
 
 
-class LoginStartError(RuntimeError):
-    """A bounded, user-facing login-start failure."""
-
-
-def env_float(name: str, default: float, *, minimum: float) -> float:
-    raw = os.environ.get(name)
-    value = default if raw is None else float(raw)
-    if value < minimum:
-        raise LoginStartError(f"{name} must be at least {minimum}")
+def env_float(name: str, default: float, minimum: float, allow_minimum: bool = False) -> float:
+    raw = os.environ.get(name, str(default))
+    try:
+        value = float(raw)
+    except ValueError as error:
+        raise ValueError(f"{name} must be a finite number") from error
+    if not math.isfinite(value) or value < minimum or (value == minimum and not allow_minimum):
+        comparison = "at least" if allow_minimum else "greater than"
+        raise ValueError(f"{name} must be finite and {comparison} {minimum}")
     return value
 
 
@@ -62,153 +57,108 @@ def emit(payload: dict[str, Any]) -> None:
     print(json.dumps(payload, separators=(",", ":"), sort_keys=True))
 
 
-def read_active_config() -> dict[str, Any]:
+def configured_state() -> tuple[list[str], list[Path], str | None]:
+    """Return (expected screens, wallpaper directories, config error)."""
     try:
-        value = json.loads(ACTIVE_CONFIG.read_text())
-    except FileNotFoundError as error:
-        raise LoginStartError(f"active wallpaper configuration is missing: {ACTIVE_CONFIG}") from error
-    except json.JSONDecodeError as error:
-        raise LoginStartError(f"active wallpaper configuration is invalid JSON: {ACTIVE_CONFIG}") from error
-    if not isinstance(value, dict):
-        raise LoginStartError("active wallpaper configuration must be a JSON object")
-    return value
+        config = json.loads(ACTIVE_CONFIG.read_text())
+    except FileNotFoundError:
+        return [], [], f"active wallpaper configuration is missing: {ACTIVE_CONFIG}"
+    except json.JSONDecodeError:
+        return [], [], f"active wallpaper configuration is invalid JSON: {ACTIVE_CONFIG}"
+    if not isinstance(config, dict):
+        return [], [], "active wallpaper configuration must be a JSON object"
 
-
-def configured_state(config: dict[str, Any]) -> tuple[list[str], list[Path]]:
     screens: set[str] = set()
-    wallpaper_paths: set[Path] = set()
-
-    active_wallpapers = config.get("activeWallpapers", {})
-    if isinstance(active_wallpapers, dict):
-        for key, record in active_wallpapers.items():
+    wallpapers: set[Path] = set()
+    for key in ("activeWallpapers", "activePlaylists"):
+        section = config.get(key)
+        if not isinstance(section, dict):
+            continue
+        for name, record in section.items():
             if not isinstance(record, dict):
                 continue
-            screen = record.get("screen", key)
+            screen = record.get("screen", name)
+            if isinstance(screen, str) and screen:
+                screens.add(screen)
             background = record.get("backgroundId")
-            if isinstance(screen, str) and screen:
-                screens.add(screen)
             if isinstance(background, str) and background:
-                wallpaper_paths.add(Path(background))
-
-    active_playlists = config.get("activePlaylists", {})
-    if isinstance(active_playlists, dict):
-        for key, record in active_playlists.items():
-            if not isinstance(record, dict):
-                continue
-            screen = record.get("screen", key)
-            if isinstance(screen, str) and screen:
-                screens.add(screen)
-
-    active_playlist = config.get("activePlaylist")
-    if isinstance(active_playlist, dict):
-        screen = active_playlist.get("screen")
-        if isinstance(screen, str) and screen:
-            screens.add(screen)
-
-    return sorted(screens), sorted(wallpaper_paths, key=str)
-
-
-def wayland_socket_ready() -> tuple[bool, str | None]:
-    runtime_dir = os.environ.get("XDG_RUNTIME_DIR")
-    display = os.environ.get("WAYLAND_DISPLAY")
-    if not runtime_dir or not display:
-        return False, None
-    path = Path(display) if display.startswith("/") else Path(runtime_dir) / display
-    return path.exists(), str(path)
+                wallpapers.add(Path(background))
+    legacy = config.get("activePlaylist")
+    if isinstance(legacy, dict) and isinstance(legacy.get("screen"), str) and legacy["screen"]:
+        screens.add(legacy["screen"])
+    return sorted(screens), sorted(wallpapers), None
 
 
 def available_monitors() -> tuple[list[str], str | None]:
     try:
-        result = subprocess.run(
-            [HYPRCTL, "monitors", "-j"],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-    except (OSError, subprocess.TimeoutExpired) as error:
-        return [], str(error)
-    if result.returncode != 0:
-        return [], f"hyprctl exited with {result.returncode}"
-    try:
-        value = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return [], "hyprctl returned invalid JSON"
-    if not isinstance(value, list):
-        return [], "hyprctl returned an unexpected monitor payload"
-    screens = sorted(
-        {
+        result = subprocess.run([HYPRCTL, "monitors", "-j"], check=False, capture_output=True, text=True, timeout=5)
+        monitors = json.loads(result.stdout) if result.returncode == 0 else None
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as error:
+        return [], f"hyprctl monitors failed: {error}"
+    if not isinstance(monitors, list):
+        return [], f"hyprctl monitors failed: exit {result.returncode}"
+    return (
+        sorted(
             str(record["name"])
-            for record in value
-            if isinstance(record, dict)
-            and isinstance(record.get("name"), str)
-            and record["name"]
-            and not record.get("disabled", False)
-        }
+            for record in monitors
+            if isinstance(record, dict) and record.get("name") and not record.get("disabled", False)
+        ),
+        None,
     )
-    return screens, None
 
 
-def inactive_audio_services() -> list[str]:
-    inactive: list[str] = []
+def audio_service_states() -> dict[str, str]:
+    states: dict[str, str] = {}
     for service in AUDIO_SERVICES:
         try:
             result = subprocess.run(
-                [SYSTEMCTL, "--user", "is-active", "--quiet", service],
+                [SYSTEMCTL, "--user", "is-active", service],
                 check=False,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=3,
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
-        except OSError, subprocess.TimeoutExpired:
-            inactive.append(service)
-            continue
-        if result.returncode != 0:
-            inactive.append(service)
-    return inactive
+            state = result.stdout.strip() or ("unknown" if result.returncode == 0 else "error")
+        except (OSError, subprocess.TimeoutExpired) as error:
+            state = f"error: {error}"
+        states[service] = state
+    return states
 
 
 def readiness_snapshot() -> dict[str, Any]:
-    try:
-        config = read_active_config()
-        expected_screens, wallpaper_paths = configured_state(config)
-        config_error: str | None = None
-    except LoginStartError as error:
-        expected_screens = []
-        wallpaper_paths = []
-        config_error = str(error)
-
-    wayland_ready, wayland_path = wayland_socket_ready()
+    expected, wallpapers, config_error = configured_state()
+    runtime_dir = os.environ.get("XDG_RUNTIME_DIR", "")
+    display = os.environ.get("WAYLAND_DISPLAY", "")
+    wayland_ready = bool(runtime_dir and display and (Path(runtime_dir) / display).exists())
     monitors, monitor_error = available_monitors()
-    missing_screens = sorted(set(expected_screens) - set(monitors))
-    missing_wallpapers = sorted(str(path) for path in wallpaper_paths if not path.is_dir())
-    inactive_audio = inactive_audio_services()
+    audio_services = audio_service_states()
+    audio_ready = all(state == "active" for state in audio_services.values())
+    missing_screens = sorted(set(expected) - set(monitors))
+    missing_wallpapers = sorted(str(path) for path in wallpapers if not path.is_dir())
     assets_ready = ASSETS_DIR.is_dir()
-
     ready = (
         config_error is None
-        and bool(expected_screens)
+        and bool(expected)
         and wayland_ready
         and monitor_error is None
+        and audio_ready
         and not missing_screens
         and assets_ready
         and not missing_wallpapers
-        and not inactive_audio
     )
-
     return {
         "ready": ready,
-        "expected_screens": expected_screens,
+        "expected_screens": expected,
         "available_screens": monitors,
         "missing_screens": missing_screens,
         "wayland_ready": wayland_ready,
-        "wayland_path": wayland_path,
         "assets_ready": assets_ready,
         "assets_dir": str(ASSETS_DIR),
         "missing_wallpaper_paths": missing_wallpapers,
-        "inactive_audio_services": inactive_audio,
         "config_error": config_error,
         "monitor_error": monitor_error,
+        "audio_ready": audio_ready,
+        "audio_services": audio_services,
     }
 
 
@@ -222,57 +172,30 @@ def wait_until_ready(timeout: float, poll_interval: float) -> dict[str, Any]:
 
 
 def invoke_control(action: str) -> tuple[int, dict[str, Any]]:
-    timeout = 45 if action == "start" else 15
     try:
         result = subprocess.run(
-            [CONTROL, action, "--json"],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
+            [CONTROL, action, "--json"], check=False, capture_output=True, text=True, timeout=START_TIMEOUT
         )
+        payload = json.loads(result.stdout)
     except (OSError, subprocess.TimeoutExpired) as error:
         return 127, {"state": "error", "error": str(error)}
-
-    try:
-        payload = json.loads(result.stdout)
     except json.JSONDecodeError:
-        payload = {
-            "state": "error",
-            "error": "wallpaper-engine-control returned invalid JSON",
-        }
+        return result.returncode, {"state": "error", "error": "wallpaper-engine-control returned invalid JSON"}
     if not isinstance(payload, dict):
-        payload = {
-            "state": "error",
-            "error": "wallpaper-engine-control returned an unexpected payload",
-        }
+        return result.returncode, {"state": "error", "error": "wallpaper-engine-control returned an unexpected payload"}
     return result.returncode, payload
 
 
 def running_matches(payload: dict[str, Any], expected_screens: list[str]) -> bool:
+    # Compare outputs only: one renderer may serve several screens (--screen-root per screen, or --screen-span).
     screens = payload.get("screens")
     return (
         payload.get("state") == "running"
         and not payload.get("error")
         and payload.get("ux_running") is True
-        and payload.get("count") == len(expected_screens)
-        and payload.get("screen_count") == len(expected_screens)
         and isinstance(screens, list)
-        and sorted(str(screen) for screen in screens) == expected_screens
+        and set(expected_screens) <= {str(screen) for screen in screens}
     )
-
-
-@contextmanager
-def exclusive_login_start() -> Iterator[None]:
-    RUNTIME_ROOT.mkdir(mode=0o700, parents=True, exist_ok=True)
-    os.chmod(RUNTIME_ROOT, 0o700)
-    descriptor = os.open(LOCK_PATH, os.O_RDWR | os.O_CREAT, 0o600)
-    with os.fdopen(descriptor, "r+") as handle:
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as error:
-            raise LoginStartError("another Wallpaper Engine login start is already running") from error
-        yield
 
 
 def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tuple[int, dict[str, Any]]:
@@ -285,19 +208,14 @@ def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tup
             "error": "login prerequisites did not become ready before the deadline",
             "readiness": readiness,
         }
+    expected = readiness["expected_screens"]
 
-    expected_screens = readiness["expected_screens"]
-    last_code = 0
-    last_payload: dict[str, Any] = {}
-
+    code = 0
+    payload: dict[str, Any] = {}
     for attempt in (1, 2):
-        last_code, last_payload = invoke_control("start")
-        if last_code == 0 and running_matches(last_payload, expected_screens):
-            result = dict(last_payload)
-            result["attempts"] = attempt
-            result["login_start"] = "ready"
-            return 0, result
-
+        code, payload = invoke_control("start")
+        if code == 0 and running_matches(payload, expected):
+            return 0, {**payload, "attempts": attempt, "login_start": "ready"}
         if attempt == 1:
             stop_code, stop_payload = invoke_control("stop")
             if stop_code != 0 or stop_payload.get("state") not in {"stopped", "error"}:
@@ -305,7 +223,7 @@ def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tup
                     "state": "error",
                     "step": "retry-cleanup",
                     "attempts": 1,
-                    "error": "safe cleanup failed after the first start attempt",
+                    "error": "cleanup failed after the first start attempt",
                     "controller_state": stop_payload.get("state"),
                 }
             time.sleep(retry_delay)
@@ -318,52 +236,69 @@ def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tup
                     "error": "login prerequisites disappeared before the retry",
                     "readiness": readiness,
                 }
-
     return 3, {
         "state": "error",
         "step": "start",
         "attempts": 2,
         "error": "Wallpaper Engine did not restore every configured output after one retry",
-        "controller_exit": last_code,
-        "controller_state": last_payload.get("state"),
-        "controller_screens": last_payload.get("screens", []),
+        "controller_exit": code,
+        "controller_state": payload.get("state"),
+        "controller_error": payload.get("error"),
+        "controller_screens": payload.get("screens", []),
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="report current login readiness without starting or stopping anything",
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--check", action="store_true", help="report readiness without starting anything")
     args = parser.parse_args()
 
+    descriptor: int | None = None
     try:
-        timeout = env_float("WALLPAPER_ENGINE_READY_TIMEOUT", 60.0, minimum=0.0)
-        poll_interval = env_float("WALLPAPER_ENGINE_READY_POLL_INTERVAL", 0.5, minimum=0.01)
-        retry_delay = env_float("WALLPAPER_ENGINE_RETRY_DELAY", 2.0, minimum=0.0)
-
         if args.check:
             payload = readiness_snapshot()
             emit(payload)
             return 0 if payload["ready"] else 1
 
-        with exclusive_login_start():
-            code, payload = login_start(timeout, poll_interval, retry_delay)
-    except (LoginStartError, ValueError) as error:
+        timeout = env_float("WALLPAPER_ENGINE_READY_TIMEOUT", 90.0, 0.0)
+        poll_interval = env_float("WALLPAPER_ENGINE_READY_POLL_INTERVAL", 0.5, 0.0)
+        retry_delay = env_float("WALLPAPER_ENGINE_RETRY_DELAY", 2.0, 0.0, allow_minimum=True)
+
+        LOCK_PATH.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        descriptor = os.open(
+            LOCK_PATH,
+            os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0),
+            0o600,
+        )
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            emit(
+                {
+                    "state": "error",
+                    "step": "setup",
+                    "attempts": 0,
+                    "error": "another login start is already running",
+                }
+            )
+            return 3
+
+        code, payload = login_start(timeout=timeout, poll_interval=poll_interval, retry_delay=retry_delay)
+        emit(payload)
+        return code
+    except Exception as error:  # noqa: BLE001 - setup failures must preserve the JSON contract
         emit(
             {
                 "state": "error",
                 "step": "setup",
                 "attempts": 0,
-                "error": str(error),
+                "error": str(error) or type(error).__name__,
             }
         )
         return 3
-
-    emit(payload)
-    return code
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
 
 
 if __name__ == "__main__":

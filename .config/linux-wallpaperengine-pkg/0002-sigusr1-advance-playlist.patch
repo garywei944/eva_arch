@@ -1,0 +1,174 @@
+diff --git a/src/WallpaperEngine/Application/WallpaperApplication.cpp b/src/WallpaperEngine/Application/WallpaperApplication.cpp
+index c9107af..f4b33d4 100644
+--- a/src/WallpaperEngine/Application/WallpaperApplication.cpp
++++ b/src/WallpaperEngine/Application/WallpaperApplication.cpp
+@@ -22,6 +22,7 @@
+ #include "recording.h"
+ #endif /* DEMOMODE */
+ 
++#include <csignal>
+ #include <algorithm>
+ #include <climits>
+ #include <numeric>
+@@ -394,6 +395,24 @@ void WallpaperApplication::advancePlaylist (
+ 
+     if (playlist.orderIndex == 0 && playlist.definition.settings.order == "random") {
+ 	std::shuffle (playlist.order.begin (), playlist.order.end (), this->m_playlistRng);
++
++	// A random wrap may put the currently displayed path first again. Prefer
++	// a usable distinct item so a successful manual Next remains visible.
++	const auto current = this->m_context.settings.general.screenBackgrounds.find (screen);
++	if (current != this->m_context.settings.general.screenBackgrounds.end () &&
++	    playlist.definition.items[playlist.order.front ()] == current->second) {
++	    const auto distinct = std::find_if (
++		playlist.order.begin () + 1,
++		playlist.order.end (),
++		[&playlist, &current] (const std::size_t itemIndex) {
++		    return !playlist.failedIndices.contains (itemIndex) &&
++			playlist.definition.items[itemIndex] != current->second;
++		}
++	    );
++	    if (distinct != playlist.order.end ()) {
++		std::iter_swap (playlist.order.begin (), distinct);
++	    }
++	}
+     }
+ 
+     std::size_t candidateOrderIndex = playlist.orderIndex;
+@@ -479,20 +498,28 @@ void WallpaperApplication::updatePlaylists () {
+     }
+ 
+     const auto now = std::chrono::steady_clock::now ();
++    // a manual advance (SIGUSR1) skips the timer check for every playlist once
++    const bool forced = this->m_advanceRequested.exchange (false, std::memory_order_relaxed);
+ 
+     for (auto& [screen, playlist] : this->m_activePlaylists) {
+ 	playlist.lastUpdate = now;
+ 
+-	if (playlist.definition.settings.mode != "timer") {
++	if (playlist.definition.items.size () <= 1) {
+ 	    continue;
+ 	}
+ 
+-	if (playlist.definition.items.size () <= 1) {
+-	    continue;
++	if (!forced) {
++	    if (playlist.definition.settings.mode != "timer") {
++		continue;
++	    }
++
++	    if (now < playlist.nextSwitch) {
++		continue;
++	    }
+ 	}
+ 
+-	if (now < playlist.nextSwitch) {
+-	    continue;
++	if (forced) {
++	    sLog.out ("Manual playlist advance requested for ", screen);
+ 	}
+ 
+ 	this->advancePlaylist (screen, playlist, now);
+@@ -857,6 +884,9 @@ void WallpaperApplication::render () {
+     static struct tm* timeinfo;
+ 
+     if (this->m_isPaused) {
++	// Next is explicitly unavailable during fullscreen pause. Drop a racing
++	// request instead of applying it unexpectedly after the user resumes.
++	this->m_advanceRequested.store (false, std::memory_order_relaxed);
+ 	usleep (FULLSCREEN_CHECK_WAIT_TIME);
+ 	if (this->m_fullScreenDetector->anythingFullscreen () && this->m_context.state.general.keepRunning) {
+ 	    return;
+@@ -929,6 +959,7 @@ void WallpaperApplication::render () {
+ #endif /* DEMOMODE */
+ 	// check for fullscreen windows and wait until there's none fullscreen
+ 	if (this->m_fullScreenDetector->anythingFullscreen () && this->m_context.state.general.keepRunning) {
++	    this->m_advanceRequested.store (false, std::memory_order_relaxed);
+ 	    this->m_isPaused = true;
+ 	    this->m_pauseStart = std::chrono::steady_clock::now ();
+ 
+@@ -975,6 +1006,12 @@ void WallpaperApplication::update (Render::Drivers::Output::OutputViewport* view
+ }
+ 
+ void WallpaperApplication::signal (int signal) {
++    if (signal == SIGUSR1) {
++	// async-signal-safe: only flip an atomic, the render thread does the work
++	this->m_advanceRequested.store (true, std::memory_order_relaxed);
++	return;
++    }
++
+     sLog.out ("Stop requested by signal ", signal);
+     this->m_context.state.general.keepRunning = false;
+ }
+diff --git a/src/WallpaperEngine/Application/WallpaperApplication.h b/src/WallpaperEngine/Application/WallpaperApplication.h
+index 1d1302a..51fa4d0 100644
+--- a/src/WallpaperEngine/Application/WallpaperApplication.h
++++ b/src/WallpaperEngine/Application/WallpaperApplication.h
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include <atomic>
+ #include <chrono>
+ #include <random>
+ 
+@@ -166,6 +167,9 @@ private:
+     /** Maps screens to backgrounds */
+     std::map<std::string, ProjectUniquePtr> m_backgrounds {};
+     std::map<std::string, ActivePlaylist> m_activePlaylists {};
++    /** Set from the SIGUSR1 handler; consumed by updatePlaylists on the render thread */
++    static_assert(std::atomic<bool>::is_always_lock_free);
++    std::atomic<bool> m_advanceRequested {false};
+ 
+     std::unique_ptr<WallpaperEngine::Audio::Drivers::Detectors::AudioPlayingDetector> m_audioDetector = nullptr;
+     std::unique_ptr<WallpaperEngine::Audio::AudioContext> m_audioContext = nullptr;
+diff --git a/src/main.cpp b/src/main.cpp
+index 908ab69..e4bb58c 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -1,5 +1,7 @@
+ #include <csignal>
+ #include <iostream>
++#include <pthread.h>
++#include <stdexcept>
+ 
+ #include "WallpaperEngine/Application/ApplicationContext.h"
+ #include "WallpaperEngine/Application/WallpaperApplication.h"
+@@ -22,6 +24,15 @@ void initLogging () {
+ 
+ int main (int argc, char* argv[]) {
+     try {
++	// A renderer becomes discoverable at exec time. Block Next before any
++	// initialization threads exist, then arm the handler before unblocking it.
++	sigset_t advanceMask {};
++	sigemptyset (&advanceMask);
++	sigaddset (&advanceMask, SIGUSR1);
++	if (pthread_sigmask (SIG_BLOCK, &advanceMask, nullptr) != 0) {
++	    throw std::runtime_error ("Cannot block SIGUSR1 during renderer startup");
++	}
++
+ 	// if type parameter is specified, this is a subprocess, so no logging should be enabled from our side
+ 	bool enableLogging = true;
+ 	const std::string typeZygote = "--type=zygote";
+@@ -59,14 +70,23 @@ int main (int argc, char* argv[]) {
+ 	std::signal (SIGINT, signalhandler);
+ 	std::signal (SIGTERM, signalhandler);
+ 	std::signal (SIGKILL, signalhandler);
++	// SIGUSR1 advances every active playlist by one wallpaper.
++	if (std::signal (SIGUSR1, signalhandler) == SIG_ERR) {
++	    throw std::runtime_error ("Cannot install the SIGUSR1 playlist handler");
++	}
++	if (pthread_sigmask (SIG_UNBLOCK, &advanceMask, nullptr) != 0) {
++	    throw std::runtime_error ("Cannot unblock SIGUSR1 after renderer startup");
++	}
+ 
+ 	// show the wallpaper application
+ 	app->show ();
+ 
+ 	// remove signal handlers before destroying app
++	pthread_sigmask (SIG_BLOCK, &advanceMask, nullptr);
+ 	std::signal (SIGINT, SIG_DFL);
+ 	std::signal (SIGTERM, SIG_DFL);
+ 	std::signal (SIGKILL, SIG_DFL);
++	std::signal (SIGUSR1, SIG_DFL);
+ 
+ 	delete app;

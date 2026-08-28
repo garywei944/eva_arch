@@ -1,0 +1,69 @@
+# Pinned local build of linux-wallpaperengine b016d7d1 with two patches:
+#  0001 album-art callback UAF containment, 0002 SIGUSR1 = next wallpaper.
+# Build: cp -r ~/.config/linux-wallpaperengine-pkg ~/sandbox/x && cd ~/sandbox/x && makepkg -si
+
+pkgname=linux-wallpaperengine-git
+_pkgname=linux-wallpaperengine
+_commit=b016d7d1fdcf4e5fd2f9c9fa420a8aaa07fee02d
+_cef_version='135.0.17+gcbc1c5b+chromium-135.0.7049.52'
+_cef_archive="cef_binary_${_cef_version}_linux64_minimal.tar.bz2"
+pkgver=r627.b016d7d1
+pkgrel=5
+pkgdesc="use steam's wallpaperengine on linux (album-art callback fix + SIGUSR1 playlist advance)"
+arch=('x86_64')
+url="https://github.com/Almamu/linux-wallpaperengine"
+license=('GPL-3.0-only')
+depends=('lz4' 'ffmpeg' 'mpv' 'glfw' 'glew' 'freeglut' 'libpulse' 'libcups' 'at-spi2-core' 'nss' 'libxcomposite' 'libxdamage' 'nspr')
+makedepends=('git' 'cmake' 'sdl2' 'glm' 'wayland-protocols' 'xorg-xrandr')
+provides=("linux-wallpaperengine")
+source=("${pkgname}::git+https://github.com/Almamu/linux-wallpaperengine.git#commit=${_commit}"
+        '0001-disable-unsafe-script-album-art-callback.patch'
+        '0002-sigusr1-advance-playlist.patch'
+        "${_cef_archive}::https://cef-builds.spotifycdn.com/${_cef_archive}")
+sha256sums=('SKIP'
+            '3583e17d39553e864d8fd9beb3b79f406f4cf87d609a9335c3a54d7049d4766a'
+            '72021b7dcc63ca1347fbbfea7b2389d1ba5e48efe6f9e56f333e4d50d071e6ec'
+            '24ac1980e62be7b1aea2c337d6bd4bc770dccd8b37e47c6db94b397f13ec4dc6')
+
+pkgver() {
+    cd "$pkgname"
+    ( set -o pipefail
+      git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+      printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    )
+}
+
+prepare() {
+    cd "$pkgname"
+    patch -Np1 -i "$srcdir/0001-disable-unsafe-script-album-art-callback.patch"
+    patch -Np1 -i "$srcdir/0002-sigusr1-advance-playlist.patch"
+    git -c protocol.file.allow=always submodule update --init
+}
+
+build() {
+    # Force CMake's downloader to consume only makepkg's SHA-256-verified CEF.
+    rm -rf build
+    install -d build/cef
+    cp "$srcdir/${_cef_archive}" "build/cef/${_cef_archive}"
+    cmake -B build -S "$pkgname" \
+        -DCMAKE_BUILD_TYPE='Release' \
+        -DCMAKE_INSTALL_PREFIX="/opt/${_pkgname}" \
+        -Wno-dev \
+        -DCMAKE_CXX_FLAGS="-ffat-lto-objects -Wno-builtin-macro-redefined" \
+        -DCMAKE_C_FLAGS="-Wno-builtin-macro-redefined"
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    install -d -m755 "${pkgdir}/usr/bin"
+    cat > "${pkgdir}/usr/bin/${_pkgname}" << EOF
+#!/bin/bash
+export LD_LIBRARY_PATH="/opt/${_pkgname}/lib:\$LD_LIBRARY_PATH"
+cd /opt/${_pkgname}; exec ./${_pkgname} "\$@"
+EOF
+    chmod +x "${pkgdir}/usr/bin/${_pkgname}"
+    chmod +x "${pkgdir}/opt/${_pkgname}/linux-wallpaperengine"
+    # capability marker read by wallpaper-engine-control before sending SIGUSR1
+    install -Dm644 /dev/null "${pkgdir}/opt/${_pkgname}/.supports-sigusr1-advance"
+}

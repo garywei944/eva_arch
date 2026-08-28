@@ -53,8 +53,11 @@
 .config/DankMaterialShell/plugins/wallpaperEngineControl/*
 !.config/DankMaterialShell/plugins/wallpaperEngineControl/plugin.json
 !.config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControl.qml
+!.config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControlService.qml
+!.config/DankMaterialShell/plugins/wallpaperEngineControl/qmldir
 !.config/etc
 !.config/hypr
+!.config/linux-wallpaperengine-pkg
 !.config/hypr-backups
 .config/hypr-backups/**/hyprpm-cache/
 .config/hypr-backups/**/config/cachy_hypr.png

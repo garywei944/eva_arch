@@ -59,6 +59,7 @@ hl.bind("SUPER + down", hl.dsp.window.fullscreen({ mode = "maximized", action = 
 hl.bind("SUPER + SHIFT + T", hl.dsp.window.float({ action = "toggle" }))
 hl.bind("SUPER + W", hl.dsp.group.toggle())
 hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("dms ipc call window-rules toggle"))
+hl.bind("SUPER + CTRL + W", hl.dsp.exec_cmd("dms ipc call wallpaperEngineControl next"))
 
 -- Focus and window movement.
 for key, direction in pairs({ Y = "l", H = "d", A = "u", E = "r" }) do
