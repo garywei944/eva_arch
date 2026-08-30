@@ -9,6 +9,7 @@ if the first start does not bring up every configured output.
 Environment overrides (used by the regression tests):
   WALLPAPER_ENGINE_ACTIVE_CONFIG, WALLPAPER_ENGINE_ASSETS_DIR,
   WALLPAPER_ENGINE_CONTROL, WALLPAPER_ENGINE_HYPRCTL,
+  WALLPAPER_ENGINE_RENDERER,
   WALLPAPER_ENGINE_READY_TIMEOUT, WALLPAPER_ENGINE_READY_POLL_INTERVAL,
   WALLPAPER_ENGINE_RETRY_DELAY
 """
@@ -35,6 +36,7 @@ ASSETS_DIR = Path(
 )
 CONTROL = os.environ.get("WALLPAPER_ENGINE_CONTROL", str(HOME / ".local/bin/wallpaper-engine-control"))
 HYPRCTL = os.environ.get("WALLPAPER_ENGINE_HYPRCTL", "hyprctl")
+RENDERER = os.environ.get("WALLPAPER_ENGINE_RENDERER", "/usr/bin/linux-wallpaperengine")
 SYSTEMCTL = os.environ.get("WALLPAPER_ENGINE_SYSTEMCTL", "systemctl")
 LOCK_PATH = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-login-start.lock"
 START_TIMEOUT = 75  # wallpaper-engine-control start gives up after ~55 s itself
@@ -125,6 +127,24 @@ def audio_service_states() -> dict[str, str]:
     return states
 
 
+def renderer_health() -> tuple[bool, str | None]:
+    """Prove the native renderer and its dynamic-library closure can load."""
+    try:
+        result = subprocess.run(
+            [RENDERER, "--help"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return False, f"renderer preflight failed: {error}"
+    if result.returncode == 0:
+        return True, None
+    detail = result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}"
+    return False, f"renderer preflight failed: {detail[-512:]}"
+
+
 def readiness_snapshot() -> dict[str, Any]:
     expected, wallpapers, config_error = configured_state()
     runtime_dir = os.environ.get("XDG_RUNTIME_DIR", "")
@@ -133,6 +153,7 @@ def readiness_snapshot() -> dict[str, Any]:
     monitors, monitor_error = available_monitors()
     audio_services = audio_service_states()
     audio_ready = all(state == "active" for state in audio_services.values())
+    renderer_ready, renderer_error = renderer_health()
     missing_screens = sorted(set(expected) - set(monitors))
     missing_wallpapers = sorted(str(path) for path in wallpapers if not path.is_dir())
     assets_ready = ASSETS_DIR.is_dir()
@@ -142,6 +163,7 @@ def readiness_snapshot() -> dict[str, Any]:
         and wayland_ready
         and monitor_error is None
         and audio_ready
+        and renderer_ready
         and not missing_screens
         and assets_ready
         and not missing_wallpapers
@@ -159,6 +181,8 @@ def readiness_snapshot() -> dict[str, Any]:
         "monitor_error": monitor_error,
         "audio_ready": audio_ready,
         "audio_services": audio_services,
+        "renderer_ready": renderer_ready,
+        "renderer_error": renderer_error,
     }
 
 
@@ -166,6 +190,8 @@ def wait_until_ready(timeout: float, poll_interval: float) -> dict[str, Any]:
     deadline = time.monotonic() + timeout
     snapshot = readiness_snapshot()
     while not snapshot["ready"] and time.monotonic() < deadline:
+        if snapshot["config_error"] or snapshot["renderer_error"]:
+            break
         time.sleep(poll_interval)
         snapshot = readiness_snapshot()
     return snapshot

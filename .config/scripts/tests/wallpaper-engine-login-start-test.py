@@ -87,6 +87,22 @@ class Fixture:
             """,
         )
 
+        self.renderer = self.bin / "linux-wallpaperengine"
+        write_executable(
+            self.renderer,
+            """
+            #!/usr/bin/env python3
+            import os
+            import sys
+
+            error = os.environ.get("FAKE_RENDERER_ERROR")
+            if error:
+                print(error, file=sys.stderr)
+                raise SystemExit(127)
+            print("Usage: linux-wallpaperengine [--help]")
+            """,
+        )
+
         self.control_log = root / "control-actions.jsonl"
         self.control_state = root / "control-state"
         self.control = self.bin / "wallpaper-engine-control"
@@ -156,6 +172,7 @@ class Fixture:
                 "WALLPAPER_ENGINE_ASSETS_DIR": str(self.assets),
                 "WALLPAPER_ENGINE_CONTROL": str(self.control),
                 "WALLPAPER_ENGINE_HYPRCTL": str(self.hyprctl),
+                "WALLPAPER_ENGINE_RENDERER": str(self.renderer),
                 "WALLPAPER_ENGINE_SYSTEMCTL": str(self.systemctl),
                 "WALLPAPER_ENGINE_READY_TIMEOUT": "0.2",
                 "WALLPAPER_ENGINE_READY_POLL_INTERVAL": "0.01",
@@ -232,6 +249,25 @@ class WallpaperEngineLoginStartTests(unittest.TestCase):
             self.assertFalse(payload["ready"])
             self.assertFalse(payload["audio_ready"])
             self.assertEqual(payload["audio_services"]["pipewire-pulse.service"], "inactive")
+            self.assertEqual(fixture.actions(), [])
+
+    def test_check_fails_closed_when_renderer_cannot_load(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            result = invoke_helper(
+                fixture.environment(
+                    FAKE_RENDERER_ERROR=(
+                        "error while loading shared libraries: " "libcdio.so.19: cannot open shared object file"
+                    )
+                ),
+                "--check",
+            )
+            payload = parse_payload(result)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(payload["ready"])
+            self.assertFalse(payload["renderer_ready"])
+            self.assertIn("libcdio.so.19", payload["renderer_error"])
             self.assertEqual(fixture.actions(), [])
 
     def test_login_start_uses_one_bounded_safe_retry(self) -> None:
