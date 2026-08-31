@@ -12,7 +12,7 @@ ctrl + alt + shift + d : powershell.exe -NoProfile -NonInteractive -WindowStyle 
 # Alt+Enter and Alt+Shift+Enter stay unbound here for Hermes TUI multiline input.
 # Windows Terminal must also pass those chords through instead of handling fullscreen.
 
-# Win+T launches Arch WSL; Win+B launches Chrome on the monitor under the pointer.
+# Win+T launches Arch WSL in WezTerm; Win+B launches Chrome on the monitor under the pointer.
 win + t                 : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/komorebi/launch-on-cursor-monitor.ps1" -Application Arch
 win + b                 : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/komorebi/launch-on-cursor-monitor.ps1" -Application Chrome
 win + shift + t         : komorebic toggle-float

@@ -8,7 +8,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$archProfileGuid = "{a5a97cb8-8961-5535-816d-772efe0c6a3f}"
+$wezTermPath = "C:\Program Files\WezTerm\wezterm-gui.exe"
 $windowTimeoutSeconds = 10
 $logPath = Join-Path $env:LOCALAPPDATA "komorebi\launch-on-cursor-monitor.log"
 Add-Content -LiteralPath $logPath -Value "$(Get-Date -Format o) launch_requested application=$Application"
@@ -58,15 +58,18 @@ $targetMonitor = [int]((& komorebic query focused-monitor-index | Out-String).Tr
 
 switch ($Application) {
     "Arch" {
-        $executableName = "WindowsTerminal.exe"
+        if (-not (Test-Path -LiteralPath $wezTermPath)) {
+            throw "WezTerm executable not found at $wezTermPath"
+        }
+        $executableName = "wezterm-gui.exe"
         $launch = {
-            Start-Process -FilePath "wt.exe" -ArgumentList @(
-                "--window",
-                "new",
-                "--pos=$($cursor.X),$($cursor.Y)",
-                "new-tab",
-                "--profile",
-                $archProfileGuid
+            Start-Process -FilePath $wezTermPath -ArgumentList @(
+                "start",
+                "--always-new-process",
+                "--position",
+                "screen:$($cursor.X),$($cursor.Y)",
+                "--domain",
+                "WSL:Arch"
             )
         }
     }
