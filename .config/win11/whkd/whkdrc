@@ -64,16 +64,16 @@ win + 7                 : komorebic focus-workspace 6
 win + 8                 : komorebic focus-workspace 7
 win + 9                 : komorebic focus-workspace 8
 
-# Send to local workspace 1-9 without following the window.
-win + shift + 1         : komorebic send-to-workspace 0
-win + shift + 2         : komorebic send-to-workspace 1
-win + shift + 3         : komorebic send-to-workspace 2
-win + shift + 4         : komorebic send-to-workspace 3
-win + shift + 5         : komorebic send-to-workspace 4
-win + shift + 6         : komorebic send-to-workspace 5
-win + shift + 7         : komorebic send-to-workspace 6
-win + shift + 8         : komorebic send-to-workspace 7
-win + shift + 9         : komorebic send-to-workspace 8
+# Move to local workspace 1-9 and follow the window.
+win + shift + 1         : komorebic move-to-workspace 0
+win + shift + 2         : komorebic move-to-workspace 1
+win + shift + 3         : komorebic move-to-workspace 2
+win + shift + 4         : komorebic move-to-workspace 3
+win + shift + 5         : komorebic move-to-workspace 4
+win + shift + 6         : komorebic move-to-workspace 5
+win + shift + 7         : komorebic move-to-workspace 6
+win + shift + 8         : komorebic move-to-workspace 7
+win + shift + 9         : komorebic move-to-workspace 8
 
 # Resize the focused tile.
 win + oem_plus          : komorebic resize-axis horizontal increase
