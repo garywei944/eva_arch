@@ -47,6 +47,19 @@
   ],
   "right_widgets": [
     {
+      "Applications": {
+        "enable": true,
+        "display": "Text",
+        "items": [
+          {
+            "name": "WHKD ON",
+            "command": "powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File E:/Projects/eva_arch/.config/win11/whkd/toggle-whkd.ps1",
+            "show_command_on_hover": true
+          }
+        ]
+      }
+    },
+    {
       "Update": {
         "enable": true
       }

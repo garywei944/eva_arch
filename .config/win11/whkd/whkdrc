@@ -1,5 +1,8 @@
 .shell powershell
-.pause ctrl + alt + shift + p
+
+# Process-level whkd pause: kill whkd so the bar's WHKD button label stays truthful.
+# whkd's own bindings die with it, so resuming is done via the bar button (mouse).
+ctrl + alt + shift + p : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/whkd/toggle-whkd.ps1"
 
 # Safe full input-stack restart: whkd first, then Kanata via the elevated helper task.
 ctrl + alt + shift + r : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/kanata/restart-whkd-kanata.ps1"
