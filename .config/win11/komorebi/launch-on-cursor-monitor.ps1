@@ -7,6 +7,9 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+# komorebic emits UTF-8; without this, CJK window titles are decoded via the
+# OEM codepage and can swallow closing quotes, breaking ConvertFrom-Json.
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 $wezTermPath = "C:\Program Files\WezTerm\wezterm-gui.exe"
 $windowTimeoutSeconds = 10
