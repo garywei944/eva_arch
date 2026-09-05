@@ -6,27 +6,16 @@ $ErrorActionPreference = "Stop"
 $whkdExe = "C:\Program Files\whkd\bin\whkd.exe"
 $whkdConfig = "E:\Projects\eva_arch\.config\win11\whkd\whkdrc"
 $helperTask = "kanata-restart-after-whkd"
-$barConfigDir = "E:\Projects\eva_arch\.config\win11\komorebi"
 $logPath = Join-Path $env:LOCALAPPDATA "komorebi\toggle-whkd.log"
 
-# Rewrites the bar button label in every bar config; komorebi-bar hot-reloads
-# the file. Write UTF-8 without BOM so the Rust JSON parser stays happy.
-function Set-BarLabel {
-    param([Parameter(Mandatory = $true)][string]$Label)
-    $encoding = New-Object System.Text.UTF8Encoding($false)
-    foreach ($file in Get-ChildItem -Path (Join-Path $barConfigDir "komorebi.bar*.json")) {
-        $text = [System.IO.File]::ReadAllText($file.FullName)
-        $updated = $text -replace '"name": "WHKD[^"]*"', ('"name": "' + $Label + '"')
-        if ($updated -ne $text) {
-            [System.IO.File]::WriteAllText($file.FullName, $updated, $encoding)
-        }
-    }
-}
+# The bar label is derived from process state so it stays truthful across
+# every start/stop path, not just this toggle.
+$syncLabelScript = "E:\Projects\eva_arch\.config\win11\whkd\sync-whkd-label.ps1"
 
 $whkd = @(Get-Process -Name "whkd" -ErrorAction SilentlyContinue)
 if ($whkd.Count -gt 0) {
     $whkd | Stop-Process -Force
-    Set-BarLabel "WHKD OFF"
+    & $syncLabelScript | Out-Null
     Add-Content -LiteralPath $logPath -Value "$(Get-Date -Format o) whkd_paused pids=$($whkd.Id -join ',')"
     Write-Output "whkd_paused"
     exit 0
@@ -56,7 +45,7 @@ do {
         if ($kanata.Count -ne 1 -or $kanata[0].StartTime -le $newWhkd.StartTime) {
             throw "Kanata did not start after replacement whkd"
         }
-        Set-BarLabel "WHKD ON"
+        & $syncLabelScript | Out-Null
         Add-Content -LiteralPath $logPath -Value "$(Get-Date -Format o) whkd_resumed whkd=$($newWhkd.Id) kanata=$($kanata[0].Id)"
         Write-Output "whkd_resumed whkd=$($newWhkd.Id) kanata=$($kanata[0].Id)"
         exit 0
