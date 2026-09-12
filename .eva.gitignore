@@ -88,6 +88,7 @@
 !/.claude/
 /.claude/*
 !.claude/CLAUDE.md
+.claude/settings.local.json
 !/.codex/
 /.codex/*
 !.codex/AGENTS.md
