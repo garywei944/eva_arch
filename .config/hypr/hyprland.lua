@@ -102,3 +102,5 @@ require("dms.workspaces")
 require("dms.binds")
 require("dms.windowrules")
 require("dms.hyprsplit")
+
+require("dms-theme-sync")

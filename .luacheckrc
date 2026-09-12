@@ -18,6 +18,10 @@ files[".config/hypr/dms/*.lua"] = {
   globals = { "hl" },
 }
 
+files[".config/hypr/dms-theme-sync.lua"] = {
+  globals = { "hl" },
+}
+
 files[".config/hypr-backups/*/config/dms/*.lua"] = {
   globals = { "hl" },
 }
