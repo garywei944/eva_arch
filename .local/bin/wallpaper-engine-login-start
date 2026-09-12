@@ -6,10 +6,19 @@ external Steam library is mounted. Wait for those, then hand lifecycle
 ownership to wallpaper-engine-control. One bounded stop/start retry is allowed
 if the first start does not bring up every configured output.
 
+The saved selection in active-wallpapers.json cannot be trusted at login: the
+Electron UX persists a screen's removal whenever that screen's renderer exits
+(crash, GPU reset, or shutdown killing renderers before the UX), so an unlucky
+shutdown permanently shrinks it. Instead of restoring the last session, login
+rebuilds the selection declaratively: every connected screen in LOGIN_PLAYLISTS
+gets its named playlist, and screens outside the declaration are pruned so a
+stale entry can never block readiness.
+
 Environment overrides (used by the regression tests):
   WALLPAPER_ENGINE_ACTIVE_CONFIG, WALLPAPER_ENGINE_ASSETS_DIR,
   WALLPAPER_ENGINE_CONTROL, WALLPAPER_ENGINE_HYPRCTL,
-  WALLPAPER_ENGINE_RENDERER,
+  WALLPAPER_ENGINE_RENDERER, WALLPAPER_ENGINE_STEAM_CONFIG,
+  WALLPAPER_ENGINE_LOGIN_PLAYLISTS (JSON object mapping screen -> playlist),
   WALLPAPER_ENGINE_READY_TIMEOUT, WALLPAPER_ENGINE_READY_POLL_INTERVAL,
   WALLPAPER_ENGINE_RETRY_DELAY
 """
@@ -38,6 +47,12 @@ CONTROL = os.environ.get("WALLPAPER_ENGINE_CONTROL", str(HOME / ".local/bin/wall
 HYPRCTL = os.environ.get("WALLPAPER_ENGINE_HYPRCTL", "hyprctl")
 RENDERER = os.environ.get("WALLPAPER_ENGINE_RENDERER", "/usr/bin/linux-wallpaperengine")
 SYSTEMCTL = os.environ.get("WALLPAPER_ENGINE_SYSTEMCTL", "systemctl")
+STEAM_CONFIG = Path(
+    os.environ.get(
+        "WALLPAPER_ENGINE_STEAM_CONFIG", HOME / ".local/share/Steam/steamapps/common/wallpaper_engine/config.json"
+    )
+)
+DEFAULT_LOGIN_PLAYLISTS = {"DP-1": "DP-1", "DP-2": "DP-2", "DP-3": "DP-3"}
 LOCK_PATH = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "wallpaper-engine-login-start.lock"
 START_TIMEOUT = 75  # wallpaper-engine-control start gives up after ~55 s itself
 AUDIO_SERVICES = ("pipewire.service", "pipewire-pulse.service", "wireplumber.service")
@@ -53,6 +68,22 @@ def env_float(name: str, default: float, minimum: float, allow_minimum: bool = F
         comparison = "at least" if allow_minimum else "greater than"
         raise ValueError(f"{name} must be finite and {comparison} {minimum}")
     return value
+
+
+def login_playlists() -> dict[str, str]:
+    raw = os.environ.get("WALLPAPER_ENGINE_LOGIN_PLAYLISTS")
+    if raw is None:
+        return dict(DEFAULT_LOGIN_PLAYLISTS)
+    try:
+        mapping = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise ValueError("WALLPAPER_ENGINE_LOGIN_PLAYLISTS must be valid JSON") from error
+    if not isinstance(mapping, dict) or not mapping:
+        raise ValueError("WALLPAPER_ENGINE_LOGIN_PLAYLISTS must be a non-empty JSON object")
+    for screen, playlist in mapping.items():
+        if not (isinstance(screen, str) and screen and isinstance(playlist, str) and playlist):
+            raise ValueError("WALLPAPER_ENGINE_LOGIN_PLAYLISTS must map screen names to playlist names")
+    return mapping
 
 
 def emit(payload: dict[str, Any]) -> None:
@@ -89,6 +120,92 @@ def configured_state() -> tuple[list[str], list[Path], str | None]:
     if isinstance(legacy, dict) and isinstance(legacy.get("screen"), str) and legacy["screen"]:
         screens.add(legacy["screen"])
     return sorted(screens), sorted(wallpapers), None
+
+
+def steam_playlist_items(name: str) -> list[str]:
+    try:
+        config = json.loads(STEAM_CONFIG.read_text())
+    except OSError, json.JSONDecodeError:
+        return []
+    if not isinstance(config, dict):
+        return []
+    for user in config.values():
+        general = user.get("general") if isinstance(user, dict) else None
+        playlists = general.get("playlists") if isinstance(general, dict) else None
+        if not isinstance(playlists, list):
+            continue
+        for playlist in playlists:
+            if isinstance(playlist, dict) and playlist.get("name") == name and isinstance(playlist.get("items"), list):
+                return [item for item in playlist["items"] if isinstance(item, str) and item]
+    return []
+
+
+def enforce_login_selection(desired: dict[str, str]) -> list[str]:
+    """Force every connected declared screen to run its named playlist.
+
+    Screens whose monitor is not connected are left for the readiness poll to
+    retry; screens whose playlist has nothing on disk are left untouched so a
+    missing Steam library never wipes a valid selection. Undeclared screens are
+    pruned. Returns the screens whose entries were (re)written.
+    """
+    monitors, monitor_error = available_monitors()
+    if monitor_error:
+        return []
+    existed = True
+    try:
+        config = json.loads(ACTIVE_CONFIG.read_text())
+    except OSError, json.JSONDecodeError:
+        config = None
+        existed = False
+    if not isinstance(config, dict):
+        config = {}
+    wallpapers = config.get("activeWallpapers")
+    playlists = config.get("activePlaylists")
+    if not isinstance(wallpapers, dict):
+        wallpapers = config["activeWallpapers"] = {}
+    if not isinstance(playlists, dict):
+        playlists = config["activePlaylists"] = {}
+    config.setdefault("activePlaylist", None)
+    config.setdefault("appliedHistory", {})
+
+    changed = False
+    applied: list[str] = []
+    for screen, playlist_name in sorted(desired.items()):
+        if screen not in monitors:
+            continue
+        playlist_entry = playlists.get(screen)
+        playlist_matches = (
+            isinstance(playlist_entry, dict)
+            and playlist_entry.get("name") == playlist_name
+            and playlist_entry.get("screen") == screen
+        )
+        wallpaper_entry = wallpapers.get(screen)
+        background = wallpaper_entry.get("backgroundId") if isinstance(wallpaper_entry, dict) else None
+        background_available = isinstance(background, str) and Path(background).is_dir()
+        if playlist_matches and background_available:
+            continue
+        if not background_available:
+            background = next((item for item in steam_playlist_items(playlist_name) if Path(item).is_dir()), None)
+            if background is None:
+                continue
+        wallpapers[screen] = {"backgroundId": background, "screen": screen}
+        playlists[screen] = {"name": playlist_name, "screen": screen}
+        changed = True
+        applied.append(screen)
+
+    for section in (wallpapers, playlists):
+        for name in [name for name in section if name not in desired]:
+            del section[name]
+            changed = True
+
+    if changed or not existed:
+        try:
+            temporary = ACTIVE_CONFIG.with_name(f"{ACTIVE_CONFIG.name}.tmp-{os.getpid()}")
+            temporary.write_text(json.dumps(config, indent="\t") + "\n")
+            os.replace(temporary, ACTIVE_CONFIG)
+        except OSError:
+            return []
+    return applied
 
 
 def available_monitors() -> tuple[list[str], str | None]:
@@ -186,15 +303,27 @@ def readiness_snapshot() -> dict[str, Any]:
     }
 
 
-def wait_until_ready(timeout: float, poll_interval: float) -> dict[str, Any]:
+def wait_until_ready(timeout: float, poll_interval: float, desired: dict[str, str] | None = None) -> dict[str, Any]:
     deadline = time.monotonic() + timeout
-    snapshot = readiness_snapshot()
-    while not snapshot["ready"] and time.monotonic() < deadline:
-        if snapshot["config_error"] or snapshot["renderer_error"]:
-            break
-        time.sleep(poll_interval)
+    applied: set[str] = set()
+    while True:
+        if desired is not None:
+            applied.update(enforce_login_selection(desired))
         snapshot = readiness_snapshot()
-    return snapshot
+        snapshot["applied_screens"] = sorted(applied)
+        # Give declared-but-disconnected screens until the deadline to come up
+        # so a slow output does not get started without its wallpaper; a
+        # genuinely removed monitor only delays the start, never blocks it.
+        pending = set(desired) - set(snapshot["available_screens"]) if desired is not None else set()
+        if snapshot["ready"] and not pending:
+            return snapshot
+        # Enforcement can heal a missing or corrupt config once monitors appear,
+        # so only a broken renderer is unrecoverable before the deadline.
+        if (snapshot["config_error"] and desired is None) or snapshot["renderer_error"]:
+            return snapshot
+        if time.monotonic() >= deadline:
+            return snapshot
+        time.sleep(poll_interval)
 
 
 def invoke_control(action: str) -> tuple[int, dict[str, Any]]:
@@ -224,8 +353,10 @@ def running_matches(payload: dict[str, Any], expected_screens: list[str]) -> boo
     )
 
 
-def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tuple[int, dict[str, Any]]:
-    readiness = wait_until_ready(timeout, poll_interval)
+def login_start(
+    timeout: float, poll_interval: float, retry_delay: float, desired: dict[str, str]
+) -> tuple[int, dict[str, Any]]:
+    readiness = wait_until_ready(timeout, poll_interval, desired=desired)
     if not readiness["ready"]:
         return 3, {
             "state": "error",
@@ -235,13 +366,14 @@ def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tup
             "readiness": readiness,
         }
     expected = readiness["expected_screens"]
+    applied = readiness.get("applied_screens", [])
 
     code = 0
     payload: dict[str, Any] = {}
     for attempt in (1, 2):
         code, payload = invoke_control("start")
         if code == 0 and running_matches(payload, expected):
-            return 0, {**payload, "attempts": attempt, "login_start": "ready"}
+            return 0, {**payload, "attempts": attempt, "applied_screens": applied, "login_start": "ready"}
         if attempt == 1:
             stop_code, stop_payload = invoke_control("stop")
             if stop_code != 0 or stop_payload.get("state") not in {"stopped", "error"}:
@@ -253,7 +385,7 @@ def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tup
                     "controller_state": stop_payload.get("state"),
                 }
             time.sleep(retry_delay)
-            readiness = wait_until_ready(timeout, poll_interval)
+            readiness = wait_until_ready(timeout, poll_interval, desired=desired)
             if not readiness["ready"]:
                 return 3, {
                     "state": "error",
@@ -262,6 +394,8 @@ def login_start(timeout: float, poll_interval: float, retry_delay: float) -> tup
                     "error": "login prerequisites disappeared before the retry",
                     "readiness": readiness,
                 }
+            expected = readiness["expected_screens"]
+            applied = sorted(set(applied) | set(readiness.get("applied_screens", [])))
     return 3, {
         "state": "error",
         "step": "start",
@@ -289,6 +423,7 @@ def main() -> int:
         timeout = env_float("WALLPAPER_ENGINE_READY_TIMEOUT", 90.0, 0.0)
         poll_interval = env_float("WALLPAPER_ENGINE_READY_POLL_INTERVAL", 0.5, 0.0)
         retry_delay = env_float("WALLPAPER_ENGINE_RETRY_DELAY", 2.0, 0.0, allow_minimum=True)
+        desired = login_playlists()
 
         LOCK_PATH.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         descriptor = os.open(
@@ -309,7 +444,9 @@ def main() -> int:
             )
             return 3
 
-        code, payload = login_start(timeout=timeout, poll_interval=poll_interval, retry_delay=retry_delay)
+        code, payload = login_start(
+            timeout=timeout, poll_interval=poll_interval, retry_delay=retry_delay, desired=desired
+        )
         emit(payload)
         return code
     except Exception as error:  # noqa: BLE001 - setup failures must preserve the JSON contract

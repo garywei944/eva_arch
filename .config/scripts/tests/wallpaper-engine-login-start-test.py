@@ -55,6 +55,22 @@ class Fixture:
             )
         )
 
+        self.steam_config = root / "steam-config.json"
+        self.steam_config.write_text(
+            json.dumps(
+                {
+                    "steamuser": {
+                        "general": {
+                            "playlists": [
+                                {"name": screen, "items": [str(self.wallpapers / screen)]}
+                                for screen in EXPECTED_SCREENS
+                            ]
+                        }
+                    }
+                }
+            )
+        )
+
         self.bin = root / "bin"
         self.bin.mkdir()
         self.hyprctl = self.bin / "hyprctl"
@@ -162,6 +178,22 @@ class Fixture:
             """,
         )
 
+    def selection_for(self, screens: list[str]) -> dict[str, Any]:
+        return {
+            "activeWallpapers": {
+                screen: {"backgroundId": str(self.wallpapers / screen), "screen": screen} for screen in screens
+            },
+            "activePlaylists": {screen: {"name": screen, "screen": screen} for screen in screens},
+            "activePlaylist": None,
+        }
+
+    def shrink_active_config(self, screens: list[str]) -> None:
+        self.active_config.write_text(json.dumps(self.selection_for(screens)))
+
+    def configured_screens(self) -> list[str]:
+        config = json.loads(self.active_config.read_text())
+        return sorted(config.get("activeWallpapers", {}))
+
     def environment(self, **updates: str) -> dict[str, str]:
         environment = os.environ.copy()
         environment.update(
@@ -174,6 +206,8 @@ class Fixture:
                 "WALLPAPER_ENGINE_HYPRCTL": str(self.hyprctl),
                 "WALLPAPER_ENGINE_RENDERER": str(self.renderer),
                 "WALLPAPER_ENGINE_SYSTEMCTL": str(self.systemctl),
+                "WALLPAPER_ENGINE_STEAM_CONFIG": str(self.steam_config),
+                "WALLPAPER_ENGINE_LOGIN_PLAYLISTS": json.dumps({screen: screen for screen in EXPECTED_SCREENS}),
                 "WALLPAPER_ENGINE_READY_TIMEOUT": "0.2",
                 "WALLPAPER_ENGINE_READY_POLL_INTERVAL": "0.01",
                 "WALLPAPER_ENGINE_RETRY_DELAY": "0.01",
@@ -308,6 +342,100 @@ class WallpaperEngineLoginStartTests(unittest.TestCase):
                 self.assertEqual(payload["step"], "setup")
                 self.assertIn("WALLPAPER_ENGINE_READY_TIMEOUT", payload["error"])
                 self.assertEqual(fixture.actions(), [])
+
+    def test_login_start_rebuilds_screens_dropped_by_the_ux(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.shrink_active_config(["DP-2"])
+            result = invoke_helper(fixture.environment())
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["state"], "running")
+            self.assertEqual(payload["screens"], EXPECTED_SCREENS)
+            self.assertEqual(payload["applied_screens"], ["DP-1", "DP-3"])
+            self.assertEqual(fixture.configured_screens(), EXPECTED_SCREENS)
+
+    def test_login_start_rebuilds_a_missing_config_from_scratch(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.active_config.unlink()
+            result = invoke_helper(fixture.environment())
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["applied_screens"], EXPECTED_SCREENS)
+            self.assertEqual(fixture.configured_screens(), EXPECTED_SCREENS)
+
+    def test_enforcement_replaces_a_foreign_playlist(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            config = json.loads(fixture.active_config.read_text())
+            config["activePlaylists"]["DP-2"]["name"] = "some-other-playlist"
+            fixture.active_config.write_text(json.dumps(config))
+            result = invoke_helper(fixture.environment())
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["applied_screens"], ["DP-2"])
+            rewritten = json.loads(fixture.active_config.read_text())
+            self.assertEqual(rewritten["activePlaylists"]["DP-2"]["name"], "DP-2")
+
+    def test_enforcement_prunes_undeclared_screens(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            config = json.loads(fixture.active_config.read_text())
+            config["activeWallpapers"]["DP-9"] = {"backgroundId": str(fixture.wallpapers / "DP-1"), "screen": "DP-9"}
+            config["activePlaylists"]["DP-9"] = {"name": "DP-9", "screen": "DP-9"}
+            fixture.active_config.write_text(json.dumps(config))
+            result = invoke_helper(fixture.environment())
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["screens"], EXPECTED_SCREENS)
+            self.assertEqual(fixture.configured_screens(), EXPECTED_SCREENS)
+
+    def test_enforcement_skips_disconnected_monitors(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.shrink_active_config(["DP-2"])
+            result = invoke_helper(
+                fixture.environment(
+                    FAKE_MONITORS="DP-1,DP-2",
+                    FAKE_EXPECTED_SCREENS="DP-1,DP-2",
+                )
+            )
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["applied_screens"], ["DP-1"])
+            self.assertEqual(fixture.configured_screens(), ["DP-1", "DP-2"])
+
+    def test_enforcement_skips_playlists_missing_on_disk(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.shrink_active_config(["DP-2"])
+            (fixture.wallpapers / "DP-3").rmdir()
+            result = invoke_helper(
+                fixture.environment(FAKE_EXPECTED_SCREENS="DP-1,DP-2"),
+            )
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["applied_screens"], ["DP-1"])
+            self.assertEqual(fixture.configured_screens(), ["DP-1", "DP-2"])
+
+    def test_check_never_rewrites_the_active_config(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Fixture(Path(directory))
+            fixture.shrink_active_config(["DP-2"])
+            result = invoke_helper(fixture.environment(), "--check")
+            payload = parse_payload(result)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(payload["expected_screens"], ["DP-2"])
+            self.assertEqual(fixture.configured_screens(), ["DP-2"])
+            self.assertEqual(fixture.actions(), [])
 
     def test_owned_autostart_replaces_the_generated_entry(self) -> None:
         desktop = DESKTOP.read_text()
