@@ -13,7 +13,7 @@ repos:
       - id: trailing-whitespace
         exclude: .*\.(spec|patch)
       - id: end-of-file-fixer
-        exclude: .*\.(spec|patch)
+        exclude: (.*\.(spec|patch)|\.config/hypr/dms/(colors|cursor|layout|windowrules)\.lua$)
       - id: check-yaml
         args: [--allow-multiple-documents]
         exclude: ^(.*template.*|.*templates.*)$
@@ -121,13 +121,13 @@ repos:
     rev: v2.5.2
     hooks:
       - id: stylua
-        exclude: ^\.config/hypr/dms/layout\.lua$
+        exclude: ^\.config/hypr/dms/(colors|cursor|layout|windowrules)\.lua$
 
   - repo: https://github.com/Calinou/pre-commit-luacheck
     rev: v1.0.0
     hooks:
       - id: luacheck
-        exclude: ^\.config/awesome/themes/
+        exclude: ^(\.config/awesome/themes/|\.config/hypr/dms/(colors|cursor|layout|windowrules)\.lua$)
   # ----------------------------------------
   # Commit message
   # ----------------------------------------

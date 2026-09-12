@@ -50,6 +50,12 @@ hl.config({
     master = {
         mfact = 0.5,
     },
+    -- Owned here, not in dms/cursor.lua: DMS regenerates that file on every
+    -- launch and has no setting for these two keys.
+    cursor = {
+        no_hardware_cursors = false,
+        default_monitor = "DP-1",
+    },
 })
 
 hl.animation({ leaf = "windowsIn", enabled = true, speed = 3, bezier = "default" })
