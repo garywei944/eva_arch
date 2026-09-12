@@ -77,16 +77,5 @@
   },
   "search.followSymlinks": false,
   "git.autoRepositoryDetection": "openEditors",
-  "git.repositoryScanMaxDepth": 2,
-  "python.analysis.exclude": [
-    "**/.cache",
-    "**/.local",
-    "**/.conda",
-    "**/.venv",
-    "**/venv",
-    "**/node_modules",
-    "**/site-packages",
-    "**/__pycache__",
-    "**/.*"
-  ]
+  "git.repositoryScanMaxDepth": 2
 }
