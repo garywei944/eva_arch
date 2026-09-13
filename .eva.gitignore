@@ -2,15 +2,8 @@
 
 # directories
 !bin
+bin/__pycache__
 !wiki
-
-# Wallpaper Engine controller and readiness-gated login entry points.
-!.local
-.local/*
-!.local/bin
-.local/bin/*
-!.local/bin/wallpaper-engine-control
-!.local/bin/wallpaper-engine-login-start
 
 # files
 !.condarc

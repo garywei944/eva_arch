@@ -12,7 +12,7 @@ This repository is Gary's dotfiles for CachyOS/Arch Linux and Windows 11, with `
 ## Layout
 
 - `.config/`: per-application configs (`hypr`, `kanata`, `kitty`, `tmux`, `win11`, `DankMaterialShell` plugins, `scripts`, ...). Only the whitelisted subdirectories are tracked.
-- `bin/` and `.local/bin/`: user scripts; `.local/bin` only tracks the Wallpaper Engine entry points.
+- `bin/`: tracked user scripts, including the Wallpaper Engine entry points. `.local/bin` is untracked.
 - `wiki/`: the LLM Wiki (public, sourced knowledge only).
 - `.claude/CLAUDE.md` and `.codex/AGENTS.md`: tracked agent instructions; the rest of `.claude/` and `.codex/` is local state and stays ignored.
 - `README.md` holds the bootstrap procedure and screenshots.

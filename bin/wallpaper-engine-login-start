@@ -43,7 +43,7 @@ ACTIVE_CONFIG = Path(
 ASSETS_DIR = Path(
     os.environ.get("WALLPAPER_ENGINE_ASSETS_DIR", HOME / ".local/share/Steam/steamapps/common/wallpaper_engine/assets")
 )
-CONTROL = os.environ.get("WALLPAPER_ENGINE_CONTROL", str(HOME / ".local/bin/wallpaper-engine-control"))
+CONTROL = os.environ.get("WALLPAPER_ENGINE_CONTROL", str(HOME / "bin/wallpaper-engine-control"))
 HYPRCTL = os.environ.get("WALLPAPER_ENGINE_HYPRCTL", "hyprctl")
 RENDERER = os.environ.get("WALLPAPER_ENGINE_RENDERER", "/usr/bin/linux-wallpaperengine")
 SYSTEMCTL = os.environ.get("WALLPAPER_ENGINE_SYSTEMCTL", "systemctl")

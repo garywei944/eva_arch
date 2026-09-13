@@ -15,7 +15,7 @@ from types import ModuleType
 from typing import Any
 from unittest import mock
 
-CONTROL = Path.home() / ".local/bin/wallpaper-engine-control"
+CONTROL = Path.home() / "bin/wallpaper-engine-control"
 
 
 def load_control() -> ModuleType:

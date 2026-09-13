@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 HOME = Path.home()
-HELPER = HOME / ".local/bin/wallpaper-engine-login-start"
+HELPER = HOME / "bin/wallpaper-engine-login-start"
 DESKTOP = HOME / ".config/autostart/wallpaper-engine-ready.desktop"
 OLD_DESKTOP = HOME / ".config/autostart/Linux Wallpaper Engine.desktop"
 SETTINGS = HOME / ".config/Linux Wallpaper Engine/settings.json"

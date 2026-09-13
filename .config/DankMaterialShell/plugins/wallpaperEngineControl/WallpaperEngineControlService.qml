@@ -22,7 +22,7 @@ Singleton {
   property var registeredViews: []
   property var lastView: null
 
-  readonly property string controlPath: Quickshell.env("HOME") + "/.local/bin/wallpaper-engine-control"
+  readonly property string controlPath: Quickshell.env("HOME") + "/bin/wallpaper-engine-control"
   readonly property bool busy: currentIntent !== ""
   readonly property bool engineUp: engineState === "running" || engineState === "paused" || engineState === "error"
   readonly property string currentAction: currentCommand
