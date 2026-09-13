@@ -17,12 +17,11 @@
       "movement": 220,
       "transparency": 150
     },
-    "fps": 120,
+    "fps": 160,
     "style": {
       "movement": "EaseOutCubic",
       "transparency": "EaseOutSine"
-    },
-    "ghost_movement": false
+    }
   },
   "theme": {
     "palette": "Catppuccin",
