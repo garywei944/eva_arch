@@ -7,7 +7,7 @@ hl.env("TERMINAL", "kitty")
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd --all")
     hl.exec_cmd("uwsm app -- dms run")
-    hl.exec_cmd("~/.config/scripts/ensure-wallpaper-engine-control-dms --wait --restart-if-changed")
+    hl.exec_cmd("~/bin/ensure-wallpaper-engine-control-dms --wait --restart-if-changed")
     -- Owned here instead of ~/.config/autostart so the XDG autostart dir stays unsynced.
     hl.exec_cmd("~/bin/wallpaper-engine-login-start")
     hl.exec_cmd("kded6")
