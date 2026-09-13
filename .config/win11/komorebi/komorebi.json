@@ -8,6 +8,22 @@
   "border": true,
   "border_width": 2,
   "border_offset": -1,
+  "animation": {
+    "enabled": {
+      "movement": true,
+      "transparency": false
+    },
+    "duration": {
+      "movement": 220,
+      "transparency": 150
+    },
+    "fps": 120,
+    "style": {
+      "movement": "EaseOutCubic",
+      "transparency": "EaseOutSine"
+    },
+    "ghost_movement": false
+  },
   "theme": {
     "palette": "Catppuccin",
     "name": "Macchiato",
