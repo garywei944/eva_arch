@@ -34,9 +34,6 @@ bin/__pycache__
 !.config
 .config/*
 !.config/alacritty
-!.config/autostart
-.config/autostart/*
-!.config/autostart/wallpaper-engine-ready.desktop
 !.config/awesome
 !.config/DankMaterialShell
 .config/DankMaterialShell/*

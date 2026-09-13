@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Start Linux Wallpaper Engine once the login session is actually usable.
 
-The XDG autostart edge fires before every output is configured and before the
+The Hyprland start edge fires before every output is configured and before the
 external Steam library is mounted. Wait for those, then hand lifecycle
 ownership to wallpaper-engine-control. One bounded stop/start retry is allowed
 if the first start does not bring up every configured output.

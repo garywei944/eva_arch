@@ -14,7 +14,7 @@ from typing import Any
 
 HOME = Path.home()
 HELPER = HOME / "bin/wallpaper-engine-login-start"
-DESKTOP = HOME / ".config/autostart/wallpaper-engine-ready.desktop"
+HYPRLAND_CONFIG = HOME / ".config/hypr/hyprland.lua"
 OLD_DESKTOP = HOME / ".config/autostart/Linux Wallpaper Engine.desktop"
 SETTINGS = HOME / ".config/Linux Wallpaper Engine/settings.json"
 EXPECTED_SCREENS = ["DP-1", "DP-2", "DP-3"]
@@ -437,15 +437,14 @@ class WallpaperEngineLoginStartTests(unittest.TestCase):
             self.assertEqual(fixture.configured_screens(), ["DP-2"])
             self.assertEqual(fixture.actions(), [])
 
-    def test_owned_autostart_replaces_the_generated_entry(self) -> None:
-        desktop = DESKTOP.read_text()
+    def test_hyprland_start_hook_replaces_the_generated_entry(self) -> None:
+        hyprland_config = HYPRLAND_CONFIG.read_text()
         settings = json.loads(SETTINGS.read_text())
 
-        self.assertIn("Type=Application", desktop)
-        self.assertIn(f"TryExec={HELPER}", desktop)
-        self.assertIn(f"Exec={HELPER}", desktop)
+        self.assertIn('hl.exec_cmd("~/bin/wallpaper-engine-login-start")', hyprland_config)
         self.assertFalse(settings["launchOnLogin"])
         self.assertFalse(OLD_DESKTOP.exists())
+        self.assertFalse((HOME / ".config/autostart/wallpaper-engine-ready.desktop").exists())
 
 
 if __name__ == "__main__":
