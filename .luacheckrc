@@ -22,10 +22,10 @@ files[".config/hypr/dms-theme-sync.lua"] = {
   globals = { "hl" },
 }
 
-files[".config/hypr-backups/*/config/dms/*.lua"] = {
+files[".config/hypr/backups/*/config/dms/*.lua"] = {
   globals = { "hl" },
 }
 
-files[".config/hypr-backups/*/validation/*.lua"] = {
+files[".config/hypr/backups/*/validation/*.lua"] = {
   globals = { "hl" },
 }
