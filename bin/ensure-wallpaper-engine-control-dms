@@ -81,14 +81,14 @@ def ensure_activation(config_dir: Path) -> list[str]:
     if not isinstance(right_widgets, list):
         raise ValueError(f"{settings_path} default bar has no rightWidgets list")
 
-    existing = [item for item in right_widgets if widget_id(item) != PLUGIN_ID]
-    anchor_index = next(
-        (index for index, item in enumerate(existing) if widget_id(item) == PLACEMENT_ANCHOR),
-        len(existing) - 1,
-    )
-    existing.insert(max(0, anchor_index + 1), {"id": PLUGIN_ID, "enabled": True})
-    if existing != right_widgets:
-        bar["rightWidgets"] = existing
+    # Only insert when the widget is missing: the user's manual placement
+    # (dragged in the DMS bar editor) must survive every login.
+    if not any(widget_id(item) == PLUGIN_ID for item in right_widgets):
+        anchor_index = next(
+            (index for index, item in enumerate(right_widgets) if widget_id(item) == PLACEMENT_ANCHOR),
+            len(right_widgets) - 1,
+        )
+        right_widgets.insert(max(0, anchor_index + 1), {"id": PLUGIN_ID, "enabled": True})
         write_json_atomic(settings_path, settings)
         changed.append(str(settings_path))
 
