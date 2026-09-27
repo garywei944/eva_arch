@@ -1,19 +1,10 @@
 # Hyprland config
 
-This configuration is written in Lua and uses the
-[hyprsplit](https://github.com/shezdy/hyprsplit) Lua library for per-monitor
-workspaces (see `dms/hyprsplit.lua`). It requires Hyprland >= v0.55.0.
+`hyprland.lua` is the whole hand-written config (Lua provider, Hyprland >= 0.56).
+The files it `require`s at the end belong to DankMaterialShell: `dms/*.lua` are
+written by DMS Settings and `dms-theme-sync.lua` by the Theme Sync plugin. Change
+those through DMS, not by hand; DMS rewrites them.
 
-## Setup
-
-`hyprsplit` is no longer vendored as a Git submodule. Clone it yourself:
-
-```sh
-git clone --depth=1 https://github.com/shezdy/hyprsplit.git ~/.config/hypr/hyprsplit
-```
-
-The clone is ignored by this repository, so local updates (`git -C
-~/.config/hypr/hyprsplit pull`) never show up as untracked changes here.
-
-Then reload Hyprland (`hyprctl reload`) — or restart your session — to pick up
-the library.
+Per-monitor workspaces need no plugin. Persistent workspace rules pin 1-9, 10-18
+and 19-27 to DP-1, DP-2 and DP-3, and the binds use the `m~N` selector (the Nth
+workspace on the focused monitor) plus `m+1`/`m-1`, which wrap within a monitor.
