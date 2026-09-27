@@ -1,5 +1,6 @@
 -- Hyprland config (Lua, Hyprland >= 0.56): https://wiki.hypr.land/Configuring/Start/
--- Everything here is hand-written. DMS owns dms/*.lua and dms-theme-sync.lua (required at the end).
+-- Everything hand-written lives here. DMS rewrites dms/*.lua and dms-theme-sync.lua (required at the end);
+-- it round-trips window rules through its own model, so hand-written rules stay in this file.
 
 ---------------
 -- Autostart --
@@ -51,6 +52,21 @@ hl.window_rule({ match = { class = "^firefox$", title = "^Picture-in-Picture$" }
 hl.window_rule({ match = { class = "^steam$", title = "^notificationtoasts" }, no_initial_focus = true, pin = true })
 hl.window_rule({ match = { class = "^steam_app_[0-9]+$" }, float = true, center = true, content = "game" })
 hl.layer_rule({ match = { namespace = "^(quickshell|dms:.*)$" }, no_anim = true })
+
+-- Open apps on their workspace of the right monitor (DP-3): 20 = Chat, 21 = Git, 25 = Music.
+hl.window_rule({ match = { class = "^(discord|Discord|wechat|WeChat|lark|Lark)$" }, workspace = "20" })
+hl.window_rule({ match = { class = "^(smerge|sublime_merge)$" }, workspace = "21" })
+hl.window_rule({ match = { class = "^qqmusic$" }, workspace = "25" })
+
+-- wallpaper-engine-control parks this hidden fullscreen helper so linux-wallpaperengine uses its
+-- native fullscreen pause instead of SIGSTOP, which can crash it after queued DBus events.
+hl.window_rule({
+    match = { class = "^zenity$", title = "^EVA Wallpaper Pause Helper [0-9a-f]+$" },
+    workspace = "special:eva-wallpaper-pause silent",
+    fullscreen = true,
+    no_focus = true,
+    no_anim = true,
+})
 
 ----------------
 -- Workspaces --
