@@ -35,16 +35,6 @@
 /.config/*
 !/.config/alacritty
 !/.config/awesome
-!/.config/DankMaterialShell
-/.config/DankMaterialShell/*
-!/.config/DankMaterialShell/plugins
-/.config/DankMaterialShell/plugins/*
-!/.config/DankMaterialShell/plugins/wallpaperEngineControl
-/.config/DankMaterialShell/plugins/wallpaperEngineControl/*
-!/.config/DankMaterialShell/plugins/wallpaperEngineControl/plugin.json
-!/.config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControl.qml
-!/.config/DankMaterialShell/plugins/wallpaperEngineControl/WallpaperEngineControlService.qml
-!/.config/DankMaterialShell/plugins/wallpaperEngineControl/qmldir
 !/.config/etc
 !/.config/hypr
 !/.config/kanata

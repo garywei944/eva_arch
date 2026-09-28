@@ -11,8 +11,6 @@ hl.env("TERMINAL", "kitty")
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd --all")
     hl.exec_cmd("uwsm app -- dms run")
-    hl.exec_cmd("~/bin/ensure-wallpaper-engine-control-dms --wait --restart-if-changed")
-    hl.exec_cmd("~/bin/wallpaper-engine-login-start")
     hl.exec_cmd("kded6")
     hl.exec_cmd("fcitx5 -d --replace")
     hl.exec_cmd("insync start")
@@ -58,11 +56,11 @@ hl.window_rule({ match = { class = "^(discord|Discord|wechat|WeChat|lark|Lark)$"
 hl.window_rule({ match = { class = "^(smerge|sublime_merge)$" }, workspace = "21" })
 hl.window_rule({ match = { class = "^qqmusic$" }, workspace = "25" })
 
--- wallpaper-engine-control parks this hidden fullscreen helper so linux-wallpaperengine uses its
--- native fullscreen pause instead of SIGSTOP, which can crash it after queued DBus events.
+-- wallpaper-engine-control pauses wallpapers by parking this fullscreen window on a hidden
+-- workspace: linux-wallpaperengine stops rendering while any window is fullscreen.
 hl.window_rule({
-    match = { class = "^zenity$", title = "^EVA Wallpaper Pause Helper [0-9a-f]+$" },
-    workspace = "special:eva-wallpaper-pause silent",
+    match = { class = "^zenity$", title = "^wallpaper-engine-pause$" },
+    workspace = "special:wallpaper-engine-pause silent",
     fullscreen = true,
     no_focus = true,
     no_anim = true,
