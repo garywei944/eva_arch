@@ -49,6 +49,13 @@ hl.window_rule({ match = { class = "^org\\.gnome\\.Nautilus$" }, float = true })
 hl.window_rule({ match = { class = "^firefox$", title = "^Picture-in-Picture$" }, float = true })
 hl.window_rule({ match = { class = "^steam$", title = "^notificationtoasts" }, no_initial_focus = true, pin = true })
 hl.window_rule({ match = { class = "^steam_app_[0-9]+$" }, float = true, center = true, content = "game" })
+-- Show Me The Key overlay: its title is kept untranslated upstream so rules can match it.
+hl.window_rule({
+    match = { class = "^one\\.alynx\\.showmethekey$", title = "^Floating Window - Show Me The Key$" },
+    float = true,
+    pin = true,
+    no_initial_focus = true,
+})
 hl.layer_rule({ match = { namespace = "^(quickshell|dms:.*)$" }, no_anim = true })
 
 -- Open apps on their workspace of the right monitor (DP-3): 20 = Chat, 21 = Git, 25 = Music.
