@@ -1,0 +1,164 @@
+# YASB status bar for the komorebi desktop, styled after the DMS bar on Linux.
+# One bar definition runs on every monitor; each instance shows its own monitor's workspaces.
+# komorebi-bar's configs stay in ../komorebi for rollback but are no longer started.
+watch_config: true
+watch_stylesheet: true
+debug: false
+update_check: false
+
+bars:
+  main:
+    enabled: true
+    screens: ["*"]
+    class_name: "yasb-bar"
+    alignment:
+      position: "top"
+      align: "center"
+    window_flags:
+      # Not a Windows app bar: komorebi does not reliably notice app bars that appear on the
+      # side monitors, so komorebi.json reserves the bar's 60 px (48 px at 125 %) itself.
+      always_on_top: true
+      windows_app_bar: false
+      hide_on_fullscreen: true
+      auto_hide: false
+    dimensions:
+      width: "100%"
+      height: 40
+    padding:
+      top: 4
+      left: 6
+      bottom: 4
+      right: 6
+    animation:
+      enabled: true
+      duration: 300
+    widgets:
+      left: ["komorebi_workspaces", "komorebi_layout", "active_window"]
+      center: ["media", "clock"]
+      right: ["whkd", "cpu", "memory", "traffic", "volume"]
+
+widgets:
+  komorebi_workspaces:
+    type: "komorebi.workspaces.WorkspaceWidget"
+    options:
+      label_offline: "komorebi offline"
+      # Colours are inline because YASB re-polishes only the button, not its label, when a
+      # workspace changes state, so state-based label colours in styles.css would go stale.
+      label_workspace_btn: "<span style='color:#737a85'>{name}</span>"
+      label_workspace_active_btn: "<span style='color:#0b1d33'>{name}</span>"
+      label_workspace_populated_btn: "<span style='color:#e3e6eb'>{name}</span>"
+      hide_empty_workspaces: false
+      hide_if_offline: false
+      app_icons:
+        enabled_populated: true
+        enabled_active: true
+        size: 16
+        max_icons: 3
+        hide_label: false
+        hide_duplicates: true
+        hide_floating: false
+
+  # Shows "Paused" while game mode (Ctrl+Alt+Shift+P) is on.
+  komorebi_layout:
+    type: "komorebi.active_layout.ActiveLayoutWidget"
+    options:
+      hide_if_offline: true
+      # This widget renders its label as one rich-text string, so the icon font is set inline.
+      label: "<span style=\"font-family:'Segoe Fluent Icons'\">{icon}</span>&nbsp;&nbsp;{layout_name}"
+      layouts: ["bsp", "columns", "rows", "grid", "vertical_stack", "horizontal_stack", "ultrawide_vertical_stack", "right_main_vertical_stack", "scrolling"]
+      layout_icons:
+        bsp: "\uf246"
+        columns: "\ueca5"
+        rows: "\ueca5"
+        grid: "\ue80a"
+        scrolling: "\ueca5"
+        vertical_stack: "\ue7c4"
+        horizontal_stack: "\ue7c4"
+        ultrawide_vertical_stack: "\ue7c4"
+        right_main_vertical_stack: "\ue7c4"
+        monocle: "\ue740"
+        maximized: "\ue740"
+        floating: "\ue737"
+        paused: "\ue769"
+        tiling: "\uf246"
+      callbacks:
+        on_left: "toggle_layout_menu"
+        on_middle: "toggle_monocle"
+        on_right: "next_layout"
+
+  active_window:
+    type: "yasb.active_window.ActiveWindowWidget"
+    options:
+      label: "{win[title]}"
+      label_alt: "{win[process][name]}"
+      label_no_window: ""
+      label_icon: true
+      label_icon_size: 16
+      max_length: 48
+      max_length_ellipsis: "…"
+      monitor_exclusive: true
+
+  media:
+    type: "yasb.media.MediaWidget"
+    options:
+      label: "{title}{s}{artist}"
+      label_alt: "{title}"
+      separator: " • "
+      hide_empty: true
+      max_field_size:
+        label: 28
+        label_alt: 40
+      show_thumbnail: false
+      controls_left: false
+      icons:
+        prev_track: "\ue892"
+        next_track: "\ue893"
+        play: "\ue768"
+        pause: "\ue769"
+
+  clock:
+    type: "yasb.clock.ClockWidget"
+    options:
+      label: "{%H:%M}<span>·</span>{%a %b %d}"
+      label_alt: "{%Y-%m-%d %H:%M:%S}"
+      update_interval: 1000
+
+  # Click for a searchable list of every whkd shortcut.
+  whkd:
+    type: "yasb.whkd.WhkdWidget"
+    options:
+      label: "<span>\ue765</span>"
+
+  cpu:
+    type: "yasb.cpu.CpuWidget"
+    options:
+      label: "<span>\ue950</span> {info[percent][total]}%"
+      label_alt: "<span>\ue950</span> {info[freq][current]} MHz"
+      update_interval: 2000
+
+  memory:
+    type: "yasb.memory.MemoryWidget"
+    options:
+      label: "<span>\ue964</span> {virtual_mem_percent}%"
+      label_alt: "<span>\ue964</span> {virtual_mem_free} free"
+      update_interval: 5000
+
+  traffic:
+    type: "yasb.traffic.TrafficWidget"
+    options:
+      label: "<span>\ue74b</span> {download_speed} <span>\ue74a</span> {upload_speed}"
+      label_alt: "<span>\ue74b</span> {download_speed} <span>\ue74a</span> {upload_speed}"
+      speed_unit: "bytes"
+      update_interval: 1000
+
+  volume:
+    type: "yasb.volume.VolumeWidget"
+    options:
+      label: "<span>{icon}</span> {level}"
+      label_alt: "{level}"
+      icons:
+        muted: "\ue74f"
+        "10": "\ue992"
+        "30": "\ue993"
+        "60": "\ue994"
+        "100": "\ue995"

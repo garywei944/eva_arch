@@ -1,146 +1,61 @@
-[CmdletBinding()]
-param(
-    [Parameter(Mandatory = $true)]
-    [ValidateSet("Arch", "Chrome")]
-    [string]$Application
-)
+# Open Arch WSL in WezTerm, or a new Chrome window, on the monitor under the mouse.
+# komorebi tiles a new window on the monitor where it first appears. WezTerm is told to appear
+# there; a running Chrome reuses its last window position instead, so its new window is moved
+# once komorebi manages it.
+param([Parameter(Mandatory = $true)][ValidateSet('Arch', 'Chrome')][string]$App)
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-# komorebic emits UTF-8; without this, CJK window titles are decoded via the
-# OEM codepage and can swallow closing quotes, breaking ConvertFrom-Json.
+# komorebic prints UTF-8; Windows PowerShell would garble CJK window titles and break the JSON.
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$wezTermPath = "C:\Program Files\WezTerm\wezterm-gui.exe"
-$windowTimeoutSeconds = 10
-$logPath = Join-Path $env:LOCALAPPDATA "komorebi\launch-on-cursor-monitor.log"
-Add-Content -LiteralPath $logPath -Value "$(Get-Date -Format o) launch_requested application=$Application"
 
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-public static class EvaCursorLaunchWindow {
-    [DllImport("user32.dll")]
-    public static extern bool SetForegroundWindow(IntPtr hWnd);
+function Get-State { komorebic state | Out-String | ConvertFrom-Json }
 
-    [DllImport("user32.dll")]
-    public static extern IntPtr GetForegroundWindow();
-}
-"@
-
-function Get-ManagedWindows {
-    param([Parameter(Mandatory = $true)][string]$ExecutableName)
-
-    $state = (& komorebic state | Out-String | ConvertFrom-Json)
-    $result = @()
-    for ($monitorIndex = 0; $monitorIndex -lt $state.monitors.elements.Count; $monitorIndex++) {
-        $monitor = $state.monitors.elements[$monitorIndex]
-        for ($workspaceIndex = 0; $workspaceIndex -lt $monitor.workspaces.elements.Count; $workspaceIndex++) {
-            $workspace = $monitor.workspaces.elements[$workspaceIndex]
-            foreach ($container in @($workspace.containers.elements)) {
-                foreach ($window in @($container.windows.elements)) {
-                    if ($window.exe -eq $ExecutableName) {
-                        $result += [pscustomobject]@{
-                            Hwnd = [int64]$window.hwnd
-                            Monitor = $monitorIndex
-                            Workspace = $workspaceIndex
-                            Title = [string]$window.title
-                        }
-                    }
+function Get-Windows($State, $Exe) {
+    $monitors = $State.monitors.elements
+    for ($m = 0; $m -lt $monitors.Count; $m++) {
+        foreach ($workspace in $monitors[$m].workspaces.elements) {
+            foreach ($container in $workspace.containers.elements) {
+                foreach ($window in $container.windows.elements) {
+                    if ($window.exe -eq $Exe) { [pscustomobject]@{ Hwnd = $window.hwnd; Monitor = $m } }
                 }
             }
         }
     }
-    @($result)
 }
 
-$cursor = [System.Windows.Forms.Cursor]::Position
-& komorebic focus-monitor-at-cursor | Out-Null
-$targetMonitor = [int]((& komorebic query focused-monitor-index | Out-String).Trim())
-
-switch ($Application) {
-    "Arch" {
-        if (-not (Test-Path -LiteralPath $wezTermPath)) {
-            throw "WezTerm executable not found at $wezTermPath"
-        }
-        $executableName = "wezterm-gui.exe"
-        $launch = {
-            Start-Process -FilePath $wezTermPath -ArgumentList @(
-                "start",
-                "--always-new-process",
-                "--position",
-                "screen:$($cursor.X),$($cursor.Y)",
-                "--domain",
-                "WSL:Arch"
-            )
-        }
-    }
-    "Chrome" {
-        if (-not (Test-Path -LiteralPath $chromePath)) {
-            throw "Chrome executable not found at $chromePath"
-        }
-        $executableName = "chrome.exe"
-        $launch = {
-            Start-Process -FilePath $chromePath -ArgumentList @(
-                "--new-window",
-                "--window-position=$($cursor.X),$($cursor.Y)"
-            )
-        }
-    }
+function Get-FocusedHwnd($State) {
+    $monitor = $State.monitors.elements[$State.monitors.focused]
+    $workspace = $monitor.workspaces.elements[$monitor.workspaces.focused]
+    $container = $workspace.containers.elements[$workspace.containers.focused]
+    $container.windows.elements[$container.windows.focused].hwnd
 }
 
-$before = @{}
-foreach ($window in @(Get-ManagedWindows -ExecutableName $executableName)) {
-    $before[$window.Hwnd] = $true
+komorebic focus-monitor-at-cursor
+$state = Get-State
+$target = $state.monitors.focused
+$exe = @{ Arch = 'wezterm-gui.exe'; Chrome = 'chrome.exe' }[$App]
+$known = @(Get-Windows $state $exe | ForEach-Object { $_.Hwnd })
+
+if ($App -eq 'Arch') {
+    $area = $state.monitors.elements[$target].work_area_size
+    Start-Process 'C:\Program Files\WezTerm\wezterm-gui.exe' "start --always-new-process --position screen:$($area.left + 100),$($area.top + 100) --domain WSL:Arch"
+} else {
+    Start-Process 'C:\Program Files\Google\Chrome\Application\chrome.exe' '--new-window'
 }
 
-& $launch
-$deadline = (Get-Date).AddSeconds($windowTimeoutSeconds)
-$newWindow = $null
-do {
-    $candidates = @(Get-ManagedWindows -ExecutableName $executableName | Where-Object {
-        -not $before.ContainsKey($_.Hwnd)
-    })
-    if ($candidates.Count -gt 1) {
-        throw "Expected one new $Application window, found $($candidates.Count)"
-    }
-    if ($candidates.Count -eq 1) {
-        $newWindow = $candidates[0]
-        break
-    }
+# Give komorebi up to 5 s to manage the new window, then move it if it landed elsewhere.
+# komorebi focuses a window it has just tiled, and move-to-monitor acts on the focused one.
+for ($i = 0; $i -lt 50; $i++) {
     Start-Sleep -Milliseconds 100
-} while ((Get-Date) -lt $deadline)
-
-if ($null -eq $newWindow) {
-    throw "Timed out waiting for the new $Application window"
-}
-
-if ($newWindow.Monitor -ne $targetMonitor) {
-    $null = [EvaCursorLaunchWindow]::SetForegroundWindow([IntPtr]$newWindow.Hwnd)
-    Start-Sleep -Milliseconds 200
-    $foreground = [EvaCursorLaunchWindow]::GetForegroundWindow().ToInt64()
-    if ($foreground -ne $newWindow.Hwnd) {
-        throw "Could not focus the new $Application window before moving it"
+    $state = Get-State
+    $new = @(Get-Windows $state $exe | Where-Object { $known -notcontains $_.Hwnd })
+    if ($new.Count -eq 0) { continue }
+    if ($new.Count -eq 1 -and $new[0].Monitor -ne $target -and (Get-FocusedHwnd $state) -eq $new[0].Hwnd) {
+        komorebic move-to-monitor $target
+        # komorebi skips re-laying out a window whose resize animation (for the brief arrival
+        # above) has not moved it yet, so the monitor the new window left can keep its windows
+        # half-sized. Retile once that animation (220 ms in komorebi.json) is over.
+        Start-Sleep -Milliseconds 500
+        komorebic retile
     }
-
-    & komorebic move-to-monitor $targetMonitor | Out-Null
-    do {
-        $moved = @(Get-ManagedWindows -ExecutableName $executableName | Where-Object {
-            $_.Hwnd -eq $newWindow.Hwnd -and $_.Monitor -eq $targetMonitor
-        })
-        if ($moved.Count -eq 1) {
-            $newWindow = $moved[0]
-            break
-        }
-        Start-Sleep -Milliseconds 100
-    } while ((Get-Date) -lt $deadline)
-
-    if ($newWindow.Monitor -ne $targetMonitor) {
-        throw "The new $Application window did not reach monitor $targetMonitor"
-    }
+    break
 }
-
-$record = "$(Get-Date -Format o) launch_ready application=$Application hwnd=$($newWindow.Hwnd) monitor=$targetMonitor"
-Add-Content -LiteralPath $logPath -Value $record
-Write-Output $record

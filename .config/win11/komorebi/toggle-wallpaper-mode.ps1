@@ -1,32 +1,15 @@
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-
-$bars = @(Get-Process -Name 'komorebi-bar' -ErrorAction SilentlyContinue)
+# Wallpaper mode: hide the bar and minimise every window; run again to restore both.
+# The marker only says which way to go next; a stale one costs one extra press.
+$marker = Join-Path $env:TEMP 'wallpaper-mode'
 $shell = New-Object -ComObject Shell.Application
+$yasbc = "$env:ProgramFiles\YASB\yasbc.exe"
 
-if ($bars.Count -gt 0) {
-    # Enter wallpaper mode: hide all komorebi bars and minimize open windows.
-    $bars | Stop-Process -Force
+if (Test-Path $marker) {
+    Remove-Item $marker
+    $shell.UndoMinimizeAll()
+    & $yasbc show-bar
+} else {
+    New-Item -ItemType File $marker | Out-Null
+    & $yasbc hide-bar
     $shell.MinimizeAll()
-    exit 0
-}
-
-# Leave wallpaper mode: restore windows and start one bar per configured monitor.
-$shell.UndoMinimizeAll()
-
-if ([string]::IsNullOrWhiteSpace($env:KOMOREBI_CONFIG_HOME)) {
-    throw 'KOMOREBI_CONFIG_HOME is not set'
-}
-
-$configs = @(
-    (Join-Path $env:KOMOREBI_CONFIG_HOME 'komorebi.bar.json'),
-    (Join-Path $env:KOMOREBI_CONFIG_HOME 'komorebi.bar.monitor1.json'),
-    (Join-Path $env:KOMOREBI_CONFIG_HOME 'komorebi.bar.monitor2.json')
-)
-
-foreach ($config in $configs) {
-    if (-not (Test-Path -LiteralPath $config)) {
-        throw "Missing bar configuration: $config"
-    }
-    Start-Process -FilePath 'komorebi-bar.exe' -ArgumentList @('--config', $config) -WindowStyle Hidden
 }

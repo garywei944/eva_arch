@@ -146,7 +146,8 @@ config.inactive_pane_hsb = {
     brightness = 0.72,
 }
 
--- Preserve the familiar Kitty shortcuts.
+-- Preserve the familiar Kitty shortcuts. WezTerm's defaults already match Kitty for
+-- Ctrl+Tab / Ctrl+Shift+Tab (next/previous tab) and Ctrl+Shift+W (close tab).
 config.keys = {
     -- WezTerm binds Alt+Enter to ToggleFullScreen by default; release it so the
     -- chord reaches TUIs (Hermes, Claude Code) as ESC+CR for multiline input.
@@ -155,15 +156,27 @@ config.keys = {
         mods = "ALT",
         action = wezterm.action.DisableDefaultAssignment,
     },
+    -- New windows and tabs stay in Arch WSL instead of WezTerm's default cmd.exe.
     {
         key = "n",
         mods = "CTRL|SHIFT",
-        action = wezterm.action.SpawnWindow,
+        action = wezterm.action.SpawnCommandInNewWindow({ domain = "CurrentPaneDomain" }),
     },
     {
         key = "t",
         mods = "CTRL",
         action = wezterm.action.SpawnTab("CurrentPaneDomain"),
+    },
+    -- Kitty switches tabs with Ctrl+Shift+Left/Right, where WezTerm would switch panes.
+    {
+        key = "LeftArrow",
+        mods = "CTRL|SHIFT",
+        action = wezterm.action.ActivateTabRelative(-1),
+    },
+    {
+        key = "RightArrow",
+        mods = "CTRL|SHIFT",
+        action = wezterm.action.ActivateTabRelative(1),
     },
     {
         key = "+",

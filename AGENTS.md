@@ -12,6 +12,7 @@ This repository is Gary's dotfiles for CachyOS/Arch Linux and Windows 11, with `
 ## Layout
 
 - `.config/`: per-application configs (`hypr`, `kanata`, `kitty`, `tmux`, `win11`, `DankMaterialShell` plugins, `scripts`, ...). Only the whitelisted subdirectories are tracked.
+- `.config/win11/`: the Windows 11 desktop (komorebi, whkd, WezTerm, kanata startup). It mirrors Windows `%USERPROFILE%\.config`; `.config/win11/install.sh` copies it there, and there is no Windows checkout of this repo. See `.config/win11/README.md`.
 - `bin/`: tracked user scripts, including the Wallpaper Engine entry points. `.local/bin` is untracked.
 - `wiki/`: the LLM Wiki (public, sourced knowledge only).
 - `.claude/CLAUDE.md` and `.codex/AGENTS.md`: tracked agent instructions; the rest of `.claude/` and `.codex/` is local state and stays ignored.

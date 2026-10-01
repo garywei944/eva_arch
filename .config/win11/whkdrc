@@ -1,23 +1,23 @@
 .shell powershell
 
-# Process-level whkd pause: kill whkd so the bar's WHKD button label stays truthful.
-# whkd's own bindings die with it, so resuming is done via the bar button (mouse).
-ctrl + alt + shift + p : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/whkd/toggle-whkd.ps1"
+# Game mode: pauses every other binding below together with komorebi tiling; press it again
+# to resume both. The bar's layout widget shows "Paused" in the meantime.
+.pause ctrl + alt + shift + p
+.pause_hook komorebic toggle-pause
 
-# Safe full input-stack restart: whkd first, then Kanata via the elevated helper task.
-ctrl + alt + shift + r : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/kanata/restart-whkd-kanata.ps1"
-ctrl + alt + shift + o : komorebic replace-configuration "$Env:KOMOREBI_CONFIG_HOME/komorebi.json"
-ctrl + alt + shift + i : komorebic toggle-pause
-# Toggle wallpaper mode: hide/show all bars and minimize/restore open windows.
-ctrl + alt + shift + d : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$Env:KOMOREBI_CONFIG_HOME/toggle-wallpaper-mode.ps1"
+# Reload this file by restarting whkd, then kanata: kanata's keyboard hook must be installed
+# after whkd's, otherwise whkd sees physical keys instead of the Gallium layout.
+ctrl + alt + shift + r : Stop-Process -Name whkd; Start-Process whkd -WindowStyle Hidden; Start-Sleep 1; Start-ScheduledTask kanata
+# Wallpaper mode: hide the bars and minimise every window; press again to restore.
+ctrl + alt + shift + d : Start-Process powershell -WindowStyle Hidden "-NoProfile -ExecutionPolicy Bypass -File $Env:KOMOREBI_CONFIG_HOME\toggle-wallpaper-mode.ps1"
 
 # Keep Windows-native Win+N, Win+P and Win+W unbound.
-# Alt+Enter and Alt+Shift+Enter stay unbound here for Hermes TUI multiline input.
-# Windows Terminal must also pass those chords through instead of handling fullscreen.
+# Alt+Enter and Alt+Shift+Enter stay unbound for TUI multiline input.
 
-# Win+T launches Arch WSL in WezTerm; Win+B launches Chrome on the monitor under the pointer.
-win + t                 : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/komorebi/launch-on-cursor-monitor.ps1" -Application Arch
-win + b                 : powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "E:/Projects/eva_arch/.config/win11/komorebi/launch-on-cursor-monitor.ps1" -Application Chrome
+# Arch WSL in WezTerm and a new Chrome window, opened on the monitor under the mouse.
+# Start-Process keeps the script from blocking whkd's shell, which runs bindings one at a time.
+win + t                 : Start-Process powershell -WindowStyle Hidden "-NoProfile -ExecutionPolicy Bypass -File $Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.ps1 Arch"
+win + b                 : Start-Process powershell -WindowStyle Hidden "-NoProfile -ExecutionPolicy Bypass -File $Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.ps1 Chrome"
 win + shift + t         : komorebic toggle-float
 win + f                 : komorebic toggle-monocle
 win + shift + f         : komorebic toggle-monocle

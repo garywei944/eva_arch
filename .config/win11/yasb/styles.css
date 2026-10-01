@@ -1,0 +1,152 @@
+/* DMS-style bar: a dark strip with rounded "islands" per widget, light-blue accent.
+   Text is Segoe UI Variable, icons are Windows' built-in Segoe Fluent Icons. */
+
+* {
+    font-family: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI";
+    font-size: 13px;
+    font-weight: 500;
+    color: #c9ccd3;
+}
+
+.yasb-bar {
+    background-color: rgba(5, 7, 10, 0.92);
+}
+
+.icon {
+    font-family: "Segoe Fluent Icons";
+    font-size: 14px;
+}
+
+/* Every widget sits in its own island. */
+.widget .widget-container {
+    background-color: #181d24;
+    border-radius: 12px;
+    margin: 0 3px;
+    padding: 0 12px;
+}
+
+.widget .widget-container .icon {
+    margin-right: 6px;
+}
+
+/* Workspaces: one pill per workspace, labelled with its name; app icons show what is open. */
+.komorebi-workspaces .widget-container {
+    padding: 0 3px;
+}
+
+.komorebi-workspaces .ws-btn {
+    background-color: transparent;
+    border: none;
+    border-radius: 11px;
+    margin: 4px 2px;
+    padding: 0 10px;
+}
+
+/* Label colours live in config.yaml; only the button itself restyles on state changes. */
+.komorebi-workspaces .ws-btn .label {
+    font-weight: 600;
+}
+
+.komorebi-workspaces .ws-btn.populated {
+    background-color: #353b44;
+}
+
+.komorebi-workspaces .ws-btn.active {
+    background-color: #a2c9fd;
+}
+
+.komorebi-workspaces .ws-btn:hover {
+    background-color: #454c57;
+}
+
+.komorebi-workspaces .ws-btn.active:hover {
+    background-color: #b6d4fd;
+}
+
+.komorebi-workspaces .ws-btn .icon {
+    margin-left: 6px;
+}
+
+.komorebi-workspaces .offline-status {
+    color: #737a85;
+    padding: 0 10px;
+}
+
+.komorebi-active-layout .label {
+    color: #a2c9fd;
+    font-weight: 600;
+}
+
+.active-window-widget .widget-container .label {
+    color: #e3e6eb;
+}
+
+.active-window-widget .widget-container .icon {
+    margin-right: 8px;
+}
+
+/* Media: play/pause gets the accent, like DMS. */
+.media-widget .label {
+    color: #e3e6eb;
+}
+
+.media-widget .btn {
+    font-family: "Segoe Fluent Icons";
+    font-size: 12px;
+    color: #c9ccd3;
+    background-color: transparent;
+    border: none;
+    border-radius: 10px;
+    margin: 5px 2px;
+    padding: 0 7px;
+}
+
+.media-widget .btn.play {
+    background-color: #a2c9fd;
+    color: #0b1d33;
+}
+
+.media-widget .btn.disabled {
+    color: #4b525c;
+}
+
+.clock-widget .label {
+    color: #e3e6eb;
+    font-weight: 600;
+}
+
+.clock-widget .icon {
+    font-family: "Segoe UI Variable Text", "Segoe UI";
+    color: #737a85;
+    margin: 0 8px;
+}
+
+.traffic-widget .icon {
+    margin-left: 4px;
+}
+
+.traffic-widget .label {
+    margin-right: 4px;
+}
+
+.volume-widget .label.muted,
+.volume-widget .icon.muted {
+    color: #737a85;
+}
+
+.cpu-widget .label.status-high,
+.cpu-widget .label.status-critical,
+.memory-widget .label.status-high,
+.memory-widget .label.status-critical {
+    color: #ffb4ab;
+}
+
+.tooltip {
+    background-color: #181d24;
+    border: 1px solid #2c333d;
+    border-radius: 8px;
+    color: #c9ccd3;
+    padding: 6px 10px;
+    font-family: "Segoe UI Variable Text", "Segoe UI";
+    font-size: 12px;
+}
