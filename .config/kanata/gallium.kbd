@@ -10,7 +10,9 @@
     "CORSAIR K100 RGB Optical-Mechanical Gaming Keyboard"
   )
 
-  process-unmapped-keys   yes
+  ;; Leave Right Ctrl untouched: keys kanata re-sends on Windows are flagged as injected,
+  ;; and Doubao IME ignores an injected Right Ctrl for its voice-input hotkey.
+  process-unmapped-keys   (all-except rctl)
   concurrent-tap-hold     yes
   allow-hardware-repeat   false
 )
@@ -21,7 +23,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt rmet menu rctl
+  lctl lmet lalt           spc            ralt rmet menu
 )
 
 (deflayer gallium
@@ -30,7 +32,7 @@
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
   lsft x    q    m    w    z    k    p    '    ;    .    @oss
-  @hyp lmet lalt           @sym           @nav rmet ralt rctl
+  @hyp lmet lalt           @sym           @nav rmet ralt
 )
 
 (deflayer qwerty
@@ -39,7 +41,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
   lsft z    x    c    v    b    n    m    ,    .    /    @oss
-  @hyp lmet lalt           @sym           @nav rmet ralt rctl
+  @hyp lmet lalt           @sym           @nav rmet ralt
 )
 
 (deflayer gaming
@@ -48,7 +50,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   esc  a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl lmet lalt           spc            ralt rmet menu rctl
+  lctl lmet lalt           spc            ralt rmet menu
 )
 
 (deflayer gaming-gallium
@@ -57,7 +59,7 @@
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   esc  n    r    t    s    g    y    h    a    e    i    /    ret
   lsft x    q    m    w    z    k    p    '    ;    .    rsft
-  lctl lmet lalt           spc            ralt rmet menu rctl
+  lctl lmet lalt           spc            ralt rmet menu
 )
 
 (defvar
@@ -165,7 +167,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              _              _    _    _    _
+  _    _    _              _              _    _    _
 )
 
 (deflayer layers
@@ -174,7 +176,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              lrld           ralt _    _    _
+  _    _    _              lrld           ralt _    _
 )
 
 (defvar
@@ -231,7 +233,7 @@
   $ntb $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm _    _
   caps $cln $lps $lbc [    $uds =    ]    $rbc $rps $vrb /    _
   _    $tld \    $ats grv  .    $lst $grt '    ;    .    _
-  _    _    _              _              _    _    _    _
+  _    _    _              _              _    _    _
 )
 
 (defalias
@@ -248,7 +250,7 @@
   _    _    _    _    _    _    @mwl @mwd @mwu @mwr _    _    _    _
   _    _    _    $ptb $ntb _    left down up   rght _    _    _
   _    _    _    _    _    _    home pgdn pgup end  _    _
-  _    _    _              A-spc          _    _    _    _
+  _    _    _              A-spc          _    _    _
 )
 
 (deflayer chords
@@ -257,7 +259,7 @@
   _    $pls 7    8    9    _    _    _    ins  _    _    _    _    _
   _    .    4    5    6    ,    _    next prev pp   _    _    _
   _    $mns 1    2    3    _    _    vold volu mute _    _
-  _    _    del            0              _    _    _    _
+  _    _    del            0              _    _    _
 )
 
 (deflayer function
@@ -266,5 +268,5 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              _              _    _    _    _
+  _    _    _              _              _    _    _
 )
