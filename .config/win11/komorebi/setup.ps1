@@ -2,11 +2,13 @@
 # One-time Windows setup, run from an elevated PowerShell after install.sh has deployed the
 # configs. It points komorebi at them and registers the two scheduled tasks that start the desktop:
 #   komorebi  at logon, not elevated: start-komorebi.ps1 (komorebi, bars, whkd, masir, then kanata)
-#   kanata    no trigger, elevated so it can remap keys in admin windows too. A second start stops
-#             the running instance first, so starting the task is how kanata is restarted after whkd.
+#   kanata    no trigger, elevated, which a hook-based (winIOv2) kanata needs to remap admin windows.
+#             A second start stops the running instance first, so starting the task is how kanata
+#             is restarted after whkd.
 # Two tasks because they need different privileges: anything whkd launches must not be elevated.
+# The default kanata is the patched Interception build from ~/.config/kanata/windows/build.sh.
 param(
-    [string]$Kanata = 'D:\opt\windows-binaries-x64\kanata_windows_gui_winIOv2_cmd_allowed_x64.exe'
+    [string]$Kanata = 'D:\opt\kanata-1.12.0-outdev\kanata_windows_gui_wintercept_cmd_allowed_x64.exe'
 )
 $ErrorActionPreference = 'Stop'
 $config = "$env:USERPROFILE\.config"

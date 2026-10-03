@@ -5,8 +5,8 @@
 .pause ctrl + alt + shift + p
 .pause_hook komorebic toggle-pause
 
-# Reload this file by restarting whkd, then kanata: kanata's keyboard hook must be installed
-# after whkd's, otherwise whkd sees physical keys instead of the Gallium layout.
+# Reload this file and gallium.kbd by restarting whkd, then kanata: a hook-based (winIOv2)
+# kanata must install its keyboard hook after whkd's, or whkd sees physical keys instead of Gallium.
 ctrl + alt + shift + r : Stop-Process -Name whkd; Start-Process whkd -WindowStyle Hidden; Start-Sleep 1; Start-ScheduledTask kanata
 # Wallpaper mode: hide the bars and minimise every window; press again to restore.
 ctrl + alt + shift + d : Start-Process powershell -WindowStyle Hidden "-NoProfile -ExecutionPolicy Bypass -File $Env:KOMOREBI_CONFIG_HOME\toggle-wallpaper-mode.ps1"

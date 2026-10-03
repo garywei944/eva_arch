@@ -1,0 +1,122 @@
+From b7c1ca07b1689eecd681120eb6a5dcd8adbaf9c1 Mon Sep 17 00:00:00 2001
+From: garywei944 <33930674+garywei944@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 18:14:04 -0700
+Subject: [PATCH] fix(windows): send interception output to a device that
+ exists
+
+Interception delivers a stroke through the device it is sent to and drops it
+when that device number has no device behind it. kanata always sent keyboard
+output to device 1 and mouse output to device 11, so on machines where those
+numbers are empty (e.g. after a keyboard was re-enumerated) every remapped key
+was silently lost while unmapped keys still passed through.
+
+Send output to the device that produced the latest intercepted stroke, and
+fall back to the first device that accepts the stroke, using send's return
+value to detect empty device numbers.
+---
+ src/kanata/windows/interception.rs |  5 +++-
+ src/oskbd/windows/interception.rs  | 44 +++++++++++++++++++++++-------
+ 2 files changed, 38 insertions(+), 11 deletions(-)
+
+diff --git a/src/kanata/windows/interception.rs b/src/kanata/windows/interception.rs
+index 365d290..4a8a176 100644
+--- a/src/kanata/windows/interception.rs
++++ b/src/kanata/windows/interception.rs
+@@ -2,11 +2,12 @@ use anyhow::{Result, anyhow};
+ use kanata_interception as ic;
+ use parking_lot::Mutex;
+ use std::sync::Arc;
++use std::sync::atomic::Ordering;
+ use std::sync::mpsc::SyncSender as Sender;
+
+ use super::PRESSED_KEYS;
+ use crate::kanata::*;
+-use crate::oskbd::KeyValue;
++use crate::oskbd::{KEYBOARD_OUTPUT_DEVICE, KeyValue, MOUSE_OUTPUT_DEVICE};
+ use kanata_parser::keys::OsCode;
+
+ impl Kanata {
+@@ -55,6 +56,7 @@ impl Kanata {
+                                 intrcptn.send(dev, &strokes[i..i + 1]);
+                                 continue;
+                             }
++                            KEYBOARD_OUTPUT_DEVICE.store(dev, Ordering::Relaxed);
+                             log::debug!("got stroke {:?}", strokes[i]);
+                             let code = match OsCodeWrapper::try_from(strokes[i]) {
+                                 Ok(c) => c.0,
+@@ -85,6 +87,7 @@ impl Kanata {
+                             );
+
+                             if allow_this_dev {
++                                MOUSE_OUTPUT_DEVICE.store(dev, Ordering::Relaxed);
+                                 log::trace!("checking mouse stroke {:?}", strokes[i]);
+
+                                 if let Some(ms_mvmt_key) = *mouse_movement_key.lock()
+diff --git a/src/oskbd/windows/interception.rs b/src/oskbd/windows/interception.rs
+index 4930c08..2f5c417 100644
+--- a/src/oskbd/windows/interception.rs
++++ b/src/oskbd/windows/interception.rs
+@@ -1,8 +1,12 @@
+ //! Windows interception-based mechanism for reading/writing input events.
+
+ use std::io;
++use std::ops::RangeInclusive;
++use std::sync::atomic::{AtomicI32, Ordering};
+
+-use kanata_interception::{Interception, KeyState, MouseFlags, MouseState, ScanCode, Stroke};
++use kanata_interception::{
++    Device, Interception, KeyState, MouseFlags, MouseState, ScanCode, Stroke,
++};
+
+ use super::OsCodeWrapper;
+ use crate::kanata::CalculatedMouseMove;
+@@ -153,20 +157,40 @@ thread_local! {
+ /// Handle for writing keys to the OS.
+ pub struct KbdOut {}
+
++// Note regarding device numbers:
++// Keyboard devices are 1-10 and mouse devices are 11-20. Source:
++// https://github.com/oblitum/Interception/blob/39eecbbc46a52e0402f783b872ef62b0254a896a/library/interception.h#L34
++const KEYBOARD_DEVICES: RangeInclusive<Device> = 1..=10;
++const MOUSE_DEVICES: RangeInclusive<Device> = 11..=20;
++
++/// Devices that keyboard and mouse output is sent to; 0 until one is known.
++///
++/// The driver delivers a stroke through the device it is sent to and drops it when that device
++/// number has no device behind it. Which numbers are populated depends on the machine and changes
++/// when devices are reconnected, so the input loop records the device of each intercepted stroke,
++/// and output falls back to the first device that accepts the stroke.
++pub static KEYBOARD_OUTPUT_DEVICE: AtomicI32 = AtomicI32::new(0);
++pub static MOUSE_OUTPUT_DEVICE: AtomicI32 = AtomicI32::new(0);
++
+ fn write_interception(event: InputEvent) {
+     let strokes = [event.0];
+     log::debug!("kanata sending {:?} to driver", strokes[0]);
++    let (output_device, mut devices) = match strokes[0] {
++        Stroke::Keyboard { .. } => (&KEYBOARD_OUTPUT_DEVICE, KEYBOARD_DEVICES),
++        Stroke::Mouse { .. } => (&MOUSE_OUTPUT_DEVICE, MOUSE_DEVICES),
++    };
+     INTRCPTN.with(|ic| {
+-        match strokes[0] {
+-            // Note regarding device numbers:
+-            // Keyboard devices are 1-10 and mouse devices are 11-20. Source:
+-            // https://github.com/oblitum/Interception/blob/39eecbbc46a52e0402f783b872ef62b0254a896a/library/interception.h#L34
+-            Stroke::Keyboard { .. } => {
+-                ic.send(1, &strokes[0..1]);
+-            }
+-            Stroke::Mouse { .. } => {
+-                ic.send(11, &strokes[0..1]);
++        // send returns the number of strokes the driver accepted: 0 means nothing was delivered.
++        let dev = output_device.load(Ordering::Relaxed);
++        if dev != 0 && ic.send(dev, &strokes) == 1 {
++            return;
++        }
++        match devices.find(|&d| d != dev && ic.send(d, &strokes) == 1) {
++            Some(d) => {
++                log::info!("sending output to interception device {d}");
++                output_device.store(d, Ordering::Relaxed);
+             }
++            None => log::error!("no interception device accepted {:?}", strokes[0]),
+         }
+     })
+ }

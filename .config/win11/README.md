@@ -47,20 +47,41 @@ The old komorebi-bar configs stay for rollback: `yasbc stop`, then `komorebic st
 
 - `komorebi` runs `start-komorebi.ps1` at logon as you: it starts komorebi, whkd, masir and
   YASB, then starts the `kanata` task.
-- `kanata` runs elevated, so the layout also works in admin windows. Starting the task while it
-  is running replaces the running instance.
+- `kanata` runs elevated. Starting the task while it is running replaces the running instance.
 
-There are two tasks because the two halves need different privileges: kanata must be elevated,
-and whkd must not be, or everything it launches would be elevated too.
-
-kanata starts last on purpose. kanata and whkd both use a low-level keyboard hook, and the hook
-installed last sees a key first. kanata has to see the physical keys and whkd the Gallium keys
-kanata emits, so kanata is restarted after whkd every time whkd starts: at logon and by
-Ctrl+Alt+Shift+R.
+There are two tasks because the two halves need different privileges: kanata runs elevated, and
+whkd must not be, or everything it launches would be elevated too. kanata is started after whkd,
+at logon and by Ctrl+Alt+Shift+R; see [kanata](#kanata) for when that matters.
 
 If the hotkeys are dead, restart everything the way logon does, from PowerShell (or WSL via
 `powershell.exe -c '...'`): `yasbc stop; komorebic stop --whkd --masir; sleep 3; Start-ScheduledTask komorebi`.
 Going through the task matters: a whkd started from WSL inherits WSL's stale environment.
+
+## kanata
+
+kanata is the Interception (`wintercept`) build of 1.12.0 with
+`../kanata/windows/wintercept-output-device.patch`, built by `../kanata/windows/build.sh` into
+`D:\opt\kanata-1.12.0-outdev`. It reads and writes keys through the Interception driver, below
+every keyboard hook, so its output enters Windows through the keyboard's own device like a
+physical key press: Doubao IME accepts a remapped Ctrl, and whkd sees the Gallium layout no matter
+which of the two starts first.
+
+Upstream kanata sends all of its output to Interception keyboard 1 (mouse output to mouse 11).
+The driver numbers devices as they appear and drops strokes sent to an empty number; here number
+1 is empty and the K100 is number 2, so upstream silently drops every remapped key. The patch
+sends output to the device the last intercepted key came from, or else to the first device that
+accepts it.
+
+- Reconnecting keyboards and mice uses up the driver's fixed pool of device numbers. After enough
+  reconnects, newly connected devices stop working until a reboot; this is an Interception bug
+  and happens without kanata too.
+- kanata sits in the input path: if it hangs, keys stop. Press physical LCtrl+Space+Esc or end it
+  from Task Manager; once it exits, the driver passes keys through again.
+
+The hook-based `winIOv2` release build (`setup.ps1 -Kanata <exe>`) remains the fallback. It needs
+the elevation to remap admin windows and must start after whkd, because the low-level hook
+installed last sees a key first. Its output is flagged as injected, which Doubao IME ignores for
+its hotkeys; that is why `gallium.kbd` leaves Right Ctrl, Doubao's voice-input key, alone.
 
 ## Keys
 
@@ -84,8 +105,8 @@ window.
 
 ## New machine
 
-1. `winget install LGUG2Z.komorebi LGUG2Z.whkd LGUG2Z.masir AmN.yasb wez.wezterm`, and put the kanata
-   release binaries in `D:\opt\windows-binaries-x64` (or pass `-Kanata <exe>` to `setup.ps1`).
-2. In WSL: `~/.config/win11/install.sh`.
+1. `winget install LGUG2Z.komorebi LGUG2Z.whkd LGUG2Z.masir AmN.yasb wez.wezterm`, and install the
+   Interception driver: `install-interception.exe /install` from its release, elevated, then reboot.
+2. In WSL: `~/.config/kanata/windows/build.sh`, then `~/.config/win11/install.sh`.
 3. In an elevated PowerShell: `& "$env:USERPROFILE\.config\komorebi\setup.ps1"`, then sign out
    and back in.
