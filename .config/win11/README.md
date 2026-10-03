@@ -70,7 +70,8 @@ Upstream kanata sends all of its output to Interception keyboard 1 (mouse output
 The driver numbers devices as they appear and drops strokes sent to an empty number; here number
 1 is empty and the K100 is number 2, so upstream silently drops every remapped key. The patch
 sends output to the device the last intercepted key came from, or else to the first device that
-accepts it.
+accepts it. It is proposed upstream as [kanata#2206](https://github.com/jtroo/kanata/pull/2206)
+(fixing #2193); once a release includes it, switch back to the release binary and drop the patch.
 
 - Reconnecting keyboards and mice uses up the driver's fixed pool of device numbers. After enough
   reconnects, newly connected devices stop working until a reboot; this is an Interception bug
