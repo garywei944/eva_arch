@@ -1,0 +1,34 @@
+# pwndbg-like order: focus and exceptions, registers, code, source, locals,
+# backtrace, host threads, watched expressions.
+dashboard -layout cuda registers code source locals stack host expressions
+
+# Host (x86-64) and device (SASS) registers; names absent in the current frame are skipped.
+dashboard registers -style list 'rax rbx rcx rdx rsi rdi rbp rsp r8 r9 r10 r11 r12 r13 r14 r15 rip eflags pc R0 R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 P0 P1 P2 P3 P4 P5 P6'
+dashboard registers -style column-major True
+
+dashboard code -style height 12
+dashboard source -style height 12
+dashboard stack -style limit 4
+dashboard stack -style compact True
+
+# Keep earlier dashboards and program output in the terminal scrollback; each
+# step still redraws the screen, but scrolling up shows the previous stops.
+dashboard -style discard_scrollback False
+
+# pwndbg-style names for redrawing the dashboard
+alias ctx = dashboard
+alias context = dashboard
+
+# pwndbg-like chrome in basic ANSI colors (the terminal theme picks the shade):
+# blue rules with blue centered "[ TITLE ]" labels (see divider in cuda.py)
+dashboard -style divider_fill_style_primary '34'
+dashboard -style divider_label_style_on_primary '1;34'
+dashboard -style divider_label_style_off_primary '34'
+dashboard -style prompt_running r'\[\e[1;31m\]>>>\[\e[0m\]'
+
+# Secondary text in white: the theme's bright black (color8) is nearly the
+# background color, unreadable in a translucent terminal.
+dashboard -style style_low '37'
+dashboard -style divider_fill_style_secondary '37'
+dashboard -style divider_label_style_off_secondary '37'
+dashboard -style prompt_not_running r'\[\e[37m\]>>>\[\e[0m\]'

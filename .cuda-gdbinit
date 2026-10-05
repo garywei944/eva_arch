@@ -1,0 +1,4 @@
+# cuda-gdb reads this file (not ~/.gdbinit, which loads pwndbg for plain gdb).
+# gdb-dashboard comes from the Arch package (extra/gdb-dashboard); its layout,
+# styles, and the CUDA panels live in ~/.config/gdb-dashboard/.
+source /usr/share/gdb-dashboard/.gdbinit

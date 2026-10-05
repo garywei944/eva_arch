@@ -7,6 +7,7 @@
 
 # files
 !/.condarc
+!/.cuda-gdbinit
 !/.editorconfig
 !/.eva.gitignore
 !/.gitconfig
@@ -36,6 +37,8 @@
 !/.config/alacritty
 !/.config/awesome
 !/.config/etc
+!/.config/gdb-dashboard
+/.config/gdb-dashboard/__pycache__
 !/.config/hypr
 !/.config/kanata
 !/.config/kitty
