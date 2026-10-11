@@ -13,7 +13,7 @@
     "bottom": 60
   },
   "border": true,
-  "border_width": 2,
+  "border_width": 5,
   "border_offset": -1,
   "animation": {
     "enabled": {
@@ -33,10 +33,10 @@
   "theme": {
     "palette": "Catppuccin",
     "name": "Macchiato",
-    "single_border": "Blue",
+    "single_border": "Peach",
     "stack_border": "Green",
     "monocle_border": "Mauve",
-    "floating_border": "Peach",
+    "floating_border": "Teal",
     "unfocused_border": "Surface0",
     "bar_accent": "Blue"
   },
