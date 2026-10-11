@@ -3,7 +3,7 @@
   "app_specific_configuration_path": "$Env:KOMOREBI_CONFIG_HOME/applications.json",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
-  "mouse_follows_focus": false,
+  "mouse_follows_focus": true,
   "default_workspace_padding": 4,
   "default_container_padding": 4,
   "global_work_area_offset": {
