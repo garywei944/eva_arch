@@ -139,7 +139,24 @@
         },
         {
           "name": "3-2 | Chat",
-          "layout": "BSP"
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "Weixin.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "Discord.exe",
+              "matching_strategy": "Equals"
+            },
+            {
+              "kind": "Exe",
+              "id": "Lark.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
         },
         {
           "name": "3-3 | Git",
@@ -159,7 +176,14 @@
         },
         {
           "name": "3-7 | Music",
-          "layout": "BSP"
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "QQMusic.exe",
+              "matching_strategy": "Equals"
+            }
+          ]
         },
         {
           "name": "3-8 | Terminal",
