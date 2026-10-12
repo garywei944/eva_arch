@@ -88,6 +88,11 @@
 )
 
 ;; Print Screen opens PixPin (Ctrl+Shift+A) on Windows; Hyprland binds Print itself.
+;; kanata has no prnt name on macOS, though it reads the key as KEY_PRINT (210).
+(deflocalkeys-macos
+  prnt 210
+)
+
 (platform (win winiov2 wintercept)
   (defalias prt C-S-a)
 )
