@@ -27,10 +27,12 @@ win + down              : komorebic toggle-monocle
 
 # Focus windows from the physical H/J/K/L positions on the Gallium layer.
 # Kanata emits Y/H/A/E from those positions; whkd sees the emitted keys.
-win + y                 : komorebic focus left
+# Left/right can cross onto another monitor. When that monitor's workspace is empty, focus
+# leaves the cursor behind; re-focusing the monitor by index centres the cursor on it.
+win + y                 : komorebic focus left; komorebic focus-monitor (komorebic query focused-monitor-index)
 win + h                 : komorebic focus down
 win + a                 : komorebic focus up
-win + e                 : komorebic focus right
+win + e                 : komorebic focus right; komorebic focus-monitor (komorebic query focused-monitor-index)
 
 # Move windows within the current workspace.
 win + shift + y         : komorebic move left
