@@ -25,7 +25,8 @@ end)
 hl.config({
     input = { numlock_by_default = true },
     xwayland = { force_zero_scaling = true },
-    cursor = { no_hardware_cursors = false, default_monitor = "DP-1" },
+    -- Software cursor: NVIDIA's hardware cursor plane skips hyprsunset's color transform.
+    cursor = { no_hardware_cursors = true, default_monitor = "DP-1" },
     decoration = {
         shadow = { range = 30, render_power = 5, offset = "0 5", color = "rgba(00000070)" },
     },
