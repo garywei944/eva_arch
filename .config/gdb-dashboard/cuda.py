@@ -703,3 +703,44 @@ def _registers_lines_cuda(self, term_width, term_height, style_changed):
 
 
 Registers.lines = _registers_lines_cuda
+
+
+# Source: mark the current line like pwndbg, a green ► in front and a background
+# band across the whole line; the stock panel only colors the line number.
+_source_lines = Source.lines
+_SGR_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def source_band():
+    """SGR background for the current line: the Pygments style's own line highlight."""
+    try:
+        from pygments.styles import get_style_by_name
+
+        color = get_style_by_name(R.syntax_highlighting or "monokai").highlight_color.lstrip("#")
+        r, g, b = (int(color[i : i + 2], 16) for i in (0, 2, 4))
+        return f"48;2;{r};{g};{b}"
+    except Exception:
+        return "48;5;237"
+
+
+def _source_lines_marked(self, term_width, term_height, style_changed):
+    out = _source_lines(self, term_width, term_height, style_changed)
+    if not out or not R.ansi:
+        return out
+    # only the current line number is drawn in style_selected_1
+    current = re.compile(rf"\x1b\[{re.escape(R.style_selected_1)}m *{gdb.selected_frame().find_sal().line}\b")
+    band = f"\x1b[{source_band()}m"
+    marked = []
+    for line in out:
+        if current.search(line):
+            line = ansi("►", "1;" + C["green"]) + line
+            pad = max(term_width - len(_SGR_RE.sub("", line)), 0)
+            # every reset inside the line (Pygments tokens, ansi()) clears the background too
+            line = band + _SGR_RE.sub(lambda m: m.group(0) + band, line) + " " * pad + "\x1b[0m"
+        else:
+            line = " " + line
+        marked.append(line)
+    return marked
+
+
+Source.lines = _source_lines_marked
