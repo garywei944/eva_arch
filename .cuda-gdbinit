@@ -1,4 +1,15 @@
 # cuda-gdb reads this file (not ~/.gdbinit, which loads pwndbg for plain gdb).
-# gdb-dashboard comes from the Arch package (extra/gdb-dashboard); its layout,
-# styles, and the CUDA panels live in ~/.config/gdb-dashboard/.
-source /usr/share/gdb-dashboard/.gdbinit
+# gdb-dashboard comes from Eden: ~/.local/share/gdb-dashboard/.gdbinit, or the
+# Arch package (extra/gdb-dashboard) under /usr/share. Its layout, styles, and
+# the CUDA panels live in ~/.config/gdb-dashboard/.
+python
+import os
+
+for _path in (
+    os.path.expanduser("~/.local/share/gdb-dashboard/.gdbinit"),
+    "/usr/share/gdb-dashboard/.gdbinit",
+):
+    if os.path.isfile(_path):
+        gdb.execute("source " + _path)
+        break
+end
