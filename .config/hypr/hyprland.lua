@@ -248,6 +248,7 @@ hl.bind("SUPER + CTRL + mouse_up", hl.dsp.window.move({ workspace = "m-1" }))
 
 require("dms.colors")
 require("dms.outputs")
+require("dms.input")
 require("dms.layout")
 require("dms.cursor")
 require("dms.windowrules")
