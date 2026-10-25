@@ -41,3 +41,8 @@ max_line_length = unset
 
 [*.{diff,patch}]
 trim_trailing_whitespace = false
+
+# DMS regenerates these on every login with tab indentation
+[.config/hypr/dms/*.lua]
+indent_style = tab
+indent_size = unset
