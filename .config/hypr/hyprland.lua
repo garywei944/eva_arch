@@ -60,7 +60,10 @@ hl.window_rule({
 hl.layer_rule({ match = { namespace = "^(quickshell|dms:.*)$" }, no_anim = true })
 
 -- Open apps on their workspace of the right monitor (DP-3): 20 = Chat, 21 = Git, 25 = Music.
-hl.window_rule({ match = { class = "^(discord|Discord|wechat|WeChat|lark|Lark)$" }, workspace = "20" })
+hl.window_rule({
+    match = { class = "^(discord|Discord|wechat|WeChat|lark|Lark|org\\.telegram\\.desktop)$" },
+    workspace = "20",
+})
 hl.window_rule({ match = { class = "^(smerge|sublime_merge)$" }, workspace = "21" })
 hl.window_rule({ match = { class = "^qqmusic$" }, workspace = "25" })
 
