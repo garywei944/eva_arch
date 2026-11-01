@@ -32,6 +32,8 @@ hl.config({
     },
     dwindle = { preserve_split = true },
     misc = { disable_hyprland_logo = true, disable_splash_rendering = true },
+    -- Stay in SDR: the fullscreen HDR switch forces a modeset that blanks all three monitors.
+    render = { cm_auto_hdr = 0 },
 })
 
 hl.animation({ leaf = "windowsIn", enabled = true, speed = 3, bezier = "default" })
