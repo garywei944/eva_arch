@@ -28,7 +28,7 @@ hl.config({
     -- Software cursor: NVIDIA's hardware cursor plane skips hyprsunset's color transform.
     cursor = { no_hardware_cursors = true, default_monitor = "DP-1" },
     decoration = {
-        shadow = { range = 30, render_power = 5, offset = "0 5", color = "rgba(00000070)" },
+        shadow = { range = 30, offset = "0 5", color = "rgba(00000070)" },
     },
     dwindle = { preserve_split = true },
     misc = { disable_hyprland_logo = true, disable_splash_rendering = true },
