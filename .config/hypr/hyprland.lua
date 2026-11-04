@@ -61,6 +61,8 @@ hl.window_rule({
     no_initial_focus = true,
 })
 hl.layer_rule({ match = { namespace = "^(quickshell|dms:.*)$" }, no_anim = true })
+-- DMS only generates xray for dms:bar in dms/layout.lua; the dank island needs it here.
+hl.layer_rule({ match = { namespace = "^dms:dankisland$" }, xray = true })
 
 -- Open apps on their workspace of the right monitor (DP-3): 20 = Chat, 21 = Git, 25 = Music.
 hl.window_rule({
