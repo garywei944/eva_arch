@@ -10,6 +10,7 @@ hl.env("TERMINAL", "kitty")
 
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd --all")
+    hl.exec_cmd("xrdb -merge ~/.Xresources")
     hl.exec_cmd("uwsm app -- dms run")
     hl.exec_cmd("kded6")
     hl.exec_cmd("fcitx5 -d --replace")
