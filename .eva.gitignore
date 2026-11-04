@@ -19,6 +19,7 @@
 !/.tmux.conf.local
 !/.vimrc
 !/.xprofile
+!/.Xresources
 !/.zlogin
 !/.zsh.bashrc
 !/arch_neofetch_v3.png
