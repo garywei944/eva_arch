@@ -69,16 +69,6 @@ hl.window_rule({
 hl.window_rule({ match = { class = "^(smerge|sublime_merge)$" }, workspace = "21" })
 hl.window_rule({ match = { class = "^qqmusic$" }, workspace = "25" })
 
--- wallpaper-engine-control pauses wallpapers by parking this fullscreen window on a hidden
--- workspace: linux-wallpaperengine stops rendering while any window is fullscreen.
-hl.window_rule({
-    match = { class = "^zenity$", title = "^wallpaper-engine-pause$" },
-    workspace = "special:wallpaper-engine-pause silent",
-    fullscreen = true,
-    no_focus = true,
-    no_anim = true,
-})
-
 ----------------
 -- Workspaces --
 ----------------
@@ -132,7 +122,6 @@ hl.bind("SUPER + TAB", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"))
 hl.bind("SUPER + X", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
 hl.bind("SUPER + SHIFT + Slash", hl.dsp.exec_cmd("dms ipc call keybinds toggle hyprland"))
 hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("dms ipc call window-rules toggle"))
-hl.bind("SUPER + CTRL + W", hl.dsp.exec_cmd("dms ipc call wallpaperEngineControl next"))
 hl.bind("CTRL + SHIFT + R", hl.dsp.exec_cmd("dms ipc call workspace-rename open"))
 hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("dms ipc call lock lock"))
 hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd("uwsm stop"))
