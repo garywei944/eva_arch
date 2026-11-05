@@ -111,3 +111,15 @@ window.
 2. In WSL: `~/.config/kanata/windows/build.sh`, then `~/.config/win11/install.sh`.
 3. In an elevated PowerShell: `& "$env:USERPROFILE\.config\komorebi\setup.ps1"`, then sign out
    and back in.
+
+## komorebi nightly
+
+komorebi runs the `nightly` build from GitHub releases, because the last tagged release
+(v0.1.41, May 2026) lacks months of focus, monitor and resize fixes. It replaces the winget
+install, and `winget pin add --id LGUG2Z.komorebi --blocking` stops `winget upgrade --all` from
+swapping it back. To update: stop the stack (see [Startup](#startup)), uninstall the installed
+komorebi MSI, install `komorebi-nightly-x86_64.msi` from the `nightly` release, then
+`Start-ScheduledTask komorebi`. Run `msiexec` from a folder Windows created (such as `%TEMP%`),
+with its `/l*v` log in `C:\Windows\Temp`: elevated msiexec fails with 1622 on a folder created from
+WSL. To go back to stable: `winget pin remove --id LGUG2Z.komorebi`, uninstall the nightly MSI,
+then `winget install LGUG2Z.komorebi`.
