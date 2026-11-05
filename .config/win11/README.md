@@ -114,12 +114,22 @@ window.
 
 ## komorebi nightly
 
-komorebi runs the `nightly` build from GitHub releases, because the last tagged release
-(v0.1.41, May 2026) lacks months of focus, monitor and resize fixes. It replaces the winget
-install, and `winget pin add --id LGUG2Z.komorebi --blocking` stops `winget upgrade --all` from
-swapping it back. To update: stop the stack (see [Startup](#startup)), uninstall the installed
-komorebi MSI, install `komorebi-nightly-x86_64.msi` from the `nightly` release, then
-`Start-ScheduledTask komorebi`. Run `msiexec` from a folder Windows created (such as `%TEMP%`),
-with its `/l*v` log in `C:\Windows\Temp`: elevated msiexec fails with 1622 on a folder created from
-WSL. To go back to stable: `winget pin remove --id LGUG2Z.komorebi`, uninstall the nightly MSI,
-then `winget install LGUG2Z.komorebi`.
+komorebi runs the winget package `LGUG2Z.komorebi.Nightly`, because the last tagged release
+(v0.1.41, May 2026) lacks months of focus, monitor and resize fixes. The package's manifest has a
+stale ProductCode, so `winget list` shows the install as the stable `LGUG2Z.komorebi`; the pin
+`winget pin add --id LGUG2Z.komorebi --blocking` keeps `winget upgrade --all` from replacing it
+with a stable release.
+
+The nightly manifest always says 0.1.42, so `winget upgrade` never offers a new build, and every
+build has the same MSI ProductCode, so it cannot be installed over the previous one. To update:
+
+1. Stop the stack: `yasbc stop; komorebic stop --whkd --masir`.
+2. `winget uninstall --id LGUG2Z.komorebi --exact`, then
+   `winget install --id LGUG2Z.komorebi.Nightly --exact`.
+3. `Start-ScheduledTask komorebi`.
+
+If winget reports a hash mismatch, GitHub has rebuilt `nightly` since the winget manifest was last
+updated (about every two weeks): wait, or install `komorebi-nightly-x86_64.msi` from the release
+with `msiexec`, from a folder Windows created such as `%TEMP%` (elevated msiexec fails with 1622 on
+a folder created from WSL). To go back to stable: `winget pin remove --id LGUG2Z.komorebi`,
+uninstall, then `winget install LGUG2Z.komorebi`.
