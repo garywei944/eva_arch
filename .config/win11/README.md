@@ -18,6 +18,12 @@ Windows programs only read that copy; there is no Windows checkout of this repo.
 | `whkdrc` | whkd, from its default path | Ctrl+Alt+Shift+R |
 | `../kanata/gallium.kbd` | kanata, shared with Linux | Ctrl+Alt+Shift+R |
 | `wezterm/wezterm.lua` | WezTerm, from its default path | reloads itself |
+| `komorebi/*.cs` | built into `*.exe` next to it by `install.sh` | next keypress |
+
+Hotkey helpers that whkd runs on every press are C#, not PowerShell scripts: a cold PowerShell
+costs ~0.4 s before the first line runs, a .NET Framework program ~30 ms. `install.sh` compiles
+them with the `csc.exe` that ships with Windows (C# 5, .NET Framework 4.8), so nothing extra is
+installed.
 
 `komorebi/applications.json` holds komorebi's community rules for applications that need
 special handling. `install.sh` downloads it once; refresh it with `komorebic fetch-asc`.
@@ -45,13 +51,20 @@ The old komorebi-bar configs stay for rollback: `yasbc stop`, then `komorebic st
 
 `komorebi/setup.ps1` (run once, elevated) registers two scheduled tasks:
 
-- `komorebi` runs `start-komorebi.ps1` at logon as you: it starts komorebi, whkd, masir and
-  YASB, then starts the `kanata` task.
+- `komorebi` runs `start-komorebi.cmd` at logon as you: it starts komorebi, whkd, masir and
+  YASB, then starts the `kanata` task. Everything is running about half a second after the task
+  starts.
 - `kanata` runs elevated. Starting the task while it is running replaces the running instance.
 
 There are two tasks because the two halves need different privileges: kanata runs elevated, and
-whkd must not be, or everything it launches would be elevated too. kanata is started after whkd,
-at logon and by Ctrl+Alt+Shift+R; see [kanata](#kanata) for when that matters.
+whkd must not be, or everything it launches would be elevated too.
+
+The `komorebi` task runs `conhost.exe --headless cmd.exe /c start-komorebi.cmd`. A task that
+starts PowerShell (or any console program) directly gets a window, because Windows 11 hands new
+consoles to Windows Terminal, which ignores `-WindowStyle Hidden`; a headless conhost never
+shows one. That conhost stays alive as the console of komorebi, whkd and masir, so the task shows
+as Running and has no time limit. The script launches the programs directly instead of through
+`komorebic start --whkd --masir`, which starts one PowerShell per program and then sleeps 3 s.
 
 If the hotkeys are dead, restart everything the way logon does, from PowerShell (or WSL via
 `powershell.exe -c '...'`): `yasbc stop; komorebic stop --whkd --masir; sleep 3; Start-ScheduledTask komorebi`.
@@ -81,8 +94,22 @@ accepts it. It is proposed upstream as [kanata#2206](https://github.com/jtroo/ka
 
 The hook-based `winIOv2` release build (`setup.ps1 -Kanata <exe>`) remains the fallback. It needs
 the elevation to remap admin windows and must start after whkd, because the low-level hook
-installed last sees a key first. Its output is flagged as injected, which Doubao IME ignores for
+installed last sees a key first. Ctrl+Alt+Shift+R waits a second for that; the logon script does
+not wait, so with this build press Ctrl+Alt+Shift+R once after logon if the layout is wrong. Its output is flagged as injected, which Doubao IME ignores for
 its hotkeys; that is why `gallium.kbd` leaves Right Ctrl, Doubao's voice-input key, alone.
+
+## Where new windows open
+
+komorebi tiles a new window on the monitor where it first appears, and the program decides where
+that is. Programs that remember their last position (Chrome, Explorer, most Electron apps) return
+there. The rest let Windows choose, which means the primary monitor, unless the launcher names a
+monitor; the Start menu and taskbar name the one they are on.
+
+`launch-on-cursor-monitor.exe <program> [args]`, behind Win+T, Win+B and Hyper+E, starts the
+program with the monitor under the mouse named, then moves the new window there with
+`komorebic move-to-monitor` if it appeared elsewhere. Starting the program takes ~0.1 s; a move
+adds the time komorebi needs to manage the window plus 0.5 s for the retile. While komorebi is
+paused it only launches.
 
 ## Keys
 
@@ -91,7 +118,7 @@ its hotkeys; that is why `gallium.kbd` leaves Right Ctrl, Doubao's voice-input k
 | Ctrl+Alt+Shift+P | game mode: pause whkd and komorebi together; the bar shows "Paused" |
 | Ctrl+Alt+Shift+R | restart whkd, then kanata |
 | Ctrl+Alt+Shift+D | wallpaper mode: hide the bar and minimise windows, or restore |
-| Win+T / Win+B | Arch WSL in WezTerm / new Chrome window, on the monitor under the mouse |
+| Win+T / Win+B / Hyper+E | Arch WSL in WezTerm / new Chrome window / File Explorer, on the monitor under the mouse |
 | Win+Y/H/A/E | focus left/down/up/right (physical H/J/K/L on Gallium) |
 | Win+Shift+Y/H/A/E, Win+Shift+arrows, Win+Left/Right | move the window |
 | Win+1..9 | focus workspace; with Shift, move the window there and follow it |

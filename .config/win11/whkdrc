@@ -14,10 +14,12 @@ ctrl + alt + shift + d : Start-Process powershell -WindowStyle Hidden "-NoProfil
 # Keep Windows-native Win+N, Win+P and Win+W unbound.
 # Alt+Enter and Alt+Shift+Enter stay unbound for TUI multiline input.
 
-# Arch WSL in WezTerm and a new Chrome window, opened on the monitor under the mouse.
-# Start-Process keeps the script from blocking whkd's shell, which runs bindings one at a time.
-win + t                 : Start-Process powershell -WindowStyle Hidden "-NoProfile -ExecutionPolicy Bypass -File $Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.ps1 Arch"
-win + b                 : Start-Process powershell -WindowStyle Hidden "-NoProfile -ExecutionPolicy Bypass -File $Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.ps1 Chrome"
+# Arch WSL in WezTerm, a new Chrome window and File Explorer (Hyper+E, as on Linux), opened on the
+# monitor under the mouse. Win+E stays focus-right, so Hyper+E replaces Windows' Explorer key.
+# The launcher is a GUI program, so PowerShell does not wait for it and whkd is never blocked.
+win + t                      : & "$Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.exe" "C:\Program Files\WezTerm\wezterm-gui.exe" start --always-new-process --domain WSL:Arch
+win + b                      : & "$Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.exe" chrome.exe --new-window
+win + ctrl + alt + shift + e : & "$Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.exe" explorer.exe
 win + shift + t         : komorebic toggle-float
 win + f                 : komorebic toggle-monocle
 win + shift + f         : komorebic toggle-monocle

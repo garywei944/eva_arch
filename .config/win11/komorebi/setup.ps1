@@ -1,7 +1,9 @@
 #Requires -RunAsAdministrator
 # One-time Windows setup, run from an elevated PowerShell after install.sh has deployed the
 # configs. It points komorebi at them and registers the two scheduled tasks that start the desktop:
-#   komorebi  at logon, not elevated: start-komorebi.ps1 (komorebi, bars, whkd, masir, then kanata)
+#   komorebi  at logon, not elevated: start-komorebi.cmd (komorebi, whkd, masir, YASB, then kanata),
+#             in a headless conhost so that no console window appears. It has no time limit,
+#             because that conhost lives as long as komorebi, whkd and masir.
 #   kanata    no trigger, elevated, which a hook-based (winIOv2) kanata needs to remap admin windows.
 #             A second start stops the running instance first, so starting the task is how kanata
 #             is restarted after whkd.
@@ -26,9 +28,9 @@ Register-ScheduledTask -Force -TaskName kanata -Settings $settings `
     -Principal (New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Highest) | Out-Null
 
 Register-ScheduledTask -Force -TaskName komorebi `
-    -Action (New-ScheduledTaskAction -Execute powershell.exe -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$config\komorebi\start-komorebi.ps1`"") `
+    -Action (New-ScheduledTaskAction -Execute conhost.exe -Argument "--headless cmd.exe /d /c `"$config\komorebi\start-komorebi.cmd`"") `
     -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $user) `
     -Principal (New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited) `
-    -Settings (New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 5) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries) | Out-Null
+    -Settings (New-ScheduledTaskSettingsSet -ExecutionTimeLimit 0 -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries) | Out-Null
 
 Get-ScheduledTask -TaskName kanata, komorebi | Format-Table TaskName, State, @{ n = 'RunLevel'; e = { $_.Principal.RunLevel } }
