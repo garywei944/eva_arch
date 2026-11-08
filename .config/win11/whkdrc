@@ -20,6 +20,20 @@ ctrl + alt + shift + d : Start-Process powershell -WindowStyle Hidden "-NoProfil
 win + t                      : & "$Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.exe" "C:\Program Files\WezTerm\wezterm-gui.exe" start --always-new-process --domain WSL:Arch
 win + b                      : & "$Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.exe" chrome.exe --new-window
 win + ctrl + alt + shift + e : & "$Env:KOMOREBI_CONFIG_HOME\launch-on-cursor-monitor.exe" explorer.exe
+
+# Apps, matching Hyprland: Hyper+M/W/D/Y open QQ Music, WeChat, Discord and Youdao Dict.
+# Mouse side buttons send Win+Numpad 4/7/0/1 from the Razer onboard profile, so they work
+# without Synapse. Numpad keys need NumLock on in Windows.
+# QQ Music installs into a versioned folder, so pick the newest QQMusic.exe.
+win + ctrl + alt + shift + m : Start-Process (Get-Item "C:\Program Files\Tencent\QQMusic\QQMusic*\QQMusic.exe")[-1]
+win + ctrl + alt + shift + w : Start-Process "C:\Program Files\Tencent\Weixin\Weixin.exe"
+win + ctrl + alt + shift + d : Start-Process "$Env:LOCALAPPDATA\Discord\Update.exe" "--processStart Discord.exe"
+win + ctrl + alt + shift + y : Start-Process "$Env:LOCALAPPDATA\youdao\dict\Application\YoudaoDict.exe"
+win + numpad4                : Start-Process (Get-Item "C:\Program Files\Tencent\QQMusic\QQMusic*\QQMusic.exe")[-1]
+win + numpad7                : Start-Process "C:\Program Files\Tencent\Weixin\Weixin.exe"
+win + numpad0                : Start-Process "$Env:LOCALAPPDATA\Discord\Update.exe" "--processStart Discord.exe"
+win + numpad1                : Start-Process "$Env:LOCALAPPDATA\youdao\dict\Application\YoudaoDict.exe"
+
 win + shift + t         : komorebic toggle-float
 win + f                 : komorebic toggle-monocle
 win + shift + f         : komorebic toggle-monocle

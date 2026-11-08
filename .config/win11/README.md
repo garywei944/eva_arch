@@ -119,6 +119,7 @@ paused it only launches.
 | Ctrl+Alt+Shift+R | restart whkd, then kanata |
 | Ctrl+Alt+Shift+D | wallpaper mode: hide the bar and minimise windows, or restore |
 | Win+T / Win+B / Hyper+E | Arch WSL in WezTerm / new Chrome window / File Explorer, on the monitor under the mouse |
+| Hyper+M / Hyper+W / Hyper+D / Hyper+Y | QQ Music / WeChat / Discord / Youdao Dict, as on Hyprland; mouse side buttons send Win+Numpad 4/7/0/1 for the same apps |
 | Win+Y/H/A/E | focus left/down/up/right (physical H/J/K/L on Gallium) |
 | Win+Shift+Y/H/A/E, Win+Shift+arrows, Win+Left/Right | move the window |
 | Win+1..9 | focus workspace; with Shift, move the window there and follow it |
