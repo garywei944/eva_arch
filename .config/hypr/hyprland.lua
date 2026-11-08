@@ -111,9 +111,17 @@ hl.bind(hyper .. " + E", hl.dsp.exec_cmd("dolphin"))
 hl.bind(hyper .. " + M", hl.dsp.exec_cmd("qqmusic"))
 hl.bind(hyper .. " + W", hl.dsp.exec_cmd("wechat"))
 hl.bind(hyper .. " + D", hl.dsp.exec_cmd("discord"))
-hl.bind("SUPER + KP_Left", hl.dsp.exec_cmd("qqmusic"))
-hl.bind("SUPER + KP_Home", hl.dsp.exec_cmd("wechat"))
-hl.bind("SUPER + KP_Insert", hl.dsp.exec_cmd("discord"))
+-- Mouse side buttons (onboard profile, shared with Windows whkd): Super+Numpad 4/7/0.
+-- Bind both keysyms so the buttons work whether NumLock is on or off.
+for _, key in ipairs({ "KP_4", "KP_Left" }) do
+    hl.bind("SUPER + " .. key, hl.dsp.exec_cmd("qqmusic"))
+end
+for _, key in ipairs({ "KP_7", "KP_Home" }) do
+    hl.bind("SUPER + " .. key, hl.dsp.exec_cmd("wechat"))
+end
+for _, key in ipairs({ "KP_0", "KP_Insert" }) do
+    hl.bind("SUPER + " .. key, hl.dsp.exec_cmd("discord"))
+end
 
 -- DMS shell and session
 hl.bind("ALT + space", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
