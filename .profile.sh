@@ -55,7 +55,6 @@ _eva_ssh_agent_is_usable() {
 
 # Iterate from lowest to highest priority because each entry is prepended.
 for _eva_dir in \
-  /opt/cisco/anyconnect/bin \
   /usr/local/go/bin \
   "${HOME}/.local/opt/go/bin" \
   "${HOME}/.cargo/bin" \

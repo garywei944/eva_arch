@@ -11,10 +11,5 @@ alias gacct='sacct -a -X -o "User, Partition, JobID, State%-10, JobName%-30, Ela
 alias gacctd='sacct -a -X -o "User, Partition, JobID, State%-10, JobName%-30, Elapsed, Timelimit, AllocTRES%-42, Priority" -s R,PD -r desa'
 alias gacctgd='sacct -a -X -o "User, Partition, JobID, State%-10, JobName%-30, Elapsed, Timelimit, AllocTRES%-42, Priority" -s R,PD -r gpu,desa'
 
-# anyconnect has been failed on arch linux
-# alias cuvpn='/opt/cisco/anyconnect/bin/vpn -s connect cuvpn.cuvpn.cornell.edu'
-# alias cudisc='/opt/cisco/anyconnect/bin/vpn -s disconnect'
-# alias custate='/opt/cisco/anyconnect/bin/vpn -s state'
-
 alias cuvpn="tmux new -s cuvpn 'sudo openconnect cuvpn.cuvpn.cornell.edu -u gw338'"
 alias tcuvpn="tmux a -t cuvpn"
