@@ -1,3 +1,0 @@
-#!/bin/bash
-
-(/opt/cisco/anyconnect/bin/vpnui </dev/null >/dev/null 2>&1) & disown

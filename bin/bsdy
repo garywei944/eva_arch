@@ -1,3 +1,0 @@
-#!/bin/bash
-
-browser-sync start -p "$1" -f "$2", \!.git
