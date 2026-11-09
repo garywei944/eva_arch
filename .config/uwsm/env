@@ -4,17 +4,14 @@ export __GLX_VENDOR_LIBRARY_NAME=nvidia
 export __GL_GSYNC_ALLOWED=1
 
 # Let GTK, SDL, and Clutter auto-detect Wayland while retaining XWayland fallback.
-
-export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 export QT_QPA_PLATFORM='wayland;xcb'
-export QT_QPA_PLATFORMTHEME=qt5ct
-# export QT_SCALE_FACTOR=2
-# export GDK_SCALE=2
 export ELECTRON_OZONE_PLATFORM_HINT=auto
-
-
-export XCURSOR_SIZE=24
 
 export QT_IM_MODULE=fcitx
 export QT_IM_MODULES="wayland;fcitx"
+
+export TERMINAL=kitty
+
+# Cursor size and QT_QPA_PLATFORMTHEME are owned by the DMS dmsThemeSync plugin
+# (environment.d/90-dms-theme-sync.conf); do not set them here.

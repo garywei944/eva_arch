@@ -6,16 +6,17 @@
 -- Autostart --
 ---------------
 
-hl.env("TERMINAL", "kitty")
-
+-- uwsm owns the session environment (~/.config/uwsm/env) and exports it to
+-- systemd/D-Bus itself; fcitx5 starts from its XDG autostart entry. Long-lived
+-- apps go through `uwsm app --` so each gets its own unit instead of piling
+-- into the compositor's service.
 hl.on("hyprland.start", function()
-    hl.exec_cmd("dbus-update-activation-environment --systemd --all")
     hl.exec_cmd("xrdb -merge ~/.Xresources")
     hl.exec_cmd("uwsm app -- dms run")
-    hl.exec_cmd("kded6")
-    hl.exec_cmd("fcitx5 -d --replace")
-    hl.exec_cmd("insync start")
-    hl.exec_cmd("google-chrome-stable --no-startup-window")
+    hl.exec_cmd("uwsm app -- kded6")
+    hl.exec_cmd("uwsm app -- insync start")
+    -- Preload Chrome so it, not a later random launcher, owns the keyring session
+    hl.exec_cmd("uwsm app -- google-chrome-stable --no-startup-window")
 end)
 
 -------------------
