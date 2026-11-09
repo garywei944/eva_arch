@@ -1,0 +1,6 @@
+{
+  "$schema": "https://raw.githubusercontent.com/goodroot/hyprwhspr/main/share/config.schema.json",
+  "recording_mode": "toggle",
+  "external_bindings": true,
+  "transcription_backend": "qwen3-asr"
+}

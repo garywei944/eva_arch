@@ -39,6 +39,7 @@
 !/.config/etc
 !/.config/gdb-dashboard
 !/.config/hypr
+!/.config/hyprwhspr
 !/.config/kanata
 !/.config/kitty
 !/.config/neofetch
