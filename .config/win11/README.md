@@ -49,26 +49,32 @@ The old komorebi-bar configs stay for rollback: `yasbc stop`, then `komorebic st
 
 ## Startup
 
-`komorebi/setup.ps1` (run once, elevated) registers two scheduled tasks:
+`komorebi/setup.ps1` (run once, elevated) sets up two entry points:
 
-- `komorebi` runs `start-komorebi.cmd` at logon as you: it starts komorebi, whkd, masir and
-  YASB, then starts the `kanata` task. Everything is running about half a second after the task
-  starts.
-- `kanata` runs elevated. Starting the task while it is running replaces the running instance.
+- `komorebi.lnk` in the Startup folder (`shell:startup`) runs `start-komorebi.cmd` at logon as
+  you: it starts komorebi, whkd, masir and YASB, then starts the `kanata` task.
+- The `kanata` scheduled task runs elevated. Starting it while it is running replaces the
+  running instance.
 
-There are two tasks because the two halves need different privileges: kanata runs elevated, and
+They are separate because the two halves need different privileges: kanata runs elevated, and
 whkd must not be, or everything it launches would be elevated too.
 
-The `komorebi` task runs `conhost.exe --headless cmd.exe /c start-komorebi.cmd`. A task that
-starts PowerShell (or any console program) directly gets a window, because Windows 11 hands new
-consoles to Windows Terminal, which ignores `-WindowStyle Hidden`; a headless conhost never
-shows one. That conhost stays alive as the console of komorebi, whkd and masir, so the task shows
-as Running and has no time limit. The script launches the programs directly instead of through
+The shortcut runs `conhost.exe --headless cmd.exe /c start-komorebi.cmd`. Starting a console
+program directly gets a window, because Windows 11 hands new consoles to Windows Terminal, which
+ignores `-WindowStyle Hidden`; a headless conhost never shows one, and it stays alive as the
+console of komorebi, whkd and masir. The script launches the programs directly instead of through
 `komorebic start --whkd --masir`, which starts one PowerShell per program and then sleeps 3 s.
 
+komorebi exits at once with `failed call to AllowSetForegroundWindow` (logged in
+`%LOCALAPPDATA%\komorebi\komorebi.err`) unless the process that starts it may set the foreground
+window. Explorer, which runs Startup items, may; a Task Scheduler process without a window may
+not, which is why this is a Startup shortcut and not a logon task (the task failed every logon
+from 2026-11-07 to 11-09).
+
 If the hotkeys are dead, restart everything the way logon does, from PowerShell (or WSL via
-`powershell.exe -c '...'`): `yasbc stop; komorebic stop --whkd --masir; sleep 3; Start-ScheduledTask komorebi`.
-Going through the task matters: a whkd started from WSL inherits WSL's stale environment.
+`powershell.exe -c '...'`): `yasbc stop; komorebic stop --whkd --masir; sleep 3; explorer.exe "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\komorebi.lnk"`.
+Going through Explorer matters: it gives the fresh logon environment (a whkd started from WSL
+inherits WSL's stale one) and the foreground rights komorebi needs.
 
 ## kanata
 
@@ -94,7 +100,7 @@ accepts it. It is proposed upstream as [kanata#2206](https://github.com/jtroo/ka
 
 The hook-based `winIOv2` release build (`setup.ps1 -Kanata <exe>`) remains the fallback. It needs
 the elevation to remap admin windows and must start after whkd, because the low-level hook
-installed last sees a key first. Ctrl+Alt+Shift+R waits a second for that; the logon script does
+installed last sees a key first. Ctrl+Alt+Shift+R waits a second for that; the startup script does
 not wait, so with this build press Ctrl+Alt+Shift+R once after logon if the layout is wrong. Its output is flagged as injected, which Doubao IME ignores for
 its hotkeys; that is why `gallium.kbd` leaves Right Ctrl, Doubao's voice-input key, alone.
 
@@ -154,7 +160,7 @@ build has the same MSI ProductCode, so it cannot be installed over the previous 
 1. Stop the stack: `yasbc stop; komorebic stop --whkd --masir`.
 2. `winget uninstall --id LGUG2Z.komorebi --exact`, then
    `winget install --id LGUG2Z.komorebi.Nightly --exact`.
-3. `Start-ScheduledTask komorebi`.
+3. `explorer.exe "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\komorebi.lnk"`.
 
 If winget reports a hash mismatch, GitHub has rebuilt `nightly` since the winget manifest was last
 updated (about every two weeks): wait, or install `komorebi-nightly-x86_64.msi` from the release

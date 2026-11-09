@@ -1,5 +1,5 @@
 @echo off
-rem Logon entry point, run by the "komorebi" scheduled task through `conhost.exe --headless`
+rem Logon entry point, run by the komorebi.lnk Startup shortcut through `conhost.exe --headless`
 rem (see setup.ps1), so no console window ever appears. It replaces `komorebic start --whkd
 rem --masir`, which runs one PowerShell per program and then sleeps 3 seconds.
 rem `start /b` keeps the console programs in the headless console; YASB is a GUI program.
