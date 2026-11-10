@@ -6,6 +6,9 @@
     ;; ASUS ROG Falchion Ace 75 HE: interface 0 and interface 3 both report full keyboards
     /dev/input/by-id/usb-ASUSTeK_ROG_FALCHION_ACE_75_HE-event-kbd
     /dev/input/by-id/usb-ASUSTeK_ROG_FALCHION_ACE_75_HE-event-if03
+    ;; ASUS ROG Falcata: interface 0 and interface 3 both report full keyboards
+    /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_F5EBF62378DD56D6-event-kbd
+    /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_F5EBF62378DD56D6-event-if03
   )
   macos-dev-names-include (
     "Apple Internal Keyboard / Trackpad"
