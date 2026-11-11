@@ -1,10 +1,9 @@
 #Requires -RunAsAdministrator
 # One-time Windows setup, run from an elevated PowerShell after install.sh has deployed the
 # configs. It points komorebi at them and sets up the two things that start the desktop:
-#   komorebi.lnk  in the Startup folder, not elevated: start-komorebi.cmd (komorebi, whkd, masir,
-#                 YASB, then kanata) in a headless conhost so that no console window appears.
-#                 Explorer starts it, so komorebi gets the foreground rights it needs; started by
-#                 Task Scheduler it fails with "failed call to AllowSetForegroundWindow".
+#   komorebi.lnk  in the Startup folder, not elevated: start-desktop.exe (komorebi, whkd, masir,
+#                 YASB, then kanata), which takes the foreground rights komorebi needs itself;
+#                 see start-desktop.cs.
 #   kanata task   no trigger, elevated, which a hook-based (winIOv2) kanata needs to remap admin
 #                 windows. A second start stops the running instance first, so starting the task
 #                 is how kanata is restarted after whkd.
@@ -34,10 +33,9 @@ Unregister-ScheduledTask -TaskName komorebi -Confirm:$false -ErrorAction Silentl
 
 $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut(
     "$([Environment]::GetFolderPath('Startup'))\komorebi.lnk")
-$lnk.TargetPath = "$env:SystemRoot\System32\conhost.exe"
-$lnk.Arguments = "--headless cmd.exe /d /c `"$config\komorebi\start-komorebi.cmd`""
+$lnk.TargetPath = "$config\komorebi\start-desktop.exe"
+$lnk.Arguments = ''
 $lnk.WorkingDirectory = "$config\komorebi"
-$lnk.WindowStyle = 7
 $lnk.Save()
 
 Get-ScheduledTask -TaskName kanata | Format-Table TaskName, State, @{ n = 'RunLevel'; e = { $_.Principal.RunLevel } }
