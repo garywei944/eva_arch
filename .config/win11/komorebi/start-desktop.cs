@@ -1,9 +1,9 @@
-// Logon entry point, run by the komorebi.lnk Startup shortcut: starts komorebi,
-// then whkd, masir, YASB and the kanata task, and shows a small notice in the
-// bottom-right corner meanwhile. install.sh builds it with the .NET Framework
-// csc.exe that ships with Windows. Its name must not contain "komorebi.exe":
-// komorebi finds other instances of itself by a substring match on process
-// names and exits when it sees one.
+// Logon entry point, run by the komorebi.lnk Startup shortcut: starts the
+// kanata task, then komorebi, whkd, masir and YASB, and shows a small notice in
+// the bottom-right corner meanwhile. install.sh builds it with the .NET
+// Framework csc.exe that ships with Windows. Its name must not contain
+// "komorebi.exe": komorebi finds other instances of itself by a substring match
+// on process names and exits when it sees one.
 //
 // komorebi exits at once with "failed call to AllowSetForegroundWindow" unless
 // the process that starts it may set the foreground window. A process started
@@ -13,7 +13,10 @@
 // own notice first (attaching to the foreground thread's input, or, failing
 // that, a synthetic Alt press), so the komorebi it starts inherits the right,
 // and it takes the foreground again before every retry. The previous foreground
-// window gets it back once komorebi answers.
+// window gets it back once komorebi answers. Neither trick works while the
+// screen is locked or an elevated window has the focus, and the desktop may
+// stay locked for hours after a reboot, so retries back off exponentially
+// (from 1 s, 1.1 times longer each try, at most 30 s) for up to two hours.
 //
 // Every program runs without a console window (CREATE_NO_WINDOW). komorebi's
 // stderr, which only carries panics, goes to
@@ -49,31 +52,38 @@ static class Startup {
                    "komorebi", "komorebi.err");
 
   public static void Run(Notice notice) {
+    // kanata carries the keyboard layout, so it starts first, without waiting
+    // for komorebi.
+    Spawn("schtasks.exe", "/run /tn kanata");
+
     bool up = KomorebiAnswers();
-    DateTime deadline = DateTime.UtcNow.AddMinutes(2);
-    int attempt = 0;
+    DateTime deadline = DateTime.UtcNow.AddHours(2);
+    int attempt = 0, delayMs = 1000;
     while (!up && DateTime.UtcNow < deadline) {
       if (!(bool)notice.Invoke(new Func<bool>(notice.TakeForeground))) {
-        // An elevated foreground window refuses both tricks; wait until it
-        // loses the focus.
+        // The lock screen or an elevated foreground window refuses both
+        // tricks; wait until it goes away.
         notice.Show(Notice.State.Waiting);
-        Log("no foreground rights yet");
-        Thread.Sleep(1000);
-        continue;
+        Log("no foreground rights yet, next try in " + Seconds(delayMs));
+      } else {
+        notice.Show(Notice.State.Starting);
+        attempt++;
+        // `start /b` lets cmd exit while komorebi keeps the redirected handles.
+        // Its log on stdout goes to nul; komorebi also writes it to
+        // %TEMP%\komorebi_plaintext.log.*.
+        Spawn("cmd.exe",
+              "/d /c start \"\" /b komorebi.exe >nul 2>>\"" + ErrLog + "\"");
+        for (int i = 0; i < 20 && !up; i++) {
+          Thread.Sleep(250);
+          up = KomorebiAnswers();
+        }
+        if (up)
+          break;
+        Log("komorebi did not start, attempt " + attempt + ", next try in " +
+            Seconds(delayMs));
       }
-      notice.Show(Notice.State.Starting);
-      attempt++;
-      // `start /b` lets cmd exit while komorebi keeps the redirected handles.
-      // Its log on stdout goes to nul; komorebi also writes it to
-      // %TEMP%\komorebi_plaintext.log.*.
-      Spawn("cmd.exe",
-            "/d /c start \"\" /b komorebi.exe >nul 2>>\"" + ErrLog + "\"");
-      for (int i = 0; i < 20 && !up; i++) {
-        Thread.Sleep(250);
-        up = KomorebiAnswers();
-      }
-      if (!up)
-        Log("komorebi did not start, attempt " + attempt);
+      Thread.Sleep(delayMs);
+      delayMs = Math.Min(delayMs * 11 / 10, 30000);
     }
     notice.Invoke(new Action(notice.RestoreForeground));
 
@@ -89,10 +99,10 @@ static class Startup {
             Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles"),
                          "YASB", "yasb.exe"));
     }
-    // kanata carries the keyboard layout, so it starts even without komorebi.
-    Spawn("schtasks.exe", "/run /tn kanata");
     notice.Show(up ? Notice.State.Ready : Notice.State.Failed);
   }
+
+  static string Seconds(int ms) { return (ms / 1000.0).ToString("0.0") + " s"; }
 
   static bool KomorebiAnswers() {
     var info = new ProcessStartInfo("komorebic.exe", "state") {
@@ -303,7 +313,7 @@ class Notice : Form {
     switch (state) {
     case State.Waiting:
       title = "正在等待前台权限";
-      body = "请先切到一个普通（非管理员）窗口";
+      body = "请解锁，或切到一个普通（非管理员）窗口";
       color = Accent;
       break;
     case State.Ready:

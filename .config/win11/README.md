@@ -52,7 +52,7 @@ The old komorebi-bar configs stay for rollback: `yasbc stop`, then `komorebic st
 `komorebi/setup.ps1` (run once, elevated) sets up two entry points:
 
 - `komorebi.lnk` in the Startup folder (`shell:startup`) runs `start-desktop.exe` at logon as
-  you: it starts komorebi, whkd, masir and YASB, then starts the `kanata` task.
+  you: it starts the `kanata` task, then komorebi, whkd, masir and YASB.
 - The `kanata` scheduled task runs elevated. Starting it while it is running replaces the
   running instance.
 
@@ -61,8 +61,10 @@ whkd must not be, or everything it launches would be elevated too.
 
 `start-desktop.exe` is built from `komorebi/start-desktop.cs` by `install.sh`. While it works it
 shows a notice in the bottom-right corner; once komorebi answers the notice says so and fades out
-after 5 s, and if komorebi does not start within two minutes it stays red until clicked. kanata is
-started either way, because it carries the keyboard layout. Every program runs without a console
+after 5 s, and if komorebi does not start within two hours it stays red until clicked. Retries
+back off exponentially (from 1 s, 1.1 times longer each try, at most 30 s), because the screen may stay locked for hours
+after a reboot and the launcher cannot take the foreground until it is unlocked. kanata starts
+first, without waiting, because it carries the keyboard layout. Every program runs without a console
 window, and programs that already run are not started twice.
 
 komorebi exits at once with `failed call to AllowSetForegroundWindow` (logged in
