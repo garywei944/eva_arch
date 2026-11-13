@@ -9,6 +9,8 @@
     ;; ASUS ROG Falcata: interface 0 and interface 3 both report full keyboards
     /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_F5EBF62378DD56D6-event-kbd
     /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_F5EBF62378DD56D6-event-if03
+    ;; ASUS ROG Falcata over 2.4 GHz (ROG SPEEDNOVA 8K receiver 0B05:1AD0); only interface 0 has keys
+    /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_169BCAF1A9DC03DA-event-kbd
   )
   macos-dev-names-include (
     "Apple Internal Keyboard / Trackpad"
