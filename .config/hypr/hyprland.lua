@@ -138,8 +138,8 @@ hl.bind("CTRL + SHIFT + R", hl.dsp.exec_cmd("dms ipc call workspace-rename open"
 hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("dms ipc call lock lock"))
 hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd("uwsm stop"))
 
--- Dictation (hyprwhspr): tap bare Right Ctrl to toggle. Hyprland skips this
--- release bind when another key was pressed meanwhile (Ctrl+C etc.).
+-- Dictation (hyprwhspr): tap bare Right Shift to toggle. Hyprland skips this
+-- release bind when another key was pressed meanwhile (Shift+A etc.).
 -- The service is not autostarted; the first tap starts it, and the FIFO write
 -- blocks until the new service opens the pipe (timeout covers a failed start).
 -- Writing the FIFO directly also avoids the hyprwhspr CLI's startup delay.
@@ -154,7 +154,7 @@ fi
 timeout 10 sh -c "echo $c > $d/recording_control"
 ']]
 hl.bind(
-    "Control_R",
+    "Shift_R",
     hl.dsp.exec_cmd(dictation_toggle),
     { release = true, non_consuming = true, ignore_mods = true, description = "Dictation toggle" }
 )
