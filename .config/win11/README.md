@@ -61,14 +61,14 @@ whkd must not be, or everything it launches would be elevated too.
 
 `start-desktop.exe` is built from `komorebi/start-desktop.cs` by `install.sh`. While it works it
 shows a notice in the bottom-right corner; once komorebi answers the notice says so and fades out
-after 5 s, and if komorebi does not start within two hours it stays red until clicked. Retries
-back off exponentially (from 1 s, 1.1 times longer each try, at most 30 s), because the screen may stay locked for hours
-after a reboot and the launcher cannot take the foreground until it is unlocked. kanata starts
+after 5 s. It never gives up: retries back off exponentially (from 1 s, 1.1 times longer each
+try, at most 30 s), because the screen may stay locked for hours after a reboot and the launcher
+cannot take the foreground until it is unlocked. kanata starts
 first, without waiting, because it carries the keyboard layout. Every program runs without a console
 window, and programs that already run are not started twice.
 
 komorebi exits at once with `failed call to AllowSetForegroundWindow` (logged in
-`%LOCALAPPDATA%\komorebi\komorebi.err`, together with failed attempts) unless the process that
+`%LOCALAPPDATA%\komorebi\komorebi.err`) unless the process that
 starts it may set the foreground window. A Startup item only may if Explorer is still in the
 foreground when it runs, so clicking into any window early in a logon used to leave komorebi down
 (2026-11-07 to 11-11). `start-desktop.exe` therefore makes its notice the foreground window before
@@ -76,7 +76,14 @@ it starts komorebi and before every retry, then hands the focus back. The launch
 not contain `komorebi.exe`: komorebi detects a second instance of itself by a substring match on
 process names and exits.
 
-If the hotkeys are dead, restart everything the way logon does, from PowerShell (or WSL via
+While the notice holds the foreground, keys meant for another window (say, Chrome opened right
+after logon) land on it. It has no system menu and ignores Alt+F4 until komorebi answers: on
+2026-11-12 something closed it right after komorebi started, which ended the launcher before it
+started whkd, masir and YASB. The launcher logs its start, failed attempts and result to `start-desktop.log` next to
+`komorebi.err`; komorebi keeps `komorebi.err` open and lets nobody else write to it.
+
+If komorebi, the bar or the hotkeys are missing, double-click `komorebi.lnk` on the Desktop (the
+same launcher; it only starts what is not running). If the hotkeys are dead, restart everything the way logon does, from PowerShell (or WSL via
 `powershell.exe -c '...'`): `yasbc stop; komorebic stop --whkd --masir; sleep 3; explorer.exe "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\komorebi.lnk"`.
 Going through Explorer matters: it gives the fresh logon environment (a whkd started from WSL
 inherits WSL's stale one).

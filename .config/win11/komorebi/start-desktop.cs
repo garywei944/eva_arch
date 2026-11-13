@@ -16,11 +16,19 @@
 // window gets it back once komorebi answers. Neither trick works while the
 // screen is locked or an elevated window has the focus, and the desktop may
 // stay locked for hours after a reboot, so retries back off exponentially
-// (from 1 s, 1.1 times longer each try, at most 30 s) for up to two hours.
+// (from 1 s, 1.1 times longer each try, at most 30 s) and never give up.
+//
+// While the notice holds the foreground, keys typed for another window land on
+// it. It therefore has no system menu (after the synthetic Alt, a typed "c"
+// would pick its Close item) and refuses to close (Alt+F4) before komorebi
+// answers; either used to end this process, startup thread included, without
+// a trace. A close only dismisses the notice until then.
 //
 // Every program runs without a console window (CREATE_NO_WINDOW). komorebi's
 // stderr, which only carries panics, goes to
-// %LOCALAPPDATA%\komorebi\komorebi.err together with failed attempts.
+// %LOCALAPPDATA%\komorebi\komorebi.err. This program logs its own progress to
+// start-desktop.log next to it: komorebi keeps komorebi.err open and lets
+// nobody else write to it while it runs.
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -47,19 +55,20 @@ static class Program {
 }
 
 static class Startup {
-  static readonly string ErrLog =
-      Path.Combine(Environment.GetEnvironmentVariable("LOCALAPPDATA"),
-                   "komorebi", "komorebi.err");
+  static readonly string LogDir = Path.Combine(
+      Environment.GetEnvironmentVariable("LOCALAPPDATA"), "komorebi");
+  static readonly string ErrLog = Path.Combine(LogDir, "komorebi.err");
+  static readonly string OwnLog = Path.Combine(LogDir, "start-desktop.log");
 
   public static void Run(Notice notice) {
+    Log("starting the desktop");
     // kanata carries the keyboard layout, so it starts first, without waiting
     // for komorebi.
     Spawn("schtasks.exe", "/run /tn kanata");
 
     bool up = KomorebiAnswers();
-    DateTime deadline = DateTime.UtcNow.AddHours(2);
     int attempt = 0, delayMs = 1000;
-    while (!up && DateTime.UtcNow < deadline) {
+    while (!up) {
       if (!(bool)notice.Invoke(new Func<bool>(notice.TakeForeground))) {
         // The lock screen or an elevated foreground window refuses both
         // tricks; wait until it goes away.
@@ -87,19 +96,18 @@ static class Startup {
     }
     notice.Invoke(new Action(notice.RestoreForeground));
 
-    if (up) {
-      // Skip what already runs, so that launching this again by hand does not
-      // double anything.
-      if (!Running("whkd"))
-        Spawn("whkd.exe", "");
-      if (!Running("masir"))
-        Spawn("masir.exe", "");
-      if (!Running("yasb"))
-        Process.Start(
-            Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles"),
-                         "YASB", "yasb.exe"));
-    }
-    notice.Show(up ? Notice.State.Ready : Notice.State.Failed);
+    // Skip what already runs, so that launching this again by hand does not
+    // double anything.
+    if (!Running("whkd"))
+      Spawn("whkd.exe", "");
+    if (!Running("masir"))
+      Spawn("masir.exe", "");
+    if (!Running("yasb"))
+      Spawn(Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles"),
+                         "YASB", "yasb.exe"),
+            "");
+    Log("komorebi answers after " + attempt + " attempt(s), desktop ready");
+    notice.Show(Notice.State.Ready);
   }
 
   static string Seconds(int ms) { return (ms / 1000.0).ToString("0.0") + " s"; }
@@ -139,7 +147,7 @@ static class Startup {
 
   static void Log(string line) {
     try {
-      File.AppendAllText(ErrLog,
+      File.AppendAllText(OwnLog,
                          DateTime.Now.ToString("MM/dd/yyyy ddd H:mm:ss.ff") +
                              " " + line + "\r\n");
     } catch (IOException) {
@@ -151,7 +159,7 @@ static class Startup {
 // monitor, styled like the YASB bar. Tool windows are not tiled by komorebi.
 // Click it to close it early.
 class Notice : Form {
-  public enum State { Starting, Waiting, Ready, Failed }
+  public enum State { Starting, Waiting, Ready }
 
   [DllImport("user32.dll")]
   static extern IntPtr GetForegroundWindow();
@@ -179,7 +187,6 @@ class Notice : Form {
   static readonly Color Text2 = Color.FromArgb(0x9a, 0xa1, 0xab);
   static readonly Color Accent = Color.FromArgb(0xa2, 0xc9, 0xfd);
   static readonly Color Good = Color.FromArgb(0x9f, 0xd8, 0xa0);
-  static readonly Color Bad = Color.FromArgb(0xf2, 0x8b, 0x82);
   const int ReadyMs = 5000, TickMs = 16;
 
   State state = State.Starting;
@@ -193,6 +200,7 @@ class Notice : Form {
 
   public Notice() {
     FormBorderStyle = FormBorderStyle.None;
+    ControlBox = false; // no system menu, see the top of this file
     ShowInTaskbar = false;
     TopMost = true;
     StartPosition = FormStartPosition.Manual;
@@ -213,6 +221,16 @@ class Notice : Form {
       cp.ExStyle |= 0x80; // WS_EX_TOOLWINDOW
       return cp;
     }
+  }
+
+  // Closing the only form ends the process, so a close before komorebi answers
+  // only dismisses the notice. Our own Close() comes once it is Ready.
+  protected override void OnFormClosing(FormClosingEventArgs e) {
+    if (state != State.Ready && e.CloseReason == CloseReason.UserClosing) {
+      e.Cancel = true;
+      closing = true;
+    }
+    base.OnFormClosing(e);
   }
 
   protected override void OnHandleCreated(EventArgs e) {
@@ -271,7 +289,7 @@ class Notice : Form {
   public void Show(State next) {
     BeginInvoke(new Action(() => {
       state = next;
-      if (closing && (next == State.Ready || next == State.Failed))
+      if (closing && next == State.Ready)
         Close(); // already dismissed by a click
       else
         Invalidate();
@@ -292,7 +310,7 @@ class Notice : Form {
     if (closing && opacity <= 0) {
       timer.Stop();
       // Keep the process (and the startup thread) alive until the work is done.
-      if (state == State.Ready || state == State.Failed)
+      if (state == State.Ready)
         Close();
       else
         Hide();
@@ -321,12 +339,6 @@ class Notice : Form {
       body = "komorebi · whkd · YASB · kanata 已启动";
       color = Good;
       glyph = "\uE930"; // Completed
-      break;
-    case State.Failed:
-      title = "komorebi 没能启动";
-      body = "详见 komorebi.err · 点击关闭";
-      color = Bad;
-      glyph = "\uEA39"; // ErrorBadge
       break;
     default:
       title = "正在启动 komorebi";
