@@ -61,7 +61,7 @@
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  b    l    d    c    v    j    f    o    u    ,    [    ]    \
   @cap @n   @r   @t   @s   g    y    @h   @a   @e   @i   @chr ret
-  lsft x    q    m    w    z    k    p    '    ;    .    @oss
+  lsft x    q    m    w    z    k    p    '    ;    .    rsft
   @hyp lmet lalt           @sym           @nav rmet ralt
 )
 
@@ -70,7 +70,7 @@
   @grl 1    2    3    4    5    6    7    8    9    0    -    =    bspc @ins
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   @cap @aqt @sqt @dqt @fqt g    h    @jqt @kqt @lqt @;qt @'qt ret
-  lsft z    x    c    v    b    n    m    ,    .    /    @oss
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
   @hyp lmet lalt           @sym           @nav rmet ralt
 )
 
@@ -195,7 +195,6 @@
   'qt (tap-hold $tt $ht ' (layer-while-held chords))
 
   ;; Move useful keys closer and add layers
-  oss (one-shot-press 2000 lsft)
   sym (tap-hold $tt $ht spc  (layer-while-held symbols))
 ;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
   nav (tap-hold $tt $ht bspc (layer-while-held nav))
