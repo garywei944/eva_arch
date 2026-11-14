@@ -121,24 +121,9 @@
     margin: 0 8px;
 }
 
-.traffic-widget .icon {
-    margin-left: 4px;
-}
-
-.traffic-widget .label {
-    margin-right: 4px;
-}
-
 .volume-widget .label.muted,
 .volume-widget .icon.muted {
     color: #737a85;
-}
-
-.cpu-widget .label.status-high,
-.cpu-widget .label.status-critical,
-.memory-widget .label.status-high,
-.memory-widget .label.status-critical {
-    color: #ffb4ab;
 }
 
 .tooltip {

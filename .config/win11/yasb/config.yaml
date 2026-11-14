@@ -35,7 +35,7 @@ bars:
     widgets:
       left: ["komorebi_workspaces", "komorebi_layout", "active_window"]
       center: ["media", "clock"]
-      right: ["whkd", "cpu", "memory", "traffic", "volume"]
+      right: ["whkd", "volume"]
 
 widgets:
   komorebi_workspaces:
@@ -128,28 +128,6 @@ widgets:
     type: "yasb.whkd.WhkdWidget"
     options:
       label: "<span>\ue765</span>"
-
-  cpu:
-    type: "yasb.cpu.CpuWidget"
-    options:
-      label: "<span>\ue950</span> {info[percent][total]}%"
-      label_alt: "<span>\ue950</span> {info[freq][current]} MHz"
-      update_interval: 2000
-
-  memory:
-    type: "yasb.memory.MemoryWidget"
-    options:
-      label: "<span>\ue964</span> {virtual_mem_percent}%"
-      label_alt: "<span>\ue964</span> {virtual_mem_free} free"
-      update_interval: 5000
-
-  traffic:
-    type: "yasb.traffic.TrafficWidget"
-    options:
-      label: "<span>\ue74b</span> {download_speed} <span>\ue74a</span> {upload_speed}"
-      label_alt: "<span>\ue74b</span> {download_speed} <span>\ue74a</span> {upload_speed}"
-      speed_unit: "bytes"
-      update_interval: 1000
 
   volume:
     type: "yasb.volume.VolumeWidget"
