@@ -88,6 +88,14 @@ same launcher; it only starts what is not running). If the hotkeys are dead, res
 Going through Explorer matters: it gives the fresh logon environment (a whkd started from WSL
 inherits WSL's stale one).
 
+For gaming, `Game mode.lnk` on the Desktop (`game-mode.exe`, from `komorebi/game-mode.cs`) closes
+YASB, komorebi (which restores its hidden windows), whkd, masir and f.lux (quit normally, so it resets the screen colour), and stops Wallpaper
+Engine's wallpapers with `-control stop` (killing it makes its next start report a crash);
+`Desktop mode.lnk` (`game-mode.exe off`) runs `start-desktop.exe`, starts f.lux and resumes the
+wallpapers. kanata, Riot Vanguard and device software stay. Stream Deck buttons use
+the same shortcuts. `Ctrl+Alt+Shift+P` remains the lighter option, which only pauses hotkeys and
+tiling.
+
 ## kanata
 
 kanata is the Interception (`wintercept`) build of 1.12.0 with

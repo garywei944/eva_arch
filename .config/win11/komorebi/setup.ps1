@@ -43,4 +43,17 @@ foreach ($folder in 'Startup', 'Desktop') {
     Write-Output "$($folder): $($lnk.FullName)"
 }
 
+# Game mode on and off, also for Stream Deck buttons; see game-mode.cs.
+$icons = @{ 'Game mode' = "$env:SystemRoot\System32\joy.cpl,0"; 'Desktop mode' = "$((Get-Command komorebi.exe).Source),0" }
+foreach ($mode in @(@('Game mode', ''), @('Desktop mode', 'off'))) {
+    $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut(
+        "$([Environment]::GetFolderPath('Desktop'))\$($mode[0]).lnk")
+    $lnk.TargetPath = "$config\komorebi\game-mode.exe"
+    $lnk.Arguments = $mode[1]
+    $lnk.WorkingDirectory = "$config\komorebi"
+    $lnk.IconLocation = $icons[$mode[0]]
+    $lnk.Save()
+    Write-Output "Desktop: $($lnk.FullName)"
+}
+
 Get-ScheduledTask -TaskName kanata | Format-Table TaskName, State, @{ n = 'RunLevel'; e = { $_.Principal.RunLevel } }
