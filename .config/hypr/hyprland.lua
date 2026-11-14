@@ -17,6 +17,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("uwsm app -- insync start")
     -- Preload Chrome so it, not a later random launcher, owns the keyring session
     hl.exec_cmd("uwsm app -- google-chrome-stable --no-startup-window")
+    -- Stream Deck daemon; --hide starts it in the tray without opening the window
+    hl.exec_cmd("uwsm app -- opendeck --hide")
 end)
 
 -------------------
