@@ -19,6 +19,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("uwsm app -- google-chrome-stable --profile-directory=Default --no-startup-window")
     -- Stream Deck daemon; --hide starts it in the tray without opening the window
     hl.exec_cmd("uwsm app -- opendeck --hide")
+    -- ActivityWatch server, window/idle watchers and tray in one process
+    hl.exec_cmd("uwsm app -- awatcher-bundle")
 end)
 
 -------------------
