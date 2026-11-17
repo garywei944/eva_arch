@@ -16,7 +16,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("uwsm app -- kded6")
     hl.exec_cmd("uwsm app -- insync start")
     -- Preload Chrome so it, not a later random launcher, owns the keyring session
-    hl.exec_cmd("uwsm app -- google-chrome-stable --no-startup-window")
+    hl.exec_cmd("uwsm app -- google-chrome-stable --profile-directory=Default --no-startup-window")
     -- Stream Deck daemon; --hide starts it in the tray without opening the window
     hl.exec_cmd("uwsm app -- opendeck --hide")
 end)
@@ -108,8 +108,8 @@ local repeat_locked = { locked = true, repeating = true }
 
 -- Apps
 hl.bind("SUPER + T", hl.dsp.exec_cmd("kitty"))
-hl.bind("SUPER + B", hl.dsp.exec_cmd("google-chrome-stable"))
-hl.bind(hyper .. " + B", hl.dsp.exec_cmd("google-chrome-stable"))
+hl.bind("SUPER + B", hl.dsp.exec_cmd("google-chrome-stable --profile-directory=Default"))
+hl.bind(hyper .. " + B", hl.dsp.exec_cmd("google-chrome-stable --profile-directory=Default"))
 hl.bind(hyper .. " + E", hl.dsp.exec_cmd("dolphin"))
 hl.bind(hyper .. " + M", hl.dsp.exec_cmd("qqmusic"))
 hl.bind(hyper .. " + W", hl.dsp.exec_cmd("wechat"))
