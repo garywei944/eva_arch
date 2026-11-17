@@ -11,12 +11,16 @@
 // foreground when the Startup items run, so clicking into any window early in a
 // logon used to leave komorebi down. This program takes the foreground for its
 // own notice first (attaching to the foreground thread's input, or, failing
-// that, a synthetic Alt press), so the komorebi it starts inherits the right,
-// and it takes the foreground again before every retry. The previous foreground
-// window gets it back once komorebi answers. Neither trick works while the
-// screen is locked or an elevated window has the focus, and the desktop may
-// stay locked for hours after a reboot, so retries back off exponentially
-// (from 1 s, 1.1 times longer each try, at most 30 s) and never give up.
+// that, a synthetic Alt press), and it takes the foreground again before every
+// retry. komorebi is a grandchild (via cmd), which does not reliably inherit
+// the right: early in a cold logon it failed every try until a manual start.
+// So once the notice holds the foreground, it also calls
+// AllowSetForegroundWindow(ASFW_ANY), which lets komorebi's own call succeed.
+// The previous foreground window gets it back once komorebi answers. Neither
+// trick works while the screen is locked or an elevated window has the focus,
+// and the desktop may stay locked for hours after a reboot, so retries back off
+// exponentially (from 1 s, 1.1 times longer each try, at most 30 s) and never
+// give up.
 //
 // While the notice holds the foreground, keys typed for another window land on
 // it. It therefore has no system menu (after the synthetic Alt, a typed "c"
@@ -77,6 +81,9 @@ static class Startup {
       } else {
         notice.Show(Notice.State.Starting);
         attempt++;
+        if (!Notice.AllowSetForegroundWindow(-1)) // ASFW_ANY
+          Log("AllowSetForegroundWindow failed, error " +
+              Marshal.GetLastWin32Error());
         // `start /b` lets cmd exit while komorebi keeps the redirected handles.
         // Its log on stdout goes to nul; komorebi also writes it to
         // %TEMP%\komorebi_plaintext.log.*.
@@ -167,6 +174,8 @@ class Notice : Form {
   static extern bool SetForegroundWindow(IntPtr hwnd);
   [DllImport("user32.dll")]
   static extern bool IsWindow(IntPtr hwnd);
+  [DllImport("user32.dll", SetLastError = true)]
+  public static extern bool AllowSetForegroundWindow(int pid);
   [DllImport("user32.dll")]
   static extern uint GetWindowThreadProcessId(IntPtr hwnd, IntPtr pid);
   [DllImport("kernel32.dll")]
