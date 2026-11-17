@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.kanata-hotplug</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/libexec/kanata-hotplug.sh</string>
+		<string>/Users/bytedance/.config/kanata/gallium.kbd</string>
+	</array>
+	<key>KeepAlive</key>
+	<true/>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardOutPath</key>
+	<string>/Library/Logs/Kanata/hotplug.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Library/Logs/Kanata/hotplug.log</string>
+</dict>
+</plist>

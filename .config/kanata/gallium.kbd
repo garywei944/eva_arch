@@ -12,10 +12,16 @@
     ;; ASUS ROG Falcata over 2.4 GHz (ROG SPEEDNOVA 8K receiver 0B05:1AD0); only interface 0 has keys
     /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_169BCAF1A9DC03DA-event-kbd
   )
+  ;; macOS registers only the names connected at startup; macos/kanata-hotplug.sh restarts
+  ;; kanata when a listed keyboard appears later.
   macos-dev-names-include (
     "Apple Internal Keyboard / Trackpad"
     "Corsair iCUE VirtualHIDKeyboard 1.8.10"
     "CORSAIR K100 RGB Optical-Mechanical Gaming Keyboard"
+    "ROG FALCHION ACE 75 HE"
+    "ROG FALCATA"
+    ;; ROG 2.4 GHz wireless receiver
+    "ROG SPEEDNOVA 8K RECEIVER"
   )
 
   ;; Windows (Interception build): remap only these keyboards. Mice that also expose a
