@@ -9,8 +9,11 @@
     ;; ASUS ROG Falcata: interface 0 and interface 3 both report full keyboards
     /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_F5EBF62378DD56D6-event-kbd
     /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_F5EBF62378DD56D6-event-if03
+    /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_0BC4E256D688624A-event-kbd
+    /dev/input/by-id/usb-ASUSTeK_ROG_FALCATA_0BC4E256D688624A-event-if03
     ;; ASUS ROG Falcata over 2.4 GHz (ROG SPEEDNOVA 8K receiver 0B05:1AD0); only interface 0 has keys
     /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_169BCAF1A9DC03DA-event-kbd
+    /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_063AE3BE23D44BDC-event-kbd
   )
   ;; macOS registers only the names connected at startup; macos/kanata-hotplug.sh restarts
   ;; kanata when a listed keyboard appears later.
