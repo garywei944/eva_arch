@@ -14,6 +14,7 @@
     ;; ASUS ROG Falcata over 2.4 GHz (ROG SPEEDNOVA 8K receiver 0B05:1AD0); only interface 0 has keys
     /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_169BCAF1A9DC03DA-event-kbd
     /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_063AE3BE23D44BDC-event-kbd
+    /dev/input/by-id/usb-ASUSTek_ROG_SPEEDNOVA_8K_RECEIVER_E20AE6FB53FA308A-event-kbd
   )
   ;; macOS registers only the names connected at startup; macos/kanata-hotplug.sh restarts
   ;; kanata when a listed keyboard appears later.
