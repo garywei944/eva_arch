@@ -219,13 +219,14 @@
 
   ;; Move useful keys closer and add layers
   ;; tap-hold-release: a key pressed and released while held activates the layer early.
-  sym (tap-hold-release $tt $ht spc  (layer-while-held symbols) (require-prior-idle 0))
+  ;; No tap-repress on sym: Space, then hold Space + `-` gives `-`, not a repeated Space.
+  sym (tap-hold-release 0 $ht spc  (layer-while-held symbols) (require-prior-idle 0))
 ;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
-  nav (tap-hold-release $tt $ht bspc (layer-while-held nav) (require-prior-idle 0))
+  nav (tap-hold-release 0 $ht bspc (layer-while-held nav) (require-prior-idle 0))
 ;;   nav (layer-while-held nav)
   chr (tap-hold-release $tt $ht /    (layer-while-held chords))
 ;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
-  cwr (caps-word-toggle 10000)
+;;   cwr (caps-word-toggle 10000)
 )
 
 (deflayer template
@@ -275,7 +276,8 @@
   ptb C-S-tab
 )
 
-;; Symbol layer activated by holding Space.
+;; Symbol layer activated by holding Space. The nav thumb repeats Backspace here, and
+;; left Space repeats Space in the nav layer, since sym and nav have no tap-repress.
 ;; Layout philosophy:
 ;;   - Home row: brackets organized as left-open / right-close pairs,
 ;;     with `=` on right index home (most common code symbol),
@@ -300,7 +302,7 @@
   $ntb $exc $dqm $num $dlr $per $crt $amp $ask $mns $pls $qtm _    _
   caps $cln $lps $lbc [    $uds =    ]    $rbc $rps $vrb /    _
   _    $tld \    $ats grv  .    $lst $grt '    ;    .
-  _    _    _              _              _    _    _
+  _    _    _              _              bspc _    _
 )
 
 (defalias
@@ -317,7 +319,7 @@
   _    _    _    _    A-f4 _    @mwl @mwd @mwu @mwr _    _    _    _
   _    _    _    $ptb $ntb _    left down up   rght _    _    _
   _    _    _    mrgt mlft _    home pgdn pgup end  _
-  _    _    _              A-spc          _    _    _
+  _    _    _              spc            _    _    _
 )
 
 (deflayer chords
