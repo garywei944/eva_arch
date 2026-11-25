@@ -56,6 +56,9 @@
   ;; injected, and Doubao IME ignores injected Right Ctrl / Right Shift for its hotkeys.
   process-unmapped-keys   (all-except rctl rsft)
   concurrent-tap-hold     yes
+  ;; A tap-hold key pressed within 150 ms of another key resolves as a tap, so rolls
+  ;; while typing never trigger home-row mods. Thumb and Caps layer keys opt out below.
+  tap-hold-require-prior-idle 150
   allow-hardware-repeat   false
 )
 
@@ -191,7 +194,7 @@
   gmg (layer-switch gaming-gallium)
 
   ;; tap for capslk, hold for lctl
-  cap (tap-hold $tt $ht esc lctl)
+  cap (tap-hold-release $tt $ht esc lctl (require-prior-idle 0))
   hyp (tap-hold $tt $ht (one-shot 2000 lctl) (multi lmet lalt lsft lctl))
 
   ;; home row mods
@@ -212,14 +215,15 @@
   kqt (tap-hold $tt $ht k lctl)
   lqt (tap-hold $tt $ht l lalt)
   ;qt (tap-hold $tt $ht ; lmet)
-  'qt (tap-hold $tt $ht ' (layer-while-held chords))
+  'qt (tap-hold-release $tt $ht ' (layer-while-held chords))
 
   ;; Move useful keys closer and add layers
-  sym (tap-hold $tt $ht spc  (layer-while-held symbols))
+  ;; tap-hold-release: a key pressed and released while held activates the layer early.
+  sym (tap-hold-release $tt $ht spc  (layer-while-held symbols) (require-prior-idle 0))
 ;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
-  nav (tap-hold $tt $ht bspc (layer-while-held nav))
+  nav (tap-hold-release $tt $ht bspc (layer-while-held nav) (require-prior-idle 0))
 ;;   nav (layer-while-held nav)
-  chr (tap-hold $tt $ht /    (layer-while-held chords))
+  chr (tap-hold-release $tt $ht /    (layer-while-held chords))
 ;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
   cwr (caps-word-toggle 10000)
 )
