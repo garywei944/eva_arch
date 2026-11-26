@@ -226,7 +226,7 @@
 ;;   num (tap-hold $tt $ht ret  (layer-while-held numbers))
   nav (tap-hold-release 0 $ht bspc (layer-while-held nav) (require-prior-idle 0))
 ;;   nav (layer-while-held nav)
-  chr (tap-hold-release $tt $ht /    (layer-while-held chords))
+  chr (tap-hold-release 0 $ht / (layer-while-held chords) (require-prior-idle 0))
 ;;   vin (tap-hold $tt $ht esc  (layer-while-held vim-nav))
 ;;   cwr (caps-word-toggle 10000)
 )
