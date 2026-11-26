@@ -193,9 +193,11 @@
   gme (layer-switch gaming)
   gmg (layer-switch gaming-gallium)
 
-  ;; tap for capslk, hold for lctl
-  cap (tap-hold-release $tt $ht esc lctl (require-prior-idle 0))
-  hyp (tap-hold $tt $ht (one-shot 2000 lctl) (multi lmet lalt lsft lctl))
+  ;; tap for esc, hold for lctl; pressing Space resolves to lctl at once, so a fast
+  ;; Caps+Space chord still sends Ctrl+Space when Caps is released first
+  cap (tap-hold-keys 0 $ht esc lctl (hold-on-press spc) (require-prior-idle 0))
+  ;; tap for lctl (some apps act on a bare left Ctrl tap), hold for Hyper
+  hyp (tap-hold $tt $ht lctl (multi lmet lalt lsft lctl))
 
   ;; home row mods
   n (tap-hold $tt $ht n lmet)
